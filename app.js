@@ -1,11 +1,9 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const routes = require("./routes/index-route");
+const mongoose = require("mongoose");
+const systemRoutes = require("./routes/system");
 
 const app = express();
-
-app.use(bodyParser.json());
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -17,12 +15,14 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(routes);
+app.use(bodyParser.json());
+
+app.use(systemRoutes);
 
 mongoose
   .connect(
     "mongodb+srv://api:rQJ2H3ze3VTfwlef@cluster0.ncvvz.mongodb.net/system13?retryWrites=true&w=majority"
   )
   .then((result) => {
-    app.listen(3000);
+    app.listen(8080);
   });

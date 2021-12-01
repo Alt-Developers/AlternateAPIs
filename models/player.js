@@ -3,12 +3,14 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const playerSchema = new Schema({
-  name: {
+  realName: {
     type: String,
     required: true,
   },
-  code: {
+  codeName: {
     type: String,
+    minlength: 3,
+    maxlength: 3,
     required: true,
   },
   score: {
