@@ -2,18 +2,21 @@ const Player = require("../models/player");
 
 exports.getPlayersList = (req, res, next) => {
   console.log("Sever has recived a request for PlayerList");
-  Player.find()
-    .select("codeName score -_id")
-    .then((players) => {
-      const playersList = {};
-      players.forEach((player) => {
-        playersList[player.codeName] = player.score;
-      });
-      console.log(playersList);
-      res.json({
-        playersList,
-      });
-    });
+  // Player.find()
+  //   .select("codeName score -_id")
+  //   .then((players) => {
+  //     const playersList = {};
+  //     players.forEach((player) => {
+  //       playersList[player.codeName] = player.score;
+  //     });
+  //     console.log(playersList);
+  //     res.json({
+  //       playersList,
+  //     });
+  //   });
+  res.status(500).json({
+    message: "This is not ok",
+  });
 };
 
 exports.getRealNameList = (req, res, next) => {
