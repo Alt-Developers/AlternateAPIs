@@ -9,7 +9,6 @@ exports.getPlayersList = (req, res, next) => {
       players.forEach((player) => {
         playersList[player.codeName] = player.score;
       });
-      console.log(playersList);
       res.json({
         playersList,
       });
