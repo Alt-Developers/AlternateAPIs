@@ -2,20 +2,21 @@ const Player = require("../models/player");
 
 exports.getPlayersList = (req, res, next) => {
   console.log("Sever has recived a request for PlayerList");
-  Player.find()
-    .select("codeName score -_id")
-    .then((players) => {
-      const playersList = {};
-      players.forEach((player) => {
-        playersList[player.codeName] = player.score;
-      });
-      res.json({
-        playersList,
-      });
-    })
-    .catch((err) => {
-      next(new Error("Can't connect to the database"));
-    });
+  // Player.find()
+  //   .select("codeName score -_id")
+  //   .then((players) => {
+  //     const playersList = {};
+  //     players.forEach((player) => {
+  //       playersList[player.codeName] = player.score;
+  //     });
+  //     res.json({
+  //       playersList,
+  //     });
+  //   })
+  //   .catch((err) => {
+  //     next(new Error("Can't connect to the database"));
+  //   });
+  res.status(500);
 };
 
 exports.getRealNameList = (req, res, next) => {
