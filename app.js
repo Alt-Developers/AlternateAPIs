@@ -20,6 +20,7 @@ app.use(bodyParser.json());
 app.use("/system13", systemRoutes);
 
 app.use((error, req, res, next) => {
+  console.log("an error has occurred");
   res.status(500).json({
     error,
   });
@@ -30,5 +31,6 @@ mongoose
     "mongodb+srv://api:rQJ2H3ze3VTfwlef@cluster0.ncvvz.mongodb.net/system13?retryWrites=true&w=majority"
   )
   .then((result) => {
+    console.log("Connected to the database");
     app.listen(80);
   });
