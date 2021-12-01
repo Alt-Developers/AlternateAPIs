@@ -16,7 +16,7 @@ exports.getPlayersList = (req, res, next) => {
   //   .catch((err) => {
   //     next(new Error("Can't connect to the database"));
   //   });
-  res.status(500);
+  next(new Error("DUMMY ERROR"));
 };
 
 exports.getRealNameList = (req, res, next) => {
