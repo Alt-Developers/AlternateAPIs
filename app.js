@@ -24,5 +24,5 @@ mongoose
     "mongodb+srv://api:rQJ2H3ze3VTfwlef@cluster0.ncvvz.mongodb.net/system13?retryWrites=true&w=majority"
   )
   .then((result) => {
-    app.listen(8080);
+    app.listen(80);
   });
