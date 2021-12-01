@@ -5,10 +5,11 @@ exports.getPlayersList = (req, res, next) => {
   Player.find()
     .select("codeName score -_id")
     .then((players) => {
-      const playersList = [];
+      const playersList = {};
       players.forEach((player) => {
-        playersList.push([player.codeName, player.score]);
+        playersList[player.codeName] = player.score;
       });
+      console.log(playersList);
       res.json({
         playersList,
       });
@@ -20,9 +21,9 @@ exports.getRealNameList = (req, res, next) => {
   Player.find()
     .select("codeName realName -_id")
     .then((players) => {
-      const playersList = [];
+      const playersList = {};
       players.forEach((player) => {
-        playersList.push([player.codeName, player.realName]);
+        playersList[player.codeName] = player.realName;
       });
       res.json({
         playersList,
