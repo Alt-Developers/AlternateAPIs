@@ -19,6 +19,12 @@ app.use(bodyParser.json());
 
 app.use("/system13", systemRoutes);
 
+app.use((error, req, res, next) => {
+  res.status(500).json({
+    error,
+  });
+});
+
 mongoose
   .connect(
     "mongodb+srv://api:rQJ2H3ze3VTfwlef@cluster0.ncvvz.mongodb.net/system13?retryWrites=true&w=majority"

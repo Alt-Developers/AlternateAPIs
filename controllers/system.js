@@ -2,21 +2,21 @@ const Player = require("../models/player");
 
 exports.getPlayersList = (req, res, next) => {
   console.log("Sever has recived a request for PlayerList");
-  // Player.find()
-  //   .select("codeName score -_id")
-  //   .then((players) => {
-  //     const playersList = {};
-  //     players.forEach((player) => {
-  //       playersList[player.codeName] = player.score;
-  //     });
-  //     console.log(playersList);
-  //     res.json({
-  //       playersList,
-  //     });
-  //   });
-  res.status(500).json({
-    message: "This is not ok",
-  });
+  Player.find()
+    .select("codeName score -_id")
+    .then((players) => {
+      const playersList = {};
+      players.forEach((player) => {
+        playersList[player.codeName] = player.score;
+      });
+      console.log(playersList);
+      res.json({
+        playersList,
+      });
+    })
+    .catch((err) => {
+      next(new Error("Can't connect to the database"));
+    });
 };
 
 exports.getRealNameList = (req, res, next) => {
@@ -31,6 +31,9 @@ exports.getRealNameList = (req, res, next) => {
       res.json({
         playersList,
       });
+    })
+    .catch((err) => {
+      next(new Error("Can't connect to the database"));
     });
 };
 
@@ -44,9 +47,14 @@ exports.addPlayer = (req, res, next) => {
     score: score,
   });
   player.save();
-  res.status(201).json({
-    message: "Successfuly created a players",
-  });
+  res
+    .status(201)
+    .json({
+      message: "Successfuly created a players",
+    })
+    .catch((err) => {
+      next(new Error("Can't connect to the database"));
+    });
 };
 
 exports.deletePlayer = (req, res, next) => {
@@ -54,7 +62,12 @@ exports.deletePlayer = (req, res, next) => {
   Player.findOneAndDelete({ codeName: playerCode }).then((result) => {
     console.log("Deleted a player");
   });
-  res.status(202).json({
-    message: "Successfully deleted a product",
-  });
+  res
+    .status(202)
+    .json({
+      message: "Successfully deleted a product",
+    })
+    .catch((err) => {
+      next(new Error("Can't connect to the database"));
+    });
 };
