@@ -4,7 +4,6 @@ function addCount(apiName) {
   Count.findOne({ apiName: apiName })
     .then((api) => {
       if (api) {
-        console.log(api);
         api.count += 1;
         return api.save();
       }
