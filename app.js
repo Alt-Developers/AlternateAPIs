@@ -18,13 +18,14 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
-// app.use("/system13", systemRoutes);
+app.use("/system13", systemRoutes);
 
-app.use("/", errorController.statusMaintenance);
+// app.use("/", errorController.statusMaintenance);
 
 app.use((error, req, res, next) => {
   console.log("an error has occurred");
   res.status(500).json({
+    message: "This error has been send from the central error handler",
     error,
   });
 });

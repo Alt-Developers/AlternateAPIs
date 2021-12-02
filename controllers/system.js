@@ -1,4 +1,5 @@
 const Player = require("../models/player");
+const { validationResult } = require("express-validator");
 
 exports.getPlayersList = (req, res, next) => {
   console.log("a request has arrived at getPlayerList");
@@ -41,6 +42,14 @@ exports.addPlayer = (req, res, next) => {
   const realName = req.body.realName;
   const codeName = req.body.codeName;
   const score = req.body.score;
+  const errors = validationResult(req);
+
+  if (errors) {
+    console.log(errors.array());
+    return res.status(422).json({
+      message: errors.array()[0].msg,
+    });
+  }
 
   Player.findOne({ codeName: codeName })
     .then((player) => {
