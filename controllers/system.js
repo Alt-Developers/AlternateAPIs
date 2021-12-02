@@ -1,4 +1,6 @@
 const Player = require("../models/player");
+const Count = require("../models/count");
+const addCount = require("../util/addCount");
 const { validationResult } = require("express-validator");
 
 exports.getPlayersList = (req, res, next) => {
@@ -17,6 +19,7 @@ exports.getPlayersList = (req, res, next) => {
     .catch((err) => {
       next(new Error("Can't connect to the database"));
     });
+  addCount("getPlayersList");
   // next(new Error("DUMMY ERROR"));
 };
 
@@ -36,6 +39,7 @@ exports.getRealNameList = (req, res, next) => {
     .catch((err) => {
       next(new Error("Can't connect to the database"));
     });
+  addCount("getRealNameList");
 };
 
 exports.addPlayer = (req, res, next) => {
@@ -75,6 +79,7 @@ exports.addPlayer = (req, res, next) => {
     .catch((err) => {
       next(new Error("Can't connect to the database"));
     });
+  addCount("addPlayer");
 };
 
 exports.deletePlayer = (req, res, next) => {
@@ -95,4 +100,5 @@ exports.deletePlayer = (req, res, next) => {
     .catch((err) => {
       next(new Error("Can't connect to the database"));
     });
+  addCount("deletePlayer");
 };
