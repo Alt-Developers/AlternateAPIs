@@ -1,7 +1,7 @@
 const Count = require("../models/count");
 
 function addCount(apiName) {
-  Count.findOne({ apiName: "getPlayerList" })
+  Count.findOne({ apiName: apiName })
     .then((api) => {
       if (api) {
         console.log(api);
@@ -9,7 +9,7 @@ function addCount(apiName) {
         return api.save();
       }
       const newApi = new Count({
-        apiName: "getPlayerList",
+        apiName: apiName,
         count: 1,
       });
       return newApi.save();
