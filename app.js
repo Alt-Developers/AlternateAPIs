@@ -36,5 +36,5 @@ mongoose
   )
   .then((result) => {
     console.log("Connected to the database");
-    app.listen(80);
+    app.listen(3000);
   });
