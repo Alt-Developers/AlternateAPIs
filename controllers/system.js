@@ -2,7 +2,7 @@ const Player = require("../models/player");
 const addCount = require("../util/addCount");
 const { validationResult } = require("express-validator");
 
-exports.getPlayerList = (req, res, next) => {
+exports.getPlayersList = (req, res, next) => {
   console.log("a request has arrived at getPlayerList");
   Player.find()
     .select("codeName score -_id")
