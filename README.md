@@ -2,16 +2,15 @@
 
 Welcome to SS APIs Repository, SS APIs is an APIs use across all of our products
 
-So far we use this api in system13 only but we are now migrating our code to use this api
+This API is used at System13 and more products coming later. We are planning to migrate data from products like Timetables and a currently unnamed blog project to these APIs 
 
 ## Features
 
 **_System 13_**
 
-- fetch player's codeName & Score
-- fetch player's displayName & codeName
-- add player (authorization required)
-- delete player (authorization required)
+- All the player data for System13
+- Add player (Waiting for frontend development)
+- Delete player (Waiting for frontend development)
 
 ## Versions
 
@@ -21,15 +20,15 @@ So far we use this api in system13 only but we are now migrating our code to use
   - errors 503 <br/>
     (Server can't handle the request because the server is down for maintenance)
 
-**_History_**
+**_Previous Versions_**
 
 - Version 1.0
-  - All feature an basic api needed
+  - All basic API features
 - Version 1.1
-  - added errors handling (central error handling middleware)
+  - Added errors handling (central error handling middleware)
 - Version 1.2
   - Started return errors message with the response for the client
-  - Remove some bug behind the scene
+  - Remove some bugs behind the scene
 - Version 2.0
   - Added validation for adding players
 
@@ -41,5 +40,4 @@ This project is protected under
 Mozilla Public License v2.0
 ```
 
-MPL 2.0 © 2022 Prawich & Jirat
-  
+MPL 2.0 © 2021-2022 Prawich & Jirat
