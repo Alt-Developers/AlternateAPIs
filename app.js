@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const systemRoutes = require("./routes/system");
 const errorController = require("./controllers/errors");
+const authRoutes = require("./routes/auth");
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
+app.use("/auth", authRoutes);
 app.use("/system13", systemRoutes);
 
 // app.use("/", errorController.statusMaintenance);
