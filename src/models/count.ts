@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, connection } from "mongoose";
 
 const countSchema: Schema = new Schema({
   apiName: {
@@ -11,4 +11,6 @@ const countSchema: Schema = new Schema({
   },
 });
 
-export default model("Count", countSchema);
+const system13Db = connection.useDb("system13");
+
+export default system13Db.model("Count", countSchema);

@@ -9,7 +9,7 @@ export const notFound404: Middleware = (req, res, next) => {
 };
 
 export const errorHandler500: ErrorRequestHandler = (err, req, res, next) => {
-  console.log("an error has occurred");
+  console.log("an error has occurred", { err });
   res.status(500).json({
     message: "This error has been send from the central error handler",
     cause: err,

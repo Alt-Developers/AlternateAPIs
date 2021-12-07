@@ -9,7 +9,7 @@ const notFound404 = (req, res, next) => {
 };
 exports.notFound404 = notFound404;
 const errorHandler500 = (err, req, res, next) => {
-    console.log("an error has occurred");
+    console.log("an error has occurred", { err });
     res.status(500).json({
         message: "This error has been send from the central error handler",
         cause: err,

@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, connection } from "mongoose";
 import { Player } from "../models/types";
 
 const playerSchema: Schema = new Schema({
@@ -17,5 +17,6 @@ const playerSchema: Schema = new Schema({
     required: true,
   },
 });
+const system13Db = connection.useDb("system13");
 
-export default model<Player>("Player", playerSchema);
+export default system13Db.model<Player>("Player", playerSchema);

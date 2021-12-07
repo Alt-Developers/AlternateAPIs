@@ -1,7 +1,8 @@
 import Count from "../models/count";
+import { Count as CountTypes } from "../models/types";
 
-function addCount(apiName: string) {
-  Count.findOne({ apiName: apiName }).then((api) => {
+export default function addCount(apiName: string) {
+  Count.findOne({ apiName: apiName }).then((api: any) => {
     if (api) {
       api.count += 1;
       return api.save();
