@@ -32,6 +32,33 @@ This API is used at System13 and more products coming later. We are planning to 
 - Version 2.0
   - Added validation for adding players
 
+## Download
+
+1.) **Download Typescript *if you don't have***
+```zsh
+> npm install typescript -g
+```
+
+2.) **Compile TypeScript**
+```zsh
+> tsc
+```
+
+3.) **Download nodemodules**
+```zsh
+> npm install
+```
+
+4.) **Run the program using** 
+```zsh
+> npm start
+
+// OR
+
+> nodemon
+```
+
+
 ## License
 
 This project is protected under
