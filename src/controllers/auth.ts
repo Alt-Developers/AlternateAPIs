@@ -6,9 +6,10 @@ export const login: Middleware = (req, res, next) => {
   if (email && password) {
     return res.status(200).json({
       status: "LOGGEDIN",
-      name: "Prawich Thawansakdivudhi",
+      firstName: "Prawich",
+      lastName: "Thawansakdivudhi",
       email: "prawich.th@gmail.com",
-      img: "https://yt3.ggpht.com/ytc/AKedOLQnp52grHdSYHky8B9cw3EqZxTX7kK8grKXmbXY8A=s176-c-k-c0x00ffffff-no-rj",
+      img: "https://s.isanook.com/ga/0/rp/r/w728/ya0xa0m1w0/aHR0cHM6Ly9zLmlzYW5vb2suY29tL2dhLzAvdWQvMjIxLzExMDY5MzcvMTEwNjkzNy10aHVtYm5haWwuanBn.jpg",
       bio: "I'm prawich!",
     });
   }
