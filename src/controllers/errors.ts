@@ -1,5 +1,9 @@
 import express, { RequestHandler } from "express";
-import { ErrorRequestHandler, Middleware } from "../models/types";
+import {
+  ErrorInterface,
+  ErrorRequestHandler,
+  Middleware,
+} from "../models/types";
 
 export const notFound404: Middleware = (req, res, next) => {
   res.status(404).json({
@@ -19,5 +23,17 @@ export const errorHandler500: ErrorRequestHandler = (err, req, res, next) => {
 export const errorHandler418: RequestHandler = (req, res, next) => {
   res.status(418).json({
     message: "I refuse to brew a coffee with a teapot!",
+  });
+};
+
+export const centralError: ErrorRequestHandler = (
+  err: ErrorInterface,
+  req,
+  res,
+  next
+) => {
+  const code = err.statusCode || 500;
+  res.status(code).json({
+    message: err.message,
   });
 };

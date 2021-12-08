@@ -24,8 +24,12 @@ const userSchema = new Schema({
   system13: {
     players: [Types.ObjectId],
   },
+  avatar: {
+    type: String,
+    required: true,
+  },
 });
 
-const userDb = connection.useDb("SS-Account");
+const userDb = connection.useDb("ss_Account");
 
 export default userDb.model<User>("User", userSchema);

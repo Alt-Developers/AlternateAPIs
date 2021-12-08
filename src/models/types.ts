@@ -28,7 +28,13 @@ export interface Player extends Document {
 export interface User extends Document {
   email: string;
   password: string;
-  username: string;
+  firstName: string;
+  lastName: string;
+  avatar: string;
   DOB?: Date;
   system13?: { players: ObjectId[] };
+}
+
+export interface ErrorInterface extends Error {
+  statusCode?: number;
 }
