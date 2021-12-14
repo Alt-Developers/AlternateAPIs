@@ -1,26 +1,58 @@
+import env from "dotenv";
 import { RequestHandler } from "express";
-import { ErrorInterface } from "../models/types";
+import { ErrorInterface, UserInterface } from "../models/types";
 import { validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
 import User from "../models/user";
 import { deleteFile } from "../utilities/fileHelper";
+import jwt from "jsonwebtoken";
+// import newAvatar from "../utilities/newAvatar";
 
 export const login: RequestHandler = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.pass;
-  if (email && password) {
-    return res.status(200).json({
-      status: "LOGGEDIN",
-      firstName: "Prawich",
-      lastName: "Thawansakdivudhi",
-      email: "prawich.th@gmail.com",
-      img: "https://s.isanook.com/ga/0/rp/r/w728/ya0xa0m1w0/aHR0cHM6Ly9zLmlzYW5vb2suY29tL2dhLzAvdWQvMjIxLzExMDY5MzcvMTEwNjkzNy10aHVtYm5haWwuanBn.jpg",
-      bio: "I'm prawich!",
+
+  let loadedUser: any;
+
+  User.findOne({ email: email })
+    .then((user) => {
+      loadedUser = user;
+      if (!user) {
+        const error: ErrorInterface = new Error("User not Found.");
+        error.statusCode = 401;
+        throw error;
+      }
+      return bcrypt.compare(password, user.password);
+    })
+    .then((isCorrect) => {
+      if (!isCorrect) {
+        const error: ErrorInterface = new Error("Wrong password.");
+        error.statusCode = 401;
+        throw error;
+      }
+
+      const token = jwt.sign(
+        {
+          email: loadedUser.email,
+          userId: loadedUser._id,
+        },
+        process.env.JWT_KEY!,
+        { expiresIn: "1m" }
+      );
+      res.status(200).json({
+        token: token,
+        firstName: loadedUser.firstName,
+        lastName: loadedUser.lastName,
+        email: loadedUser.email,
+        img: loadedUser.avatar,
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
     });
-  }
-  const error: ErrorInterface = new Error("No account found!");
-  error.statusCode = 401;
-  next(error);
 };
 
 export const signup: RequestHandler = (req, res, next) => {
@@ -28,22 +60,36 @@ export const signup: RequestHandler = (req, res, next) => {
   const password = req.body.pass;
   const firstName = req.body.firstName;
   const lastName = req.body.lastName;
-  const avatarPath = req.file?.path;
   const errors = validationResult(req);
+  let avatarPath: string;
+  let defaultOrNot: boolean;
+
+  if (!req.file) {
+    // avatarPath = newAvatar(firstName, lastName);
+    avatarPath = "images/default.png";
+    defaultOrNot = true;
+  } else if (req.file) {
+    avatarPath = req.file?.path;
+    defaultOrNot = false;
+  }
 
   if (!email || !password || !firstName || !lastName) {
     const err: ErrorInterface = new Error("Not all field were filled");
     err.statusCode = 422;
-    deleteFile(avatarPath!);
-    return next(err);
+    if (!defaultOrNot!) {
+      deleteFile(avatarPath!);
+    }
+    throw err;
   }
   if (!errors.isEmpty()) {
     const err: ErrorInterface = new Error(
       `Validation Error(s) : ${errors.array()[0].msg}`
     );
-    deleteFile(avatarPath!);
+    if (!defaultOrNot!) {
+      deleteFile(avatarPath!);
+    }
     err.statusCode = 422;
-    return next(err);
+    throw err;
   }
 
   User.findOne({ email: email })
@@ -78,7 +124,32 @@ export const signup: RequestHandler = (req, res, next) => {
       if (!err.statusCode) {
         err.statusCode = 500;
       }
-      deleteFile(avatarPath!);
+      if (!defaultOrNot!) {
+        deleteFile(avatarPath!);
+      }
+      next(err);
+    });
+};
+
+export const getPlayerData: RequestHandler = (req, res, next) => {
+  User.findById(req.userId)
+    .then((user) => {
+      if (!user) {
+        const error: ErrorInterface = new Error(
+          "No user with this ID were found."
+        );
+        error.statusCode = 404;
+        throw error;
+      }
+      return res.status(200).json({
+        token: req.authToken,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        img: user.avatar,
+      });
+    })
+    .catch((err) => {
       next(err);
     });
 };

@@ -5,17 +5,17 @@ import {
   Middleware,
 } from "../models/types";
 
-export const notFound404: Middleware = (req, res, next) => {
+export const notFound404: RequestHandler = (req, res, next) => {
   res.status(404).json({
-    message: "Not found",
-    requestedProduct: req.path,
+    message: "SS APIs can't seem to find service you requested.",
+    requestedService: req.path,
   });
 };
 
 export const errorHandler500: ErrorRequestHandler = (err, req, res, next) => {
   console.log("an error has occurred", { err });
   res.status(500).json({
-    message: "This error has been send from the central error handler",
+    message: "Server Side Error Has Occurred!",
     cause: err,
   });
 };
@@ -34,6 +34,7 @@ export const centralError: ErrorRequestHandler = (
 ) => {
   const code = err.statusCode || 500;
   res.status(code).json({
-    message: err.message,
+    error: err.message,
+    message: "an error has occurred",
   });
 };

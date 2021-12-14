@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as authController from "../controllers/auth";
 import { body } from "express-validator";
+import dCrypt from "../middleware/isAuth";
 
 const router = Router();
 
@@ -18,5 +19,7 @@ router.post(
   ],
   authController.signup
 );
+
+router.get("/getUserData", dCrypt, authController.getPlayerData);
 
 export default router;
