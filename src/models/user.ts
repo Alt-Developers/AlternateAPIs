@@ -21,9 +21,8 @@ const userSchema = new Schema(
       required: true,
     },
     DOB: Date,
-    system13: {
-      players: [Types.ObjectId],
-    },
+    system13: [Types.ObjectId],
+    expenses: [Types.ObjectId],
     avatar: {
       type: String,
       required: true,

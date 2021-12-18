@@ -41,9 +41,23 @@ export interface UserInterface extends Document {
   lastName: string;
   avatar: string;
   DOB?: Date;
-  system13?: { players: ObjectId[] };
+  system13?: ObjectId[];
+  expenses?: ObjectId[];
 }
 
 export interface ErrorInterface extends Error {
   statusCode?: number;
+}
+
+export interface UnlockedObjectInterface extends Object {
+  [key: string]: any;
+}
+
+export interface ExpensesInterface extends Document {
+  name: string;
+  type: string;
+  amount: number;
+  detail?: string;
+  createdBy: ObjectId;
+  createdAt: Date;
 }

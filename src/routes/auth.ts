@@ -20,6 +20,14 @@ router.post(
   authController.signup
 );
 
+router.post(
+  "/updateUserProfilePicture",
+  dCrypt,
+  authController.postEditProfilePicture
+);
+router.post("/updateUserInfo", dCrypt, authController.editAccount);
+router.post("/changePassword", dCrypt, authController.editPassword);
+
 router.get("/getUserData", dCrypt, authController.getPlayerData);
 
 export default router;

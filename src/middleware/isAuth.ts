@@ -4,13 +4,13 @@ import { ErrorInterface } from "../models/types";
 import jwt from "jsonwebtoken";
 
 const dCrypt: RequestHandler = (req, res, next) => {
-  req.authToken = req.get("Authorization")!.split(" ")[1];
   const authHeader = req.get("Authorization");
   if (!authHeader) {
     const error: ErrorInterface = new Error("Token not found.");
     error.statusCode = 400;
     throw error;
   }
+  req.authToken = req.get("Authorization")!.split(" ")[1];
   const token = req.get("Authorization")!.split(" ")[1];
   let decodedToken: any;
 

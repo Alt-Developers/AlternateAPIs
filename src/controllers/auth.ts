@@ -1,6 +1,10 @@
 import env from "dotenv";
 import { RequestHandler } from "express";
-import { ErrorInterface, UserInterface } from "../models/types";
+import {
+  ErrorInterface,
+  UnlockedObjectInterface,
+  UserInterface,
+} from "../models/types";
 import { validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
 import User from "../models/user";
@@ -37,7 +41,7 @@ export const login: RequestHandler = (req, res, next) => {
           userId: loadedUser._id,
         },
         process.env.JWT_KEY!,
-        { expiresIn: "1m" }
+        { expiresIn: "10d" }
       );
       res.status(200).json({
         token: token,
@@ -152,4 +156,129 @@ export const getPlayerData: RequestHandler = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
+};
+
+export const postEditProfilePicture: RequestHandler = (req, res, next) => {
+  const userId = req.userId;
+  const filePath = req.file?.path;
+  if (!filePath) {
+    const error: ErrorInterface = new Error("No photo attached to the req");
+    error.statusCode = 400;
+    throw error;
+  }
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        const error: ErrorInterface = new Error("No User with this Id found");
+        error.statusCode = 404;
+        throw error;
+      }
+      user.avatar = filePath;
+      user.save();
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+export const editAccount: RequestHandler = (req, res, next) => {
+  const email = req.body.email;
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
+  const password = req.body.password;
+  const userId = req.userId;
+  const errors = validationResult(req);
+  let snapshot: any;
+
+  if (password) {
+    const error: ErrorInterface = new Error(
+      "You can't change a password in this endpoint"
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!errors.isEmpty()) {
+    const error: ErrorInterface = new Error("Validation Error");
+    error.statusCode = 422;
+    throw error;
+  }
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        const error: ErrorInterface = new Error("No user with this id found");
+        error.statusCode = 404;
+        throw error;
+      }
+      snapshot = user;
+      if (email) user.email = email;
+      if (firstName) user.firstName = firstName;
+      if (lastName) user.lastName = lastName;
+
+      return user.save();
+    })
+    .then((result) => {
+      const updated: UnlockedObjectInterface = {};
+      if (email) updated.email = result.email;
+      if (firstName) updated.firstName = result.firstName;
+      if (lastName) updated.lastName = result.lastName;
+
+      res.status(201).json({
+        message: "Successfully Updated a user",
+        updated: updated,
+      });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+export const editPassword: RequestHandler = (req, res, next) => {
+  const userId = req.userId;
+  const newPassword = req.body.newPassword;
+  const ConfirmNewPassword = req.body.confirmNewPassword;
+  const password = req.body.password;
+
+  let fetchedUser: UserInterface;
+
+  if (newPassword !== ConfirmNewPassword) {
+    const error: ErrorInterface = new Error(
+      "Confirm new password must be equal to new password."
+    );
+    error.statusCode = 422;
+    throw error;
+  }
+
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        const error: ErrorInterface = new Error(
+          "No user with this id were found."
+        );
+        error.statusCode = 404;
+        throw error;
+      }
+      fetchedUser = user;
+      return bcrypt.compare(password, user.password);
+    })
+    .then((isCorrect) => {
+      if (!isCorrect) {
+        const error: ErrorInterface = new Error("Wrong old password.");
+        error.statusCode = 403;
+        throw error;
+      }
+      bcrypt
+        .hash(newPassword, 12)
+        .then((hashedPassword) => {
+          fetchedUser.password = hashedPassword;
+          fetchedUser.save();
+          return res.status(201).json({
+            message: "Successfully Edited a password.",
+          });
+        })
+        .catch((err) => {
+          throw err;
+        });
+    })
+    .catch((err) => next(err));
 };

@@ -10,6 +10,8 @@ env.config({ path: "./.env" });
 import * as errorController from "./controllers/errors";
 import systemRoutes from "./routes/system";
 import authRoutes from "./routes/auth";
+import expensesRoutes from "./routes/expenses";
+import { landing } from "./controllers/landing";
 
 const fileStorage = multer.diskStorage({
   destination: (req: any, file: any, cb: any) => {
@@ -41,7 +43,10 @@ app.use(
 );
 app.use(cors());
 
+app.get("/", landing);
+
 app.use("/images", express.static("./images"));
+app.use("/expenses", expensesRoutes);
 app.use("/auth", authRoutes);
 app.use("/system13", systemRoutes);
 
