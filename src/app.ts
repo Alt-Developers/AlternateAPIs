@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import mongoose from "mongoose";
 import multer from "multer";
+import { v4 as uuid4 } from "uuid";
 
 env.config({ path: "./.env" });
 
@@ -19,7 +20,7 @@ const fileStorage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const newName = file.originalname.replace(/ /g, "_");
-    cb(null, new Date().toISOString() + "-" + newName);
+    cb(null, `${uuid4()}.png`);
   },
 });
 
@@ -43,7 +44,7 @@ app.use(
 );
 app.use(cors());
 
-app.get("/", landing);
+app.use("/", landing);
 
 app.use("/images", express.static("./images"));
 app.use("/expenses", expensesRoutes);

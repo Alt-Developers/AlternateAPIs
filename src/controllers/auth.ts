@@ -73,7 +73,7 @@ export const signup: RequestHandler = (req, res, next) => {
     avatarPath = "images/default.png";
     defaultOrNot = true;
   } else if (req.file) {
-    avatarPath = req.file?.path;
+    avatarPath = req.file?.path.replace("\\", "/");
     defaultOrNot = false;
   }
 
@@ -160,7 +160,7 @@ export const getPlayerData: RequestHandler = (req, res, next) => {
 
 export const postEditProfilePicture: RequestHandler = (req, res, next) => {
   const userId = req.userId;
-  const filePath = req.file?.path;
+  const filePath = req.file?.path.replace("\\", "/");
   if (!filePath) {
     const error: ErrorInterface = new Error("No photo attached to the req");
     error.statusCode = 400;
@@ -173,6 +173,7 @@ export const postEditProfilePicture: RequestHandler = (req, res, next) => {
         error.statusCode = 404;
         throw error;
       }
+      console.log(filePath);
       user.avatar = filePath;
       user.save();
     })
