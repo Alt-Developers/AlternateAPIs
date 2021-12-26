@@ -14,11 +14,7 @@ This API is used at System13 and more products coming later. We are planning to 
 
 ## Versions
 
-**_Current Version_ | v1.2.2** <br/>
-
-- Added the errors controllers
-  - errors 503 <br/>
-    (Server can't handle the request because the server is down for maintenance)
+**_Current Version_ | v3.4.5.2** <br/>
 
 **_Previous Versions_**
 
@@ -31,25 +27,17 @@ This API is used at System13 and more products coming later. We are planning to 
   - Remove some bugs behind the scene
 - Version 2.0
   - Added validation for adding players
+- Version 3.0
+  - All SS Account support and polish system13 APIs endpoints
 
 ## Download
 
-1.) **Download Typescript *if you don't have***
-```zsh
-> npm install typescript -g
-```
-
-2.) **Compile TypeScript**
-```zsh
-> tsc
-```
-
-3.) **Download nodemodules**
+1.) **Download node_modules**
 ```zsh
 > npm install
 ```
 
-4.) **Run the program using** 
+2.) **Run the program using** 
 ```zsh
 > npm start
 
@@ -66,5 +54,7 @@ This project is protected under
 ```sh
 Mozilla Public License v2.0
 ```
+
+To read the full license [Click here](LICENSE)
 
 MPL 2.0 © 2021-2022 Prawich & Jirat

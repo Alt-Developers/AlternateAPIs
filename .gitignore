@@ -1,3 +1,12 @@
+
+# build folder
 dist/
+
+# node modules `npm install`
 node_modules/
+
+# dev env
 .env
+.vscode/
+
+.DS_Store

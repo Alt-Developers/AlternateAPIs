@@ -1,11 +1,12 @@
 {
   "name": "ss-apis",
   "version": "1.0.0",
-  "description": "Welcome to SS APIs Repository, SS APIs is an APIs use across all of our products",
+  "description": "SS APIs is an APIs use across all of SS developers' products",
   "main": "./src/app.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon"
+    "start": "tsc && node ./dist/app.js",
+    "dev": "nodemon"
   },
   "repository": {
     "type": "git",
@@ -27,8 +28,7 @@
     "express-validator": "^6.13.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.0.14",
-    "multer": "^1.4.4",
-    "uuid": "^8.3.2"
+    "multer": "^1.4.4"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
@@ -40,6 +40,7 @@
     "@types/multer": "^1.4.7",
     "@types/node": "^16.11.11",
     "@types/uuid": "^8.3.3",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "typescript": "^4.5.4"
   }
 }

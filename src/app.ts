@@ -19,17 +19,15 @@ const fileStorage = multer.diskStorage({
     cb(null, "images");
   },
   filename: (req, file, cb) => {
-    const newName = file.originalname.replace(/ /g, "_");
-    cb(null, `${uuid4()}.png`);
+    const sanitizedOriginalName = file.originalname.replace(/ /g, "_");
+    const dateAdded = new Date().toISOString()
+    cb(null, `${dateAdded}-${sanitizedOriginalName}`);
   },
 });
 
 const fileFilter = (req: any, file: any, cb: any) => {
-  if (
-    file.mimetype === "image/png" ||
-    file.mimetype === "image/jpg" ||
-    file.mimetype === "image/jpeg"
-  ) {
+  const fileType: string = file.mimetype;
+  if (fileType.startsWith("image")) {
     cb(null, true);
   } else {
     cb(null, false);
@@ -38,13 +36,16 @@ const fileFilter = (req: any, file: any, cb: any) => {
 
 const app = express();
 
+// parse a json request
 app.use(bodyParser.json());
+
+// get an Image form the file
 app.use(
   multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
 );
-app.use(cors());
 
-app.use("/", landing);
+// Cross Origins Handler
+app.use(cors());
 
 app.use("/images", express.static("./images"));
 app.use("/expenses", expensesRoutes);
@@ -61,5 +62,5 @@ const db = mongoose.connection;
 
 db.once("open", () => {
   console.log("Connected to the database");
-  app.listen(80);
+  app.listen(8080);
 });

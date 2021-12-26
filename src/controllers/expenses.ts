@@ -58,6 +58,12 @@ export const addTransaction: RequestHandler = async (req, res, next) => {
     res.status(200).json({
       message: "Successfully Created a transaction.",
       transactionName: thisTransaction?.name,
+      transaction: [
+          thisTransaction?._id,
+          thisTransaction?.name,
+          thisTransaction?.amount,
+          thisTransaction?.createdAt,
+        ]
     });
   } catch (err) {
     next(err);
@@ -123,8 +129,6 @@ export const deleteTransaction: RequestHandler = async (req, res, next) => {
       throw error;
     }
     const filtered = user.expenses?.filter((cur) => {
-      console.log(cur.toString(), transactionId.toString());
-      console.log(cur.toString() !== transactionId.toString());
       return cur.toString() !== transactionId.toString();
     });
 
@@ -148,10 +152,12 @@ export const deleteTransaction: RequestHandler = async (req, res, next) => {
       throw error;
     }
 
-    await Expenses.findByIdAndDelete(transactionId);
+    const deletedTransaction = await Expenses.findByIdAndDelete(transactionId);
 
     res.json({
-      message: "Deleted",
+      message: "Deleted a transaction.",
+      transactionName: deletedTransaction?.name,
+      transactionId: deletedTransaction?._id
     });
   } catch (err) {
     next(err);

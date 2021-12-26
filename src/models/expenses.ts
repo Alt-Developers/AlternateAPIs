@@ -27,6 +27,6 @@ const expensesSchema = new Schema(
   { timestamps: true }
 );
 
-const userDb = connection.useDb("Expenses");
+const userDb = connection.useDb("expenses");
 
 export default userDb.model<ExpensesInterface>("Expenses", expensesSchema);
