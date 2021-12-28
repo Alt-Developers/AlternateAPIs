@@ -1,5 +1,4 @@
 import fs from "fs";
-import { ErrorInterface } from "../models/types";
 
 export function deleteFile(filePath: string) {
   console.log(filePath);

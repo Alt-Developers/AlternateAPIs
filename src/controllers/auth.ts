@@ -1,15 +1,12 @@
 import env from "dotenv";
 import { RequestHandler } from "express";
-import {
-  ErrorInterface,
-  UnlockedObjectInterface,
-  UserInterface,
-} from "../models/types";
+import { UnlockedObjectInterface, UserInterface } from "../models/types";
 import { validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
 import User from "../models/user";
 import { deleteFile } from "../utilities/fileHelper";
 import jwt from "jsonwebtoken";
+import newError from "../utilities/newError";
 // import newAvatar from "../utilities/newAvatar";
 
 export const login: RequestHandler = (req, res, next) => {
@@ -21,19 +18,11 @@ export const login: RequestHandler = (req, res, next) => {
   User.findOne({ email: email })
     .then((user) => {
       loadedUser = user;
-      if (!user) {
-        const error: ErrorInterface = new Error("User not Found.");
-        error.statusCode = 401;
-        throw error;
-      }
+      if (!user) return newError(401, "User with this email not found.");
       return bcrypt.compare(password, user.password);
     })
     .then((isCorrect) => {
-      if (!isCorrect) {
-        const error: ErrorInterface = new Error("Wrong password.");
-        error.statusCode = 401;
-        throw error;
-      }
+      if (!isCorrect) return newError(401, "Wrong Password.");
 
       const token = jwt.sign(
         {
@@ -78,7 +67,7 @@ export const signup: RequestHandler = (req, res, next) => {
   }
 
   if (!email || !password || !firstName || !lastName) {
-    const err: ErrorInterface = new Error("Not all field were filled");
+    const err: Error = new Error("Not all field were filled");
     err.statusCode = 422;
     if (!defaultOrNot!) {
       deleteFile(avatarPath!);
@@ -86,7 +75,7 @@ export const signup: RequestHandler = (req, res, next) => {
     throw err;
   }
   if (!errors.isEmpty()) {
-    const err: ErrorInterface = new Error(
+    const err: Error = new Error(
       `Validation Error(s) : ${errors.array()[0].msg}`
     );
     if (!defaultOrNot!) {
@@ -98,11 +87,7 @@ export const signup: RequestHandler = (req, res, next) => {
 
   User.findOne({ email: email })
     .then((account) => {
-      if (account) {
-        const error: ErrorInterface = new Error("Email already Existed");
-        error.statusCode = 409;
-        throw error;
-      }
+      if (account) return newError(409, "Email already existed.");
       return;
     })
     .then((user) => {
@@ -120,11 +105,11 @@ export const signup: RequestHandler = (req, res, next) => {
           user.save();
           return res.status(201).json({ message: "Complete", user: user });
         })
-        .catch((err: ErrorInterface) => {
+        .catch((err: Error) => {
           throw err;
         });
     })
-    .catch((err: ErrorInterface) => {
+    .catch((err: Error) => {
       if (!err.statusCode) {
         err.statusCode = 500;
       }
@@ -138,13 +123,7 @@ export const signup: RequestHandler = (req, res, next) => {
 export const getPlayerData: RequestHandler = (req, res, next) => {
   User.findById(req.userId)
     .then((user) => {
-      if (!user) {
-        const error: ErrorInterface = new Error(
-          "No user with this ID were found."
-        );
-        error.statusCode = 404;
-        throw error;
-      }
+      if (!user) return newError(404, "User not found.");
       return res.status(200).json({
         token: req.authToken,
         firstName: user.firstName,
@@ -161,18 +140,14 @@ export const getPlayerData: RequestHandler = (req, res, next) => {
 export const postEditProfilePicture: RequestHandler = (req, res, next) => {
   const userId = req.userId;
   const filePath = req.file?.path.replace("\\", "/");
-  if (!filePath) {
-    const error: ErrorInterface = new Error("No photo attached to the req");
-    error.statusCode = 400;
-    throw error;
-  }
+  if (!filePath)
+    return newError(
+      400,
+      "Can't change profile picture if there's no photo attached."
+    );
   User.findById(userId)
     .then((user) => {
-      if (!user) {
-        const error: ErrorInterface = new Error("No User with this Id found");
-        error.statusCode = 404;
-        throw error;
-      }
+      if (!user) return newError(404, "User not found.");
       console.log(filePath);
       user.avatar = filePath;
       user.save();
@@ -191,26 +166,21 @@ export const editAccount: RequestHandler = (req, res, next) => {
   const errors = validationResult(req);
   let snapshot: any;
 
-  if (password) {
-    const error: ErrorInterface = new Error(
-      "You can't change a password in this endpoint"
+  if (password)
+    return newError(
+      400,
+      "Can't change password in this endpoint / please select the right service."
     );
-    error.statusCode = 400;
-    throw error;
-  }
 
   if (!errors.isEmpty()) {
-    const error: ErrorInterface = new Error("Validation Error");
-    error.statusCode = 422;
-    throw error;
+    const errMsg = `Validation Error: ${errors.array()[0].msg}.`;
+    console.log(errMsg);
+    return newError(422, errMsg);
   }
+
   User.findById(userId)
     .then((user) => {
-      if (!user) {
-        const error: ErrorInterface = new Error("No user with this id found");
-        error.statusCode = 404;
-        throw error;
-      }
+      if (!user) return newError(404, "user not found.");
       snapshot = user;
       if (email) user.email = email;
       if (firstName) user.firstName = firstName;
@@ -242,32 +212,20 @@ export const editPassword: RequestHandler = (req, res, next) => {
 
   let fetchedUser: UserInterface;
 
-  if (newPassword !== ConfirmNewPassword) {
-    const error: ErrorInterface = new Error(
-      "Confirm new password must be equal to new password."
+  if (newPassword !== ConfirmNewPassword)
+    return newError(
+      422,
+      "newPassword and ConfirmNewPassword must be the same."
     );
-    error.statusCode = 422;
-    throw error;
-  }
 
   User.findById(userId)
     .then((user) => {
-      if (!user) {
-        const error: ErrorInterface = new Error(
-          "No user with this id were found."
-        );
-        error.statusCode = 404;
-        throw error;
-      }
+      if (!user) return newError(404, "User not found.");
       fetchedUser = user;
       return bcrypt.compare(password, user.password);
     })
     .then((isCorrect) => {
-      if (!isCorrect) {
-        const error: ErrorInterface = new Error("Wrong old password.");
-        error.statusCode = 403;
-        throw error;
-      }
+      if (!isCorrect) return newError(403, "Wrong Old Password. / Not Authorized. / Forbidden.")
       bcrypt
         .hash(newPassword, 12)
         .then((hashedPassword) => {

@@ -2,7 +2,7 @@
 
 Welcome to SS APIs Repository, SS APIs is an APIs use across all of our products
 
-This API is used at System13 and more products coming later. We are planning to migrate data from products like Timetables and a currently unnamed blog project to these APIs 
+This API is used at System13 and more products coming later. We are planning to migrate data from products like Timetables and a currently unnamed blog project to these APIs
 
 ## Features
 
@@ -12,32 +12,36 @@ This API is used at System13 and more products coming later. We are planning to 
 - Add player (Waiting for frontend development)
 - Delete player (Waiting for frontend development)
 
+**_Expenses_** (Early development)
+
 ## Versions
 
-**_Current Version_ | v3.4.5.2** <br/>
+**_Current Version_ | v3.5** <br/>
 
 **_Previous Versions_**
 
 - Version 1.0
-  - All basic API features
+  - All basic API features.
 - Version 1.1
-  - Added errors handling (central error handling middleware)
+  - Added errors handling (central error handling middleware).
 - Version 1.2
-  - Started return errors message with the response for the client
-  - Remove some bugs behind the scene
+  - Started return errors message with the response for the client.
+  - Remove some bugs behind the scene.
 - Version 2.0
-  - Added validation for adding players
+  - Added validation for adding players.
 - Version 3.0
-  - All SS Account support and polish system13 APIs endpoints
+  - All SS Account support and polish system13 APIs endpoints + expenses project.
 
 ## Download
 
 1.) **Download node_modules**
+
 ```zsh
 > npm install
 ```
 
-2.) **Run the program using** 
+2.) **Run the program using**
+
 ```zsh
 > npm start
 
@@ -45,7 +49,6 @@ This API is used at System13 and more products coming later. We are planning to 
 
 > nodemon
 ```
-
 
 ## License
 

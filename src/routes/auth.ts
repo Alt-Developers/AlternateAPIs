@@ -25,7 +25,16 @@ router.post(
   dCrypt,
   authController.postEditProfilePicture
 );
-router.post("/updateUserInfo", dCrypt, authController.editAccount);
+router.post(
+  "/updateUserInfo",
+  [
+    body("email", "Invalid Email").isEmail(),
+    body("firstName"),
+    body("lastName"),
+  ],
+  dCrypt,
+  authController.editAccount
+);
 router.post("/changePassword", dCrypt, authController.editPassword);
 
 router.get("/getUserData", dCrypt, authController.getPlayerData);

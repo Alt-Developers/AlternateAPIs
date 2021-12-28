@@ -1,18 +1,17 @@
 import { RequestHandler } from "express";
 import Expenses from "../models/expenses";
 import User from "../models/user";
-import { ErrorInterface, UserInterface } from "../models/types";
+import { UserInterface } from "../models/types";
 import { validationResult } from "express-validator";
+import newError from "../utilities/newError";
 
 export const addTransaction: RequestHandler = async (req, res, next) => {
   try {
     const validationError = validationResult(req);
     if (!validationError.isEmpty()) {
-      const error: ErrorInterface = new Error(
-        `validation Error: ${validationError.array()[0].msg}`
-      );
-      error.statusCode = 404;
-      throw error;
+      const errMsg = `Validation Error: ${validationError.array()[0].msg}.`;
+      console.log(errMsg);
+      return newError(422, errMsg);
     }
     const userId = req.userId;
     const amount = req.body.amount;
@@ -25,13 +24,7 @@ export const addTransaction: RequestHandler = async (req, res, next) => {
 
     const user = await User.findById(userId);
 
-    if (!user) {
-      const error: ErrorInterface = new Error(
-        "No user with this ID were found."
-      );
-      error.statusCode = 404;
-      throw error;
-    }
+    if (!user) return newError(404, "User not found.");
 
     let thisTransaction;
     if (!detail) {
@@ -59,11 +52,11 @@ export const addTransaction: RequestHandler = async (req, res, next) => {
       message: "Successfully Created a transaction.",
       transactionName: thisTransaction?.name,
       transaction: [
-          thisTransaction?._id,
-          thisTransaction?.name,
-          thisTransaction?.amount,
-          thisTransaction?.createdAt,
-        ]
+        thisTransaction?._id,
+        thisTransaction?.name,
+        thisTransaction?.amount,
+        thisTransaction?.createdAt,
+      ],
     });
   } catch (err) {
     next(err);
@@ -121,13 +114,7 @@ export const deleteTransaction: RequestHandler = async (req, res, next) => {
 
     const user = await User.findById(userId);
 
-    if (!user) {
-      const error: ErrorInterface = new Error(
-        "No User with the ID were found."
-      );
-      error.statusCode = 404;
-      throw error;
-    }
+    if (!user) return newError(404, "user not found.");
     const filtered = user.expenses?.filter((cur) => {
       return cur.toString() !== transactionId.toString();
     });
@@ -138,26 +125,17 @@ export const deleteTransaction: RequestHandler = async (req, res, next) => {
 
     const transaction = await Expenses.findById(transactionId);
 
-    if (!transaction) {
-      const error: ErrorInterface = new Error(
-        "No transaction with the ID were found."
-      );
-      error.statusCode = 404;
-      throw error;
-    }
+    if (!transaction) return newError(404, "Transaction not found.");
 
-    if (transaction.createdBy.toString() !== userId.toString()) {
-      const error: ErrorInterface = new Error("Not Authorized");
-      error.statusCode = 403;
-      throw error;
-    }
+    if (transaction.createdBy.toString() !== userId.toString())
+      return newError(403, "Not Authorized. / Forbidden.");
 
     const deletedTransaction = await Expenses.findByIdAndDelete(transactionId);
 
     res.json({
       message: "Deleted a transaction.",
       transactionName: deletedTransaction?.name,
-      transactionId: deletedTransaction?._id
+      transactionId: deletedTransaction?._id,
     });
   } catch (err) {
     next(err);

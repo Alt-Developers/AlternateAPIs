@@ -7,10 +7,8 @@ const router = Router();
 router.get("/getPlayersList", dCrypt, systemController.getPlayersList);
 router.get("/getRealNameList", dCrypt, systemController.getRealNameList);
 router.post("/addPlayer", dCrypt, systemController.addPlayer);
-router.delete(
-  "/deletePlayer/:playerCode",
-  dCrypt,
-  systemController.getPlayersList
-);
+router.delete("/deletePlayer/:playerId", dCrypt, systemController.deletePlayer);
+
+router.get("/getUserPlayer", dCrypt, systemController.getUserPlayer);
 
 export default router;

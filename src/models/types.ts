@@ -7,6 +7,9 @@ declare global {
       [key: string]: any;
     }
   }
+  interface Error {
+    statusCode: number;
+  }
 }
 
 export type ErrorRequestHandler = (
@@ -43,10 +46,6 @@ export interface UserInterface extends Document {
   DOB?: Date;
   system13?: ObjectId[];
   expenses?: ObjectId[];
-}
-
-export interface ErrorInterface extends Error {
-  statusCode?: number;
 }
 
 export interface UnlockedObjectInterface extends Object {

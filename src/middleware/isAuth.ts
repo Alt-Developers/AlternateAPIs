@@ -1,15 +1,11 @@
 import env from "dotenv";
 import { RequestHandler } from "express";
-import { ErrorInterface } from "../models/types";
 import jwt from "jsonwebtoken";
+import newError from "../utilities/newError";
 
 const dCrypt: RequestHandler = (req, res, next) => {
   const authHeader = req.get("Authorization");
-  if (!authHeader) {
-    const error: ErrorInterface = new Error("Token not found.");
-    error.statusCode = 400;
-    throw error;
-  }
+  if (!authHeader) return newError(400, "Token not found.");
   req.authToken = req.get("Authorization")!.split(" ")[1];
   const token = req.get("Authorization")!.split(" ")[1];
   let decodedToken: any;
@@ -23,11 +19,7 @@ const dCrypt: RequestHandler = (req, res, next) => {
     }
   }
 
-  if (!decodedToken) {
-    const error: ErrorInterface = new Error("Not Authenticated.");
-    error.statusCode = 401;
-    throw error;
-  }
+  if (!decodedToken) return newError(401, "Not Authenticated.");
   req.userId = decodedToken.userId;
   next();
 };
