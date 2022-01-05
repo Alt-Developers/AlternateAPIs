@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
+import { Timestamp } from "mongodb";
 import { Document, ObjectId } from "mongoose";
 
 declare global {
@@ -46,6 +47,9 @@ export interface UserInterface extends Document {
   DOB?: Date;
   system13?: ObjectId[];
   expenses?: ObjectId[];
+  timetables?: {
+    [key: string]: any;
+  };
 }
 
 export interface UnlockedObjectInterface extends Object {
@@ -59,4 +63,22 @@ export interface ExpensesInterface extends Document {
   detail?: string;
   createdBy: ObjectId;
   createdAt: Date;
+}
+
+export interface TimetableContentInterface extends Object {
+  monday: string[];
+  tuesday: string[];
+  wednesday: string[];
+  thursday: string[];
+  friday: string[];
+}
+
+export interface TimetableInterface extends Document {
+  classNo: string;
+  program: string;
+  defaultColor: string;
+  timetableContent: TimetableContentInterface;
+  createdBy: ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
 }

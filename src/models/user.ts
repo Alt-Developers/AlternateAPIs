@@ -31,6 +31,6 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
-const userDb = connection.useDb("ss_Account");
+const db = connection.useDb("ss_Account");
 
-export default userDb.model<UserInterface>("User", userSchema);
+export default db.model<UserInterface>("User", userSchema);

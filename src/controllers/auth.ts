@@ -29,8 +29,7 @@ export const login: RequestHandler = (req, res, next) => {
           email: loadedUser.email,
           userId: loadedUser._id,
         },
-        process.env.JWT_KEY!,
-        { expiresIn: "10d" }
+        process.env.JWT_KEY!
       );
       res.status(200).json({
         token: token,
@@ -148,9 +147,14 @@ export const postEditProfilePicture: RequestHandler = (req, res, next) => {
   User.findById(userId)
     .then((user) => {
       if (!user) return newError(404, "User not found.");
-      console.log(filePath);
+      deleteFile(user.avatar);
       user.avatar = filePath;
       user.save();
+    })
+    .then(() => {
+      res.status(201).json({
+        message: "Successfully edited user's profile picture.",
+      });
     })
     .catch((err) => {
       next(err);
@@ -225,7 +229,11 @@ export const editPassword: RequestHandler = (req, res, next) => {
       return bcrypt.compare(password, user.password);
     })
     .then((isCorrect) => {
-      if (!isCorrect) return newError(403, "Wrong Old Password. / Not Authorized. / Forbidden.")
+      if (!isCorrect)
+        return newError(
+          403,
+          "Wrong Old Password. / Not Authorized. / Forbidden."
+        );
       bcrypt
         .hash(newPassword, 12)
         .then((hashedPassword) => {

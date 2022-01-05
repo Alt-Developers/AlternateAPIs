@@ -4,7 +4,6 @@ import { Middleware, PlayerInterface } from "../models/types";
 import addCount from "../utilities/addCount";
 import { validationResult } from "express-validator";
 import User from "../models/user";
-import user from "../models/user";
 import newError from "../utilities/newError";
 
 export const getPlayersList: Middleware = async (req, res, next) => {

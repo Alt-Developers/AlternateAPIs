@@ -12,6 +12,7 @@ import * as errorController from "./controllers/errors";
 import systemRoutes from "./routes/system";
 import authRoutes from "./routes/auth";
 import expensesRoutes from "./routes/expenses";
+import timetablesRoutes from "./routes/timetables";
 
 const fileStorage = multer.diskStorage({
   destination: (req: any, file: any, cb: any) => {
@@ -51,6 +52,7 @@ app.use("/images", express.static("./images"));
 app.use("/expenses", expensesRoutes);
 app.use("/auth", authRoutes);
 app.use("/system13", systemRoutes);
+app.use("/timetables", timetablesRoutes);
 
 // Can't find Endpoint
 app.use("/", errorController.notFound404);
