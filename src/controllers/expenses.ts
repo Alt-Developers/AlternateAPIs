@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
-import Expenses from "../models/expenses";
-import User from "../models/user";
+import Expenses from "../models/expenses/expenses";
+import User from "../models/ss_Account/user";
 import { UserInterface } from "../models/types";
 import { validationResult } from "express-validator";
 import newError from "../utilities/newError";

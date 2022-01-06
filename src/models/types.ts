@@ -48,7 +48,10 @@ export interface UserInterface extends Document {
   system13?: ObjectId[];
   expenses?: ObjectId[];
   timetables?: {
-    [key: string]: any;
+    preferredColor: String;
+    primaryClass: ObjectId;
+    starred: ObjectId[];
+    created: ObjectId[];
   };
 }
 
@@ -81,4 +84,11 @@ export interface TimetableInterface extends Document {
   createdBy: ObjectId;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface ClassesInterface extends Document {
+  classNo: string;
+  program: string;
+  timetable: ObjectId;
+  primaryClassOf: ObjectId[];
 }

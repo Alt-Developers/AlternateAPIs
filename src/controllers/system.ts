@@ -1,9 +1,9 @@
 import express, { RequestHandler } from "express";
-import Player from "../models/player";
+import Player from "../models/system13/player";
 import { Middleware, PlayerInterface } from "../models/types";
 import addCount from "../utilities/addCount";
 import { validationResult } from "express-validator";
-import User from "../models/user";
+import User from "../models/ss_Account/user";
 import newError from "../utilities/newError";
 
 export const getPlayersList: Middleware = async (req, res, next) => {

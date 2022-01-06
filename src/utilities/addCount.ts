@@ -1,4 +1,4 @@
-import Count from "../models/count";
+import Count from "../models/system13/count";
 import { Count as CountTypes } from "../models/types";
 
 export default function addCount(apiName: string) {

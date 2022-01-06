@@ -3,7 +3,7 @@ import { RequestHandler } from "express";
 import { UnlockedObjectInterface, UserInterface } from "../models/types";
 import { validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
-import User from "../models/user";
+import User from "../models/ss_Account/user";
 import { deleteFile } from "../utilities/fileHelper";
 import jwt from "jsonwebtoken";
 import newError from "../utilities/newError";
