@@ -37,6 +37,6 @@ router.post(
 );
 router.post("/changePassword", dCrypt, authController.editPassword);
 
-router.get("/getUserData", dCrypt, authController.getPlayerData);
+router.get("/getUserData", dCrypt, authController.getUserData);
 
 export default router;

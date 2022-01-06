@@ -119,7 +119,7 @@ export const signup: RequestHandler = (req, res, next) => {
     });
 };
 
-export const getPlayerData: RequestHandler = (req, res, next) => {
+export const getUserData: RequestHandler = (req, res, next) => {
   User.findById(req.userId)
     .then((user) => {
       if (!user) return newError(404, "User not found.");

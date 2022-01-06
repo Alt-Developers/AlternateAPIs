@@ -5,13 +5,10 @@
   "main": "./src/app.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc && node ./dist/app.js",
+    "start": "",
     "dev": "nodemon"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/SS-Developers/SS-APIs.git"
-  },
+  "repository": "git+https://github.com/SS-Developers/SS-APIs.git",
   "author": "Prawich Thawansakdivudhi",
   "license": "ISC",
   "bugs": {
@@ -28,7 +25,8 @@
     "express-validator": "^6.13.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.0.14",
-    "multer": "^1.4.4"
+    "multer": "^1.4.4",
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
