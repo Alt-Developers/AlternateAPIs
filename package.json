@@ -5,8 +5,8 @@
   "main": "./src/app.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "",
-    "dev": "nodemon"
+    "start": "nodemon",
+    "server": "node ./dist/app.js"
   },
   "repository": "git+https://github.com/SS-Developers/SS-APIs.git",
   "author": "Prawich Thawansakdivudhi",
