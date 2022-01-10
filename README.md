@@ -16,7 +16,7 @@ This API is used at System13 and more products coming later. We are planning to 
 
 ## Versions
 
-**_Current Version_ | v3.5** <br/>
+**_Current Version_ | v3.9** <br/>
 
 **_Previous Versions_**
 

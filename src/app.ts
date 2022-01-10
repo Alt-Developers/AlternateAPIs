@@ -4,7 +4,6 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import mongoose from "mongoose";
 import multer from "multer";
-import { v4 as uuid4 } from "uuid";
 
 env.config({ path: "./.env" });
 
