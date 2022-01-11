@@ -1,251 +1,216 @@
 import env from "dotenv";
-import { RequestHandler } from "express";
-import { UnlockedObjectInterface, UserInterface } from "../models/types";
-import { validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
-import User from "../models/ss_Account/user";
-import { deleteFile } from "../utilities/fileHelper";
+import { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import newError from "../utilities/newError";
-// import newAvatar from "../utilities/newAvatar";
+import { deleteFile } from "../utilities/fileHelper";
+import User from "../models/ss_Account/user";
+import { validationResult } from "express-validator";
+import validationErrCheck from "../utilities/validationErrChecker";
 
-export const login: RequestHandler = (req, res, next) => {
-  const email = req.body.email;
-  const password = req.body.pass;
+export const signup: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
 
-  let loadedUser: any;
+    const email = req.body.email;
+    const password = req.body.pass;
+    const firstName = req.body.firstName;
+    const lastName = req.body.lastName;
+    const color = req.body.primaryColor;
+    let avatarPath: string;
+    let isDefault: boolean;
 
-  User.findOne({ email: email })
-    .then((user) => {
-      loadedUser = user;
-      if (!user) return newError(401, "User with this email not found.");
-      return bcrypt.compare(password, user.password);
-    })
-    .then((isCorrect) => {
-      if (!isCorrect) return newError(401, "Wrong Password.");
+    if (!req.file) {
+      avatarPath = "images/default.png";
+      isDefault = true;
+    } else {
+      avatarPath = req.file.path.replace("\\", "/");
+      isDefault = false;
+    }
 
-      const token = jwt.sign(
-        {
-          email: loadedUser.email,
-          userId: loadedUser._id,
-        },
-        process.env.JWT_KEY!
-      );
-      res.status(200).json({
-        token: token,
-        firstName: loadedUser.firstName,
-        lastName: loadedUser.lastName,
-        email: loadedUser.email,
-        img: loadedUser.avatar,
-      });
-    })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
+    if (!email || !password || !firstName || !lastName) {
+      if (!isDefault) deleteFile(avatarPath);
+      return newError(400, "Not all fields were filled.");
+    }
+
+    const user = await User.findOne({ email: email });
+    if (user) return newError(409, "Email existed.");
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const newUser = new User({
+      firstName: firstName,
+      lastName: lastName,
+      password: hashedPassword,
+      email: email,
+      avatar: avatarPath,
+      preferredColor: color,
     });
+
+    const result = await newUser.save();
+
+    res.status(201).json;
+  } catch (err) {
+    next(err);
+  }
 };
 
-export const signup: RequestHandler = (req, res, next) => {
-  const email = req.body.email;
-  const password = req.body.pass;
-  const firstName = req.body.firstName;
-  const lastName = req.body.lastName;
-  const errors = validationResult(req);
-  let avatarPath: string;
-  let defaultOrNot: boolean;
+export const login: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
 
-  if (!req.file) {
-    // avatarPath = newAvatar(firstName, lastName);
-    avatarPath = "images/default.png";
-    defaultOrNot = true;
-  } else if (req.file) {
-    avatarPath = req.file?.path.replace("\\", "/");
-    defaultOrNot = false;
-  }
+    const email = req.body.email;
+    const password = req.body.pass;
 
-  if (!email || !password || !firstName || !lastName) {
-    const err: Error = new Error("Not all field were filled");
-    err.statusCode = 422;
-    if (!defaultOrNot!) {
-      deleteFile(avatarPath!);
-    }
-    throw err;
-  }
-  if (!errors.isEmpty()) {
-    const err: Error = new Error(
-      `Validation Error(s) : ${errors.array()[0].msg}`
-    );
-    if (!defaultOrNot!) {
-      deleteFile(avatarPath!);
-    }
-    err.statusCode = 422;
-    throw err;
-  }
+    const user = await User.findOne({ email: email });
+    if (!user) return newError(404, "User not found.");
 
-  User.findOne({ email: email })
-    .then((account) => {
-      if (account) return newError(409, "Email already existed.");
-      return;
-    })
-    .then((user) => {
-      bcrypt
-        .hash(password, 12)
-        .then((hashedPassword) => {
-          const user = new User({
-            firstName: firstName,
-            lastName: lastName,
-            password: hashedPassword,
-            email: email,
-            avatar: avatarPath,
-          });
-          console.log(user);
-          user.save();
-          return res.status(201).json({ message: "Complete", user: user });
-        })
-        .catch((err: Error) => {
-          throw err;
-        });
-    })
-    .catch((err: Error) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      if (!defaultOrNot!) {
-        deleteFile(avatarPath!);
-      }
-      next(err);
-    });
-};
+    const isCorrectPassword = bcrypt.compare(password, user.password);
+    if (!isCorrectPassword) return newError(401, "Wrong Password.");
 
-export const getUserData: RequestHandler = (req, res, next) => {
-  User.findById(req.userId)
-    .then((user) => {
-      if (!user) return newError(404, "User not found.");
-      return res.status(200).json({
-        token: req.authToken,
-        firstName: user.firstName,
-        lastName: user.lastName,
+    const token = jwt.sign(
+      {
         email: user.email,
-        img: user.avatar,
-      });
-    })
-    .catch((err) => {
-      next(err);
-    });
-};
-
-export const postEditProfilePicture: RequestHandler = (req, res, next) => {
-  const userId = req.userId;
-  const filePath = req.file?.path.replace("\\", "/");
-  if (!filePath)
-    return newError(
-      400,
-      "Can't change profile picture if there's no photo attached."
-    );
-  User.findById(userId)
-    .then((user) => {
-      if (!user) return newError(404, "User not found.");
-      deleteFile(user.avatar);
-      user.avatar = filePath;
-      user.save();
-    })
-    .then(() => {
-      res.status(201).json({
-        message: "Successfully edited user's profile picture.",
-      });
-    })
-    .catch((err) => {
-      next(err);
-    });
-};
-
-export const editAccount: RequestHandler = (req, res, next) => {
-  const email = req.body.email;
-  const firstName = req.body.firstName;
-  const lastName = req.body.lastName;
-  const password = req.body.password;
-  const userId = req.userId;
-  const errors = validationResult(req);
-  let snapshot: any;
-
-  if (password)
-    return newError(
-      400,
-      "Can't change password in this endpoint / please select the right service."
+        userId: user._id,
+      },
+      process.env.JWT_KEY!
     );
 
-  if (!errors.isEmpty()) {
-    const errMsg = `Validation Error: ${errors.array()[0].msg}.`;
-    console.log(errMsg);
-    return newError(422, errMsg);
+    res.status(200).json({
+      token: token,
+    });
+  } catch (err) {
+    next(err);
   }
+};
 
-  User.findById(userId)
-    .then((user) => {
-      if (!user) return newError(404, "user not found.");
-      snapshot = user;
-      if (email) user.email = email;
-      if (firstName) user.firstName = firstName;
-      if (lastName) user.lastName = lastName;
+export const getUserData: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
 
-      return user.save();
-    })
-    .then((result) => {
-      const updated: UnlockedObjectInterface = {};
-      if (email) updated.email = result.email;
-      if (firstName) updated.firstName = result.firstName;
-      if (lastName) updated.lastName = result.lastName;
+    const userId = req.userId;
+    const user = await User.findById(userId);
+    if (!user) return newError(404, "User not found.");
 
-      res.status(201).json({
-        message: "Successfully Updated a user",
-        updated: updated,
-      });
-    })
-    .catch((err) => {
-      next(err);
+    res.status(200).json({
+      token: req.authToken,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      img: user.avatar,
     });
+  } catch (err) {
+    next(err);
+  }
 };
 
-export const editPassword: RequestHandler = (req, res, next) => {
+export const changeAvatar: RequestHandler = async (req, res, next) => {
   const userId = req.userId;
-  const newPassword = req.body.newPassword;
-  const ConfirmNewPassword = req.body.confirmNewPassword;
-  const password = req.body.password;
+  const newAvatarPath = req.file?.path.replace("\\", "/");
+  if (!newAvatarPath) return newError(400, "Attachment not found.");
 
-  let fetchedUser: UserInterface;
+  const user = await User.findById(userId);
+  if (!user) {
+    deleteFile(newAvatarPath);
+    return newError(404, "User not found.");
+  }
+  const isDefault = user.avatar === "images/default.png";
 
-  if (newPassword !== ConfirmNewPassword)
-    return newError(
-      422,
-      "newPassword and ConfirmNewPassword must be the same."
-    );
+  if (!isDefault) deleteFile(user.avatar);
+  user.avatar = newAvatarPath;
+  const result = await user.save();
 
-  User.findById(userId)
-    .then((user) => {
-      if (!user) return newError(404, "User not found.");
-      fetchedUser = user;
-      return bcrypt.compare(password, user.password);
-    })
-    .then((isCorrect) => {
-      if (!isCorrect)
-        return newError(
-          403,
-          "Wrong Old Password. / Not Authorized. / Forbidden."
-        );
-      bcrypt
-        .hash(newPassword, 12)
-        .then((hashedPassword) => {
-          fetchedUser.password = hashedPassword;
-          fetchedUser.save();
-          return res.status(201).json({
-            message: "Successfully Edited a password.",
-          });
-        })
-        .catch((err) => {
-          throw err;
-        });
-    })
-    .catch((err) => next(err));
+  res.status(200).json({
+    message: "Successfully edited user's profile picture.",
+    newAvatar: result.avatar,
+  });
 };
+
+// export const editAccount: RequestHandler = (req, res, next) => {
+//     const email = req.body.email;
+//     const firstName = req.body.firstName;
+//     const lastName = req.body.lastName;
+//     const password = req.body.password;
+//     const userId = req.userId;
+//     const errors = validationResult(req);
+//     let snapshot: any;
+
+//     if (password)
+//       return newError(
+//         400,
+//         "Can't change password in this endpoint / please select the right service."
+//       );
+
+//     if (!errors.isEmpty()) {
+//       const errMsg = `Validation Error: ${errors.array()[0].msg}.`;
+//       console.log(errMsg);
+//       return newError(422, errMsg);
+//     }
+
+//     User.findById(userId)
+//       .then((user) => {
+//         if (!user) return newError(404, "user not found.");
+//         snapshot = user;
+//         if (email) user.email = email;
+//         if (firstName) user.firstName = firstName;
+//         if (lastName) user.lastName = lastName;
+
+//         return user.save();
+//       })
+//       .then((result) => {
+//         const updated: UnlockedObjectInterface = {};
+//         if (email) updated.email = result.email;
+//         if (firstName) updated.firstName = result.firstName;
+//         if (lastName) updated.lastName = result.lastName;
+
+//         res.status(201).json({
+//           message: "Successfully Updated a user",
+//           updated: updated,
+//         });
+//       })
+//       .catch((err) => {
+//         next(err);
+//       });
+//   };
+
+//   export const editPassword: RequestHandler = (req, res, next) => {
+//     const userId = req.userId;
+//     const newPassword = req.body.newPassword;
+//     const ConfirmNewPassword = req.body.confirmNewPassword;
+//     const password = req.body.password;
+
+//     let fetchedUser: UserInterface;
+
+//     if (newPassword !== ConfirmNewPassword)
+//       return newError(
+//         422,
+//         "newPassword and ConfirmNewPassword must be the same."
+//       );
+
+//     User.findById(userId)
+//       .then((user) => {
+//         if (!user) return newError(404, "User not found.");
+//         fetchedUser = user;
+//         return bcrypt.compare(password, user.password);
+//       })
+//       .then((isCorrect) => {
+//         if (!isCorrect)
+//           return newError(
+//             403,
+//             "Wrong Old Password. / Not Authorized. / Forbidden."
+//           );
+//         bcrypt
+//           .hash(newPassword, 12)
+//           .then((hashedPassword) => {
+//             fetchedUser.password = hashedPassword;
+//             fetchedUser.save();
+//             return res.status(201).json({
+//               message: "Successfully Edited a password.",
+//             });
+//           })
+//           .catch((err) => {
+//             throw err;
+//           });
+//       })
+//       .catch((err) => next(err));
+//   };

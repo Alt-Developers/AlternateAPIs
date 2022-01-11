@@ -24,72 +24,42 @@ const timetableSchema = new Schema(
     timetableContent: {
       monday: [
         {
-          subjectName: {
-            type: String,
-            required: true,
-          },
-          subjectCode: {
-            type: String,
-            required: true,
-            minlength: 3,
-            maxlength: 3,
-          },
+          type: String,
+          required: true,
+          minlength: 3,
+          maxlength: 3,
         },
       ],
       tuesday: [
         {
-          subjectName: {
-            type: String,
-            required: true,
-          },
-          subjectCode: {
-            type: String,
-            required: true,
-            minlength: 3,
-            maxlength: 3,
-          },
+          type: String,
+          required: true,
+          minlength: 3,
+          maxlength: 3,
         },
       ],
       wednesday: [
         {
-          subjectName: {
-            type: String,
-            required: true,
-          },
-          subjectCode: {
-            type: String,
-            required: true,
-            minlength: 3,
-            maxlength: 3,
-          },
+          type: String,
+          required: true,
+          minlength: 3,
+          maxlength: 3,
         },
       ],
       thursday: [
         {
-          subjectName: {
-            type: String,
-            required: true,
-          },
-          subjectCode: {
-            type: String,
-            required: true,
-            minlength: 3,
-            maxlength: 3,
-          },
+          type: String,
+          required: true,
+          minlength: 3,
+          maxlength: 3,
         },
       ],
       friday: [
         {
-          subjectName: {
-            type: String,
-            required: true,
-          },
-          subjectCode: {
-            type: String,
-            required: true,
-            minlength: 3,
-            maxlength: 3,
-          },
+          type: String,
+          required: true,
+          minlength: 3,
+          maxlength: 3,
         },
       ],
     },

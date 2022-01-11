@@ -16,16 +16,23 @@ import validationErrCheck from "../utilities/validationErrChecker";
 import { programTypes } from "../models/ss_timetables/data";
 
 const colorList = [
-  "#ffd454",
-  "#39df70",
-  "#27989C",
-  "#62221D",
-  "#044B79",
-  "#B71033",
-  "#2DD7B6",
+  // "#39df70",
+  // "#27989C",
+  // "#62221D",
+  // "#044B79",
+  // "#B71033",
+  // "#2DD7B6",
+  // "#5E4DFC",
+  // "#3164E2",
+  // "#102F8A",
+  "#FF5252",
+  "#4a92ff",
   "#5E4DFC",
-  "#3164E2",
-  "#102F8A",
+  "#5df089",
+  "#2DD7B6",
+  "#ffd454",
+  "#c842f5",
+  "#fa46c7",
 ];
 
 export const registerUserClass: RequestHandler = async (req, res, next) => {
@@ -179,7 +186,7 @@ export const createTimetable: RequestHandler = async (req, res, next) => {
       }
     }
 
-    const existedUserClass = await UserClass.findOne({
+    let classResult = await UserClass.findOne({
       classNo: classNo,
       program: program,
     });
@@ -207,8 +214,18 @@ export const createTimetable: RequestHandler = async (req, res, next) => {
       );
     }
 
+    if (!classResult) {
+      const newUserClass = new userClass({
+        classNo: classNo,
+        program: program,
+        defaultColor: defaultColor,
+      });
+      classResult = await newUserClass.save();
+    }
+
     const newTimetable = new Timetable({
       classNo: classNo,
+      classId: classResult?._id,
       program: program,
       defaultColor: defaultColor,
       timetableContent: timetableContent,
@@ -217,19 +234,8 @@ export const createTimetable: RequestHandler = async (req, res, next) => {
 
     const result = await newTimetable.save();
 
-    let classResult;
-    if (!existedUserClass) {
-      const newUserClass = new userClass({
-        classNo: classNo,
-        program: program,
-        defaultColor: defaultColor,
-        timetable: result._id,
-      });
-      classResult = await newUserClass.save();
-    } else {
-      existedUserClass.timetable = result._id;
-      classResult = await existedUserClass.save();
-    }
+    classResult.timetable = result._id;
+    await classResult.save();
 
     // @ts-ignore
     const programName: String = programTypes[program];

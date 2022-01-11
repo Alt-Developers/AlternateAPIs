@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
-import { Timestamp } from "mongodb";
+import { SetProfilingLevelOptions, Timestamp } from "mongodb";
 import { Document, ObjectId } from "mongoose";
 
 declare global {
@@ -47,6 +47,7 @@ export interface UserInterface extends Document {
   DOB?: Date;
   system13?: ObjectId[];
   expenses?: ObjectId[];
+  preferredColor: String;
   timetables?: {
     preferredColor: String;
     primaryClass: ObjectId;

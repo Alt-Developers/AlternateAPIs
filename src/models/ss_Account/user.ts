@@ -20,6 +20,10 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    preferredColor: {
+      type: String,
+      required: true,
+    },
     DOB: Date,
     system13: [Types.ObjectId],
     expenses: [Types.ObjectId],

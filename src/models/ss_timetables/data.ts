@@ -15,7 +15,7 @@ export const BELL_Class = {
   GUI: "Guidance",
   THA: "Thai",
   MAT: "Math",
-  SOS: "Social Study",
+  SOS: "Social Studies",
   SCE: "Science E.",
   SOE: "Social E",
   PED: "P.E.",
@@ -25,7 +25,7 @@ export const BELL_Class = {
   ART: "Art",
   SCO: "Scouts/STEM",
   CLU: "Club",
-  CHI: "Chinese Literature",
+  CHI: "Chinese",
   HEA: "Health",
   MOR: "Morality",
 };
@@ -34,9 +34,29 @@ export const BELL_Class = {
 //   // English Program
 // };
 
-// export const CHEN_Class = {
-//   // Chinese English Program
-// };
+export const CHEN_Class = {
+  // Chinese English Program
+  SCI: "Science",
+  MAE: "Math E.",
+  GUI: "Guidance",
+  THA: "Thai",
+  MAT: "Math",
+  SOS: "Social Studies",
+  SCE: "Science E.",
+  SOE: "Social E",
+  PED: "P.E.",
+  HIS: "History",
+  TEC: "Technology",
+  COM: "Computers",
+  ENG: "English",
+  ART: "Art",
+  SCO: "Scouts/STEM",
+  CLU: "Club",
+  CHI: "Chinese",
+  HEA: "Health",
+  MOR: "Morality",
+  OCU: "Occupational Works",
+};
 
 // export const DTTH_Class = {
 //   // Digital & Technology Program
