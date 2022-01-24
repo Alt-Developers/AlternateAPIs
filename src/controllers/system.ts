@@ -3,7 +3,7 @@ import Player from "../models/system13/player";
 import { Middleware, PlayerInterface } from "../models/types";
 import addCount from "../utilities/addCount";
 import { validationResult } from "express-validator";
-import User from "../models/ss_Account/user";
+import User from "../models/authentication/user";
 import newError from "../utilities/newError";
 
 export const getPlayersList: Middleware = async (req, res, next) => {
@@ -66,7 +66,6 @@ export const addPlayer: Middleware = async (req, res, next) => {
 
   try {
     if (!errors.isEmpty()) {
-      console.log(errors.array());
       return res.status(422).json({
         message: errors.array()[0].msg,
       });
@@ -135,7 +134,6 @@ export const deletePlayer: Middleware = async (req, res, next) => {
 
     const result = await Player.findByIdAndDelete(playerId);
 
-    console.log(result, "Deleted a player");
     if (result) {
       res.status(200).json({
         message: "Successfully deleted a product",

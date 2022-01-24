@@ -2,8 +2,9 @@ import env from "dotenv";
 import express, { ErrorRequestHandler, NextFunction } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
-import mongoose from "mongoose";
+import mongoose, { AnyArray } from "mongoose";
 import multer from "multer";
+import socketIO from "socket.io";
 
 env.config({ path: "./.env" });
 
@@ -12,6 +13,10 @@ import systemRoutes from "./routes/system";
 import authRoutes from "./routes/auth";
 import expensesRoutes from "./routes/expenses";
 import timetablesRoutes from "./routes/timetables";
+import socket from "./socket";
+
+let curTime: any;
+let curDay: any;
 
 const fileStorage = multer.diskStorage({
   destination: (req: any, file: any, cb: any) => {
@@ -59,11 +64,23 @@ app.use("/", errorController.notFound404);
 // Central Error Handler
 app.use(errorController.centralError);
 
-mongoose.connect(process.env.MONGOOSE_URI!);
+let io;
+mongoose
+  .connect(process.env.MONGOOSE_URI!)
+  .then((result) => {
+    console.log("Connected to the database.");
+    const server = app.listen(8080);
+    // @ts-ignore
+    io = socket.init(server);
+    io.on("connection", (socket: any) => {
+      console.log("Client connected");
+      socket.emit(
+        "welcome",
+        "You have been connected to SS-APIs websocket Network."
+      );
+    });
+  })
+  .catch((err) => console.log(err));
 
 const db = mongoose.connection;
-
-db.once("open", () => {
-  console.log("Connected to the database");
-  app.listen(8080);
-});
+export const sio = io;

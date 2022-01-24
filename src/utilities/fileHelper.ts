@@ -1,8 +1,6 @@
 import fs from "fs";
 
 export function deleteFile(filePath: string) {
-  console.log(filePath);
-
   if (filePath.split("/").includes("default.png")) return;
 
   fs.stat(filePath, (err, stat) => {
@@ -14,7 +12,6 @@ export function deleteFile(filePath: string) {
       });
       return 0;
     } else if (err.code === "ENOENT") {
-      console.log("File Not Found!");
       return 0;
     } else {
       return err;

@@ -15,6 +15,7 @@ export const centralError: ErrorRequestHandler = (
   next
 ) => {
   const code = err.statusCode || 500;
+  console.log(err);
   res.status(code).json({
     error: err.message,
     message: "an error has occurred",

@@ -7,6 +7,8 @@ export const programTypes = {
   GIFT: "Gifted",
 };
 
+export const classTime = [830, 920, 1010, 1100, 1240, 1330, 1420];
+
 export const BELL_Class = {
   // BELL Program
   SCI: "Science",
@@ -25,14 +27,33 @@ export const BELL_Class = {
   ART: "Art",
   SCO: "Scouts/STEM",
   CLU: "Club",
-  CHI: "Chinese",
+  CHL: "Chinese Literature",
   HEA: "Health",
   MOR: "Morality",
 };
 
-// export const EPPG_Class = {
-//   // English Program
-// };
+export const ENPG_Class = {
+  // English Program
+  FMT: "Foundation Math",
+  UMT: "Universal Math",
+  FSC: "Foundation Science",
+  USC: "Universal Science",
+  SEN: "Supplemental English",
+  FEN: "Foundation English",
+  HIS: "History",
+  CHI: "Chinese",
+  ART: "Arts",
+  TAI: "Thai",
+  SOC: "Social",
+  GUI: "Guidance",
+  SCO: "Scout",
+  CUB: "Club",
+  VED: "Value Education [STEAM]",
+  OPW: "Occupation Works",
+  TCS: "Technology & Computer Science",
+  PED: "P.E.",
+  HEA: "Health",
+};
 
 export const CHEN_Class = {
   // Chinese English Program
@@ -56,6 +77,7 @@ export const CHEN_Class = {
   HEA: "Health",
   MOR: "Morality",
   OCU: "Occupational Works",
+  EEN: "Extra English",
 };
 
 // export const DTTH_Class = {

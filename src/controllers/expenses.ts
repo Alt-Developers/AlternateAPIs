@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import Expenses from "../models/expenses/expenses";
-import User from "../models/ss_Account/user";
+import User from "../models/authentication/user";
 import { UserInterface } from "../models/types";
 import { validationResult } from "express-validator";
 import newError from "../utilities/newError";
@@ -10,7 +10,6 @@ export const addTransaction: RequestHandler = async (req, res, next) => {
     const validationError = validationResult(req);
     if (!validationError.isEmpty()) {
       const errMsg = `Validation Error: ${validationError.array()[0].msg}.`;
-      console.log(errMsg);
       return newError(422, errMsg);
     }
     const userId = req.userId;

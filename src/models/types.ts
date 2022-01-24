@@ -47,12 +47,17 @@ export interface UserInterface extends Document {
   DOB?: Date;
   system13?: ObjectId[];
   expenses?: ObjectId[];
-  preferredColor: String;
+  preferredColor: string;
   timetables?: {
-    preferredColor: String;
+    preferredColor: string;
     primaryClass: ObjectId;
     starred: ObjectId[];
     created: ObjectId[];
+  };
+  preferredConfig: {
+    language: string;
+    dateTime: string;
+    showCovid: string;
   };
 }
 
@@ -92,4 +97,14 @@ export interface ClassesInterface extends Document {
   program: string;
   timetable: ObjectId;
   primaryClassOf: ObjectId[];
+  defaultColor: string;
+}
+
+export interface codeInterface extends Document {
+  programCode: string;
+  programName: string;
+  classCode: {
+    EN: Object;
+    TH: Object;
+  };
 }

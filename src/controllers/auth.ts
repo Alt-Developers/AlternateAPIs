@@ -4,7 +4,7 @@ import { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import newError from "../utilities/newError";
 import { deleteFile } from "../utilities/fileHelper";
-import User from "../models/ss_Account/user";
+import User from "../models/authentication/user";
 import { validationResult } from "express-validator";
 import validationErrCheck from "../utilities/validationErrChecker";
 
@@ -49,7 +49,9 @@ export const signup: RequestHandler = async (req, res, next) => {
 
     const result = await newUser.save();
 
-    res.status(201).json;
+    res.status(201).json({
+      message: "Successfully Created an account.",
+    });
   } catch (err) {
     next(err);
   }
@@ -214,3 +216,31 @@ export const changeAvatar: RequestHandler = async (req, res, next) => {
 //       })
 //       .catch((err) => next(err));
 //   };
+
+export const editConfig: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
+
+    const userId = req.userId;
+
+    const dateTime: string = req.body.dateTime;
+    const language: string = req.body.language;
+    const showCovid: string = req.body.showCovid;
+
+    const user = await User.findById(userId);
+    if (!user) return newError(404, "User not found.");
+
+    if (dateTime) user.preferredConfig.dateTime = dateTime;
+    if (language) user.preferredConfig.language = language;
+    if (showCovid) user.preferredConfig.showCovid = showCovid;
+
+    const result = await user.save();
+
+    res.status(201).json({
+      newConfig: result.preferredConfig,
+      message: "success!",
+    });
+  } catch (err) {
+    next(err);
+  }
+};

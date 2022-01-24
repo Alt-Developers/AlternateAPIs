@@ -28,7 +28,6 @@ const userSchema = new Schema(
     system13: [Types.ObjectId],
     expenses: [Types.ObjectId],
     timetables: {
-      preferredColor: String,
       primaryClass: Types.ObjectId,
       starred: [Types.ObjectId],
       created: [Types.ObjectId],
@@ -36,6 +35,11 @@ const userSchema = new Schema(
     avatar: {
       type: String,
       required: true,
+    },
+    preferredConfig: {
+      language: String,
+      dateTime: String,
+      showCovid: String,
     },
   },
   { timestamps: true }

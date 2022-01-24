@@ -6,9 +6,12 @@ const validationErrCheck = (req: any) => {
 
   if (errors.isEmpty()) return;
 
-  console.log(errors.array());
+  // console.log(errors.array());
 
-  newError(422, `Validation Error: ${errors.array()[0].msg}`);
+  newError(
+    422,
+    `Validation Error: ${errors.array()[0].value} ${errors.array()[0].msg}`
+  );
 };
 
 export default validationErrCheck;

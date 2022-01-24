@@ -10,6 +10,8 @@ const programList = Object.keys(programTypes);
 router.get("/getUser", dCrypt, timetablesController.getUser);
 router.get("/getTimetable", dCrypt, timetablesController.getTimetable);
 
+router.get("/getNotUserClass", dCrypt, timetablesController.getNotUserClass);
+
 router.post(
   "/registerUserClass",
   dCrypt,
@@ -55,5 +57,19 @@ router.post(
   ],
   timetablesController.createTimetable
 );
+
+router.post(
+  "/removeRegisteredClass",
+  dCrypt,
+  [
+    body("classNo", "ClassNo must be filled.").notEmpty(),
+    body("program", "program must be filled.").notEmpty(),
+  ],
+  timetablesController.removeClassFromUser
+);
+
+router.post("/newProgram", timetablesController.newProgram);
+router.get("/getCode", timetablesController.getCode);
+router.get("/socketRefresh", timetablesController.socketRefresh);
 
 export default router;

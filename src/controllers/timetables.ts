@@ -1,6 +1,6 @@
 import env from "dotenv";
 import Timetable from "../models/ss_timetables/timetable";
-import User from "../models/ss_Account/user";
+import User from "../models/authentication/user";
 import UserClass from "../models/ss_timetables/userClass";
 import {
   TimetableContentInterface,
@@ -11,29 +11,50 @@ import { RequestHandler } from "express";
 import newError from "../utilities/newError";
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
-import userClass from "../models/ss_timetables/userClass";
 import validationErrCheck from "../utilities/validationErrChecker";
-import { programTypes } from "../models/ss_timetables/data";
+import { programTypes, classTime } from "../models/ss_timetables/data";
+import Code from "../models/ss_timetables/code";
+import { DateTime, NumberUnitLength, Settings } from "luxon";
+import socket from "../socket";
 
-const colorList = [
-  // "#39df70",
-  // "#27989C",
-  // "#62221D",
-  // "#044B79",
-  // "#B71033",
-  // "#2DD7B6",
-  // "#5E4DFC",
-  // "#3164E2",
-  // "#102F8A",
-  "#FF5252",
-  "#4a92ff",
-  "#5E4DFC",
-  "#5df089",
-  "#2DD7B6",
-  "#ffd454",
-  "#c842f5",
-  "#fa46c7",
-];
+let curTime: number;
+let curDay: string;
+let curWeekDay: number;
+Settings.defaultZone = "utc+7";
+
+export default setInterval(() => {
+  const now = DateTime.local();
+  const day = now.weekday;
+  const advanceTime = +`${now.hour}${
+    (now.minute < 10 ? "0" : "") + now.minute
+  }${(now.second < 10 ? "0" : "") + now.second}`;
+  curTime = +`${now.hour}${(now.minute < 10 ? "0" : "") + now.minute}`;
+  curWeekDay = day;
+  if (day === 1) curDay = "monday";
+  if (day === 2) curDay = "tuesday";
+  if (day === 3) curDay = "wednesday";
+  if (day === 4) curDay = "thursday";
+  if (day === 5) curDay = "friday";
+
+  if (day === 7 || day === 6) curDay = "weekend";
+
+  if (
+    advanceTime === 83000 ||
+    advanceTime === 92000 ||
+    advanceTime === 110000 ||
+    advanceTime === 114000 ||
+    advanceTime === 124000 ||
+    advanceTime === 133000 ||
+    advanceTime === 142000 ||
+    advanceTime === 150000
+  ) {
+    console.log("emitting the message!");
+    socket.getIO().emit("glance", {
+      action: "refresh",
+      currentTime: curTime,
+    });
+  }
+}, 1000);
 
 export const registerUserClass: RequestHandler = async (req, res, next) => {
   try {
@@ -46,20 +67,22 @@ export const registerUserClass: RequestHandler = async (req, res, next) => {
 
     const classNo = req.body.classNo;
     const program = req.body.program;
+    const color = req.body.program;
     let isPrimary = req.body.isPrimary;
 
     if (isPrimary === "true") isPrimary = true;
     if (isPrimary === "false") isPrimary = false;
 
-    let thisClass = await userClass.findOne({
+    let thisClass = await UserClass.findOne({
       classNo: classNo,
       program: program,
     });
 
     if (!thisClass) {
-      const newClass = new userClass({
+      const newClass = new UserClass({
         classNo: classNo,
         program: program,
+        defaultColor: color,
       });
       thisClass = await newClass.save();
     }
@@ -81,7 +104,6 @@ export const registerUserClass: RequestHandler = async (req, res, next) => {
     } else {
       if (user.timetables?.starred.includes(thisClass._id))
         newError(409, "This class is already in user's starred class.");
-      console.log(user.timetables!.starred);
       user.timetables!.starred.push(thisClass._id);
     }
 
@@ -102,6 +124,83 @@ export const registerUserClass: RequestHandler = async (req, res, next) => {
   }
 };
 
+export const removeClassFromUser: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
+
+    const userId = req.userId;
+
+    const classNo = req.body.classNo;
+    const program = req.body.program;
+
+    const user = await User.findById(userId);
+
+    if (!user) return newError(404, "User Not found.");
+
+    if (!user.timetables)
+      return newError(400, "This account not migrated yet!");
+
+    const thisClass = await UserClass.findOne({
+      classNo: classNo,
+      program: program,
+    });
+    if (!thisClass) return newError(404, "Class not existed.");
+
+    const filtered = user.timetables?.starred.filter(
+      (cur) => cur.toString() !== thisClass._id.toString()
+    );
+    user.timetables.starred = filtered;
+
+    const result = await user.save();
+
+    res.status(200).json({
+      starredNow: user.timetables.starred,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getNotUserClass: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
+
+    const userId = req.userId;
+
+    const user = await User.findById(userId);
+    if (!user) return newError(404, "User not found.");
+
+    const allClass = await UserClass.find();
+    if (!allClass) return newError(500, "Something went wrong.");
+
+    let filtered = allClass.filter((cur) => {
+      return !user.timetables?.starred.includes(cur._id);
+    });
+
+    if (user.timetables?.primaryClass) {
+      filtered = filtered.filter((cur) => {
+        return cur._id.toString() !== user.timetables?.primaryClass.toString();
+      });
+    }
+
+    const formattedData: any[] = [];
+
+    filtered.forEach((cur) => {
+      formattedData.push({
+        className: `${cur.program === "ENPG" ? "EP" : "M"} ${cur.classNo}`,
+        classNo: cur.classNo,
+        program: cur.program,
+      });
+    });
+
+    res.status(200).json({
+      data: formattedData,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const getUser: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.userId;
@@ -111,51 +210,127 @@ export const getUser: RequestHandler = async (req, res, next) => {
     let primaryClass: any;
     const starredClasses: any[] = [];
 
-    const randomColor = () => {
-      const randomIndex = Math.trunc(Math.random() * colorList.length - 1);
-      return colorList[randomIndex];
-    };
-
-    if (
-      !user.timetables?.primaryClass &&
-      user.timetables?.starred.length === 0
-    ) {
+    if (!user.timetables?.primaryClass) {
       return res.status(200).json({
         firstName: user.firstName,
         lastName: user.lastName,
-        color: randomColor(),
+        color: user.preferredColor,
         profilePicture: user.avatar,
+        glance: {
+          currentClass: "AYC",
+          nextClass: "AYC",
+        },
+        config: {
+          dateTime: "24h",
+          showCovid: "covShow",
+          language: "EN",
+        },
         primaryClass: false,
         starredClass: [],
       });
     }
 
-    primaryClass = await userClass.findById(user.timetables?.primaryClass);
-    const starredClass = await userClass.find({
+    primaryClass = await UserClass.findById(user.timetables?.primaryClass);
+    const starredClass = await UserClass.find({
       _id: user.timetables?.starred,
     });
 
     starredClass.forEach((cur) => {
       starredClasses.push({
-        className: `${cur.program === "english" ? "EP" : "M"} ${cur.classNo}`,
-        color: randomColor(),
+        className: `${cur.program === "ENPG" ? "EP" : "M"} ${cur.classNo}`,
+        color: cur.defaultColor,
         classNo: cur.classNo,
         program: cur.program,
       });
     });
 
+    let curClass;
+    let nextClass;
+    if (user.timetables.primaryClass) {
+      if (curDay !== "weekend") {
+        const userClass = await UserClass.findById(
+          user.timetables.primaryClass
+        );
+        if (userClass?.timetable) {
+          let thisClassIndex;
+          if (curTime < 830 || curTime >= 1500) thisClassIndex = -1;
+          if (curTime >= 830 && curTime < 920) thisClassIndex = 0;
+          if (curTime >= 920 && curTime < 1010) thisClassIndex = 1;
+          if (curTime >= 1010 && curTime < 1100) thisClassIndex = 2;
+          if (curTime >= 1100 && curTime < 1140) thisClassIndex = 3;
+          if (curTime >= 1140 && curTime < 1240) thisClassIndex = 3;
+          if (curTime >= 1240 && curTime < 1330) thisClassIndex = 4;
+          if (curTime >= 1330 && curTime < 1420) thisClassIndex = 5;
+          if (curTime >= 1420 && curTime < 1500) thisClassIndex = 6;
+          if (!thisClassIndex && thisClassIndex !== 0)
+            return newError(500, "an error has occurred.");
+          const userTimetable = await Timetable.findById(userClass?.timetable);
+
+          // if (thisClassIndex === false) curClass = "BFS";
+          // curClass =
+
+          // userTimetable?.timetableContent[time.curDay][thisClassIndex];
+
+          if (thisClassIndex !== 6) {
+            nextClass =
+              // @ts-ignore
+              userTimetable?.timetableContent[curDay][thisClassIndex + 1];
+          } else if (thisClassIndex === 6) {
+            curWeekDay = curWeekDay + 1;
+            // let tmrDay;
+            // if (curWeekDay === 1) tmrDay = "monday";
+            // if (curWeekDay === 2) tmrDay = "tuesday";
+            // if (curWeekDay === 3) tmrDay = "wednesday";
+            // if (curWeekDay === 4) tmrDay = "thursday";
+            // if (curWeekDay === 5) tmrDay = "friday";
+            // console.log(curDay, tmrDay);
+            // nextClass =
+            //   // @ts-ignore
+            //   userTimetable?.timetableContent[tmrDay][0];
+            // console.log(nextClass);
+            nextClass = "FTD";
+          }
+
+          if (curTime < 1140 || curTime >= 1240) {
+            // @ts-ignore
+            curClass = userTimetable?.timetableContent[curDay][thisClassIndex];
+          }
+          if (curTime >= 1140 && curTime < 1240) {
+            curClass = "LUC";
+          }
+          if (curTime < 830) curClass = "BFS";
+          if (curTime >= 1500) {
+            curClass = "FTD";
+            nextClass = "FTD";
+          }
+        }
+      } else {
+        curClass = "WKN";
+        nextClass = "WKN";
+      }
+    }
+
     res.status(200).json({
       firstName: user.firstName,
       lastName: user.lastName,
-      color: randomColor(),
+      color: user.preferredColor,
       profilePicture: user.avatar,
       primaryClass: {
-        className: `${primaryClass.program === "english" ? "EP" : "M"} ${
+        className: `${primaryClass.program === "ENPG" ? "EP" : "M"} ${
           primaryClass.classNo
         }`,
-        color: randomColor(),
+        color: primaryClass.defaultColor,
         classNo: primaryClass.classNo,
         program: primaryClass.program,
+      },
+      glance: {
+        currentClass: curClass,
+        nextClass: nextClass,
+      },
+      config: {
+        dateTime: user.preferredConfig.dateTime || "24h",
+        showCovid: user.preferredConfig.showCovid || "covShow",
+        language: user.preferredConfig.language || "EN",
       },
       starredClasses: starredClasses,
     });
@@ -196,6 +371,34 @@ export const createTimetable: RequestHandler = async (req, res, next) => {
     if (!timetableContent.wednesday) newError(400, "wednesday must be filled");
     if (!timetableContent.thursday) newError(400, "thursday must be filled");
     if (!timetableContent.friday) newError(400, "friday must be filled");
+    const code = await Code.findOne({ programCode: program });
+    if (!code) return newError(404, "Program not found.");
+    const subjectCode = Object.keys(code.classCode);
+
+    timetableContent.monday.forEach((cur) => {
+      if (!subjectCode.includes(cur))
+        newError(400, "Wrong subject Code [MONDAY]");
+    });
+
+    timetableContent.tuesday.forEach((cur) => {
+      if (!subjectCode.includes(cur))
+        newError(400, "Wrong subject Code [TUESDAY]");
+    });
+
+    timetableContent.wednesday.forEach((cur) => {
+      if (!subjectCode.includes(cur))
+        newError(400, "Wrong subject Code [WEDNESDAY]");
+    });
+
+    timetableContent.thursday.forEach((cur) => {
+      if (!subjectCode.includes(cur))
+        newError(400, "Wrong subject Code [THURSDAY]");
+    });
+
+    timetableContent.friday.forEach((cur) => {
+      if (!subjectCode.includes(cur))
+        newError(400, "Wrong subject Code [FRIDAY]");
+    });
 
     if (timetableContent) {
       if (
@@ -215,7 +418,7 @@ export const createTimetable: RequestHandler = async (req, res, next) => {
     }
 
     if (!classResult) {
-      const newUserClass = new userClass({
+      const newUserClass = new UserClass({
         classNo: classNo,
         program: program,
         defaultColor: defaultColor,
@@ -273,7 +476,7 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
     if (!user.timetables?.preferredColor) color = thisTimetable.defaultColor;
 
     res.status(200).json({
-      className: `${thisTimetable.program === "english" ? "EP" : "M"} ${
+      className: `${thisTimetable.program === "ENPG" ? "EP" : "M"} ${
         thisTimetable.classNo
       }`,
       color: color,
@@ -285,4 +488,116 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+export const newProgram: RequestHandler = async (req, res, next) => {
+  const programCode = req.body.code;
+  const programName = req.body.programName;
+  const classCode = req.body.classCode;
+
+  console.log(classCode);
+  const newCode = new Code({
+    programCode: programCode,
+    programName: programName,
+    classCode: classCode,
+  });
+
+  const result = await newCode.save();
+  console.log(result);
+
+  res.json({
+    result,
+  });
+};
+
+export const getCode: RequestHandler = async (req, res, next) => {
+  const language = req.query.language;
+  try {
+    console.log(language !== "EN");
+    console.log(language !== "TH");
+    console.log(language);
+    // @ts-ignore
+    if (language !== "EN" && language !== "TH")
+      return newError(400, 'languages shall be "TH" or "EN"');
+
+    const codes = await Code.find();
+
+    const formattedCode: any = {};
+
+    codes.forEach((cur) => {
+      const key: string = cur.programCode;
+      console.log(cur.classCode.EN);
+      formattedCode[key] = cur.classCode[language];
+      // console.log(cur.classCode[language]);
+      if (language === "EN") {
+        formattedCode[key].LUC = {
+          name: "Lunch",
+          icon: "LUC",
+        };
+        formattedCode[key].BFS = {
+          name: "Before School",
+          icon: "BFS",
+        };
+        formattedCode[key].AYC = {
+          name: "Add Your Class",
+          icon: "BFS",
+        };
+        formattedCode[key].FTD = {
+          name: "Finished the day!",
+          icon: "FTD",
+        };
+        formattedCode[key].WKN = {
+          name: "Weekend",
+          icon: "FTD",
+        };
+      } else if (language === "TH") {
+        formattedCode[key].LUC = {
+          name: "พักกลางวัน",
+          icon: "LUC",
+        };
+        formattedCode[key].BFS = {
+          name: "ก่อนเริ่มเรียน",
+          icon: "BFS",
+        };
+        formattedCode[key].AYC = {
+          name: "ยังไม่มีห้องหลัก",
+          icon: "BFS",
+        };
+        formattedCode[key].FTD = {
+          name: "เรียนจบวัน",
+          icon: "FTD",
+        };
+        formattedCode[key].WKN = {
+          name: "วันหยุดสุดสัปดาห์",
+          icon: "FTD",
+        };
+      }
+    });
+
+    // const formattedCode: any = {};
+    // codes.forEach((cur) => {
+    //   const key: string = cur.programCode;
+    //   formattedCode.EN[key] = cur.classCode.EN;
+
+    //   formattedCode.TH[key] = cur.classCode.EN;
+
+    // });
+
+    res.status(200).json({
+      totalAmountOfPrograms: await Code.find().countDocuments(),
+      codes: formattedCode,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const socketRefresh: RequestHandler = (req, res, next) => {
+  socket.getIO().emit("glance", {
+    action: "refresh",
+    currentTime: curTime,
+  });
+  res.status(200).json({
+    message: "Successfully emitted.",
+  });
 };
