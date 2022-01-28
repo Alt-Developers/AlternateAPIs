@@ -5,6 +5,8 @@ import cors from "cors";
 import mongoose, { AnyArray } from "mongoose";
 import multer from "multer";
 import socketIO from "socket.io";
+import { v4 as uuidv4 } from "uuid";
+import { DateTime, Settings } from "luxon";
 
 env.config({ path: "./.env" });
 
@@ -17,15 +19,26 @@ import socket from "./socket";
 
 let curTime: any;
 let curDay: any;
-
+Settings.defaultZone = "utc+7";
 const fileStorage = multer.diskStorage({
   destination: (req: any, file: any, cb: any) => {
     cb(null, "images");
   },
   filename: (req, file, cb) => {
     const sanitizedOriginalName = file.originalname.replace(/ /g, "_");
-    const dateAdded = new Date().toISOString();
-    cb(null, `${dateAdded}-${sanitizedOriginalName}`);
+    const dateAdded = DateTime.local();
+    cb(
+      null,
+      `${dateAdded.day}${
+        dateAdded.month < 10 ? "0" + dateAdded.month : dateAdded.month
+      }${dateAdded.year}-${uuidv4()}.${
+        file.mimetype.endsWith("png")
+          ? ".png"
+          : file.mimetype.endsWith("jpg")
+          ? ".jpg"
+          : ".jpeg"
+      }`
+    );
   },
 });
 
@@ -73,7 +86,7 @@ mongoose
     // @ts-ignore
     io = socket.init(server);
     io.on("connection", (socket: any) => {
-      console.log("Client connected");
+      console.log(`Client connected | ID ${socket.id}`);
       socket.emit(
         "welcome",
         "You have been connected to SS-APIs websocket Network."

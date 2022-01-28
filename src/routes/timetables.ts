@@ -9,7 +9,9 @@ const programList = Object.keys(programTypes);
 
 router.get("/getUser", dCrypt, timetablesController.getUser);
 router.get("/getTimetable", dCrypt, timetablesController.getTimetable);
-
+router.get("/getGlance", timetablesController.getGlance);
+router.get("/getCode", timetablesController.getCode);
+router.get("/socketRefresh", timetablesController.socketRefresh);
 router.get("/getNotUserClass", dCrypt, timetablesController.getNotUserClass);
 
 router.post(
@@ -46,7 +48,7 @@ router.post(
       .custom((value) => {
         if (!programList.includes(value)) {
           return Promise.reject(
-            "Program does not exist. there's bell, english, chinese, mathScience, digitalTechnology and gifted"
+            `Program does not exist. please select between ${programList.flat()}`
           );
         } else return Promise.resolve();
       }),
@@ -63,13 +65,15 @@ router.post(
   dCrypt,
   [
     body("classNo", "ClassNo must be filled.").notEmpty(),
-    body("program", "program must be filled.").notEmpty(),
+    body("program", "program must be 4 letter long.")
+      .notEmpty()
+      .toUpperCase()
+      .isLength({ min: 4, max: 4 }),
   ],
   timetablesController.removeClassFromUser
 );
 
-router.post("/newProgram", timetablesController.newProgram);
-router.get("/getCode", timetablesController.getCode);
-router.get("/socketRefresh", timetablesController.socketRefresh);
+// router.post("/newProgram", timetablesController.newProgram);
+// router.post("/newUniversalClass", timetablesController.newUniversalClass);
 
 export default router;

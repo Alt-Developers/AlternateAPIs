@@ -108,3 +108,10 @@ export interface codeInterface extends Document {
     TH: Object;
   };
 }
+
+export interface UniversalCodeInterface extends Document {
+  universalCodes: {
+    EN: Object;
+    TH: Object;
+  };
+}

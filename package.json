@@ -28,9 +28,11 @@
     "mongoose": "^6.0.14",
     "multer": "^1.4.4",
     "socket.io": "^4.4.1",
+    "uuid": "^8.3.2",
     "uuid4": "^2.0.2",
     "uuidv4": "^6.2.12",
-    "validator": "^13.7.0"
+    "validator": "^13.7.0",
+    "working-time-calculator": "^0.0.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",

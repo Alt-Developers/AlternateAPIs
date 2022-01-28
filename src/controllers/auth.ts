@@ -34,7 +34,10 @@ export const signup: RequestHandler = async (req, res, next) => {
     }
 
     const user = await User.findOne({ email: email });
-    if (user) return newError(409, "Email existed.");
+    if (user) {
+      deleteFile(avatarPath);
+      return newError(409, "Email existed.");
+    }
 
     const hashedPassword = await bcrypt.hash(password, 12);
 

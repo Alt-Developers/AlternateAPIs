@@ -4,7 +4,6 @@ const newError = (code: number, msg: string) => {
   }
   const error = new Error(msg);
   error.statusCode = code;
-  console.log(`Error: ${error.message} - Status: ${error.statusCode}`);
   throw error;
 };
 

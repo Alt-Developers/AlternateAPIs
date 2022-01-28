@@ -16,6 +16,9 @@ import { programTypes, classTime } from "../models/ss_timetables/data";
 import Code from "../models/ss_timetables/code";
 import { DateTime, NumberUnitLength, Settings } from "luxon";
 import socket from "../socket";
+import UniversalCode from "../models/ss_timetables/universalCode";
+import identifyCurrentClassIndex from "../utilities/identifyCurrentClass";
+// const timeCalculator = require("working-time-calculator");
 
 let curTime: number;
 let curDay: string;
@@ -54,6 +57,8 @@ export default setInterval(() => {
       currentTime: curTime,
     });
   }
+
+  // console.log(curDay, curWeekDay, advanceTime);
 }, 1000);
 
 export const registerUserClass: RequestHandler = async (req, res, next) => {
@@ -252,18 +257,7 @@ export const getUser: RequestHandler = async (req, res, next) => {
           user.timetables.primaryClass
         );
         if (userClass?.timetable) {
-          let thisClassIndex;
-          if (curTime < 830 || curTime >= 1500) thisClassIndex = -1;
-          if (curTime >= 830 && curTime < 920) thisClassIndex = 0;
-          if (curTime >= 920 && curTime < 1010) thisClassIndex = 1;
-          if (curTime >= 1010 && curTime < 1100) thisClassIndex = 2;
-          if (curTime >= 1100 && curTime < 1140) thisClassIndex = 3;
-          if (curTime >= 1140 && curTime < 1240) thisClassIndex = 3;
-          if (curTime >= 1240 && curTime < 1330) thisClassIndex = 4;
-          if (curTime >= 1330 && curTime < 1420) thisClassIndex = 5;
-          if (curTime >= 1420 && curTime < 1500) thisClassIndex = 6;
-          if (!thisClassIndex && thisClassIndex !== 0)
-            return newError(500, "an error has occurred.");
+          const thisClassIndex = identifyCurrentClassIndex(curTime);
           const userTimetable = await Timetable.findById(userClass?.timetable);
 
           // if (thisClassIndex === false) curClass = "BFS";
@@ -277,13 +271,6 @@ export const getUser: RequestHandler = async (req, res, next) => {
               userTimetable?.timetableContent[curDay][thisClassIndex + 1];
           } else if (thisClassIndex === 6) {
             curWeekDay = curWeekDay + 1;
-            // let tmrDay;
-            // if (curWeekDay === 1) tmrDay = "monday";
-            // if (curWeekDay === 2) tmrDay = "tuesday";
-            // if (curWeekDay === 3) tmrDay = "wednesday";
-            // if (curWeekDay === 4) tmrDay = "thursday";
-            // if (curWeekDay === 5) tmrDay = "friday";
-            // console.log(curDay, tmrDay);
             // nextClass =
             //   // @ts-ignore
             //   userTimetable?.timetableContent[tmrDay][0];
@@ -295,9 +282,8 @@ export const getUser: RequestHandler = async (req, res, next) => {
             // @ts-ignore
             curClass = userTimetable?.timetableContent[curDay][thisClassIndex];
           }
-          if (curTime >= 1140 && curTime < 1240) {
-            curClass = "LUC";
-          }
+          if (curTime >= 1140 && curTime < 1240) curClass = "LUC";
+          if (curTime >= 1100 && curTime < 1140) nextClass = "LUC";
           if (curTime < 830) curClass = "BFS";
           if (curTime >= 1500) {
             curClass = "FTD";
@@ -309,6 +295,8 @@ export const getUser: RequestHandler = async (req, res, next) => {
         nextClass = "WKN";
       }
     }
+
+    // const timeUntillNextPeriod = timeCalculator.calcMinutesBetween();
 
     res.status(200).json({
       firstName: user.firstName,
@@ -475,6 +463,26 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
     if (user.timetables?.preferredColor) color = user.timetables.preferredColor;
     if (!user.timetables?.preferredColor) color = thisTimetable.defaultColor;
 
+    let thisClassIndex: number = identifyCurrentClassIndex(curTime);
+    let nextClassIndex: number = thisClassIndex + 1;
+
+    let tmrDay;
+    // @ts-ignore
+    if (curWeekDay === 6 || curWeekDay === 5) {
+      tmrDay = "weekend";
+    } else {
+      if (curWeekDay === 7) tmrDay = "monday";
+      if (curWeekDay === 1) tmrDay = "tuesday";
+      if (curWeekDay === 2) tmrDay = "wednesday";
+      if (curWeekDay === 3) tmrDay = "thursday";
+      if (curWeekDay === 4) tmrDay = "friday";
+    }
+
+    if (curTime >= 1140 && curTime < 1240) thisClassIndex = 3.5;
+    if (curTime >= 1100 && curTime < 1140) nextClassIndex = 3.5;
+
+    // console.log(curWeekDay, curDay, tmrDay);
+
     res.status(200).json({
       className: `${thisTimetable.program === "ENPG" ? "EP" : "M"} ${
         thisTimetable.classNo
@@ -483,6 +491,22 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
       content: thisTimetable.timetableContent,
       detail: {
         classNo: thisTimetable.classNo,
+      },
+      identifier: {
+        curClass: {
+          index: curDay === "weekend" ? 10 : thisClassIndex,
+          day: curDay === "weekend" ? "monday" : curDay,
+        },
+        nextClass: {
+          index:
+            nextClassIndex < 7 ? nextClassIndex : tmrDay === "weekend" ? 10 : 1,
+          day:
+            tmrDay === "weekend"
+              ? "monday"
+              : thisClassIndex === 6
+              ? tmrDay
+              : curDay,
+        },
       },
     });
   } catch (err) {
@@ -521,57 +545,18 @@ export const getCode: RequestHandler = async (req, res, next) => {
       return newError(400, 'languages shall be "TH" or "EN"');
 
     const codes = await Code.find();
+    const universalCode = await UniversalCode.findOne();
+    if (!codes || !universalCode) return newError(500, "Somthing went worng.");
 
     const formattedCode: any = {};
 
     codes.forEach((cur) => {
       const key: string = cur.programCode;
       console.log(cur.classCode.EN);
-      formattedCode[key] = cur.classCode[language];
-      // console.log(cur.classCode[language]);
-      if (language === "EN") {
-        formattedCode[key].LUC = {
-          name: "Lunch",
-          icon: "LUC",
-        };
-        formattedCode[key].BFS = {
-          name: "Before School",
-          icon: "BFS",
-        };
-        formattedCode[key].AYC = {
-          name: "Add Your Class",
-          icon: "BFS",
-        };
-        formattedCode[key].FTD = {
-          name: "Finished the day!",
-          icon: "FTD",
-        };
-        formattedCode[key].WKN = {
-          name: "Weekend",
-          icon: "FTD",
-        };
-      } else if (language === "TH") {
-        formattedCode[key].LUC = {
-          name: "พักกลางวัน",
-          icon: "LUC",
-        };
-        formattedCode[key].BFS = {
-          name: "ก่อนเริ่มเรียน",
-          icon: "BFS",
-        };
-        formattedCode[key].AYC = {
-          name: "ยังไม่มีห้องหลัก",
-          icon: "BFS",
-        };
-        formattedCode[key].FTD = {
-          name: "เรียนจบวัน",
-          icon: "FTD",
-        };
-        formattedCode[key].WKN = {
-          name: "วันหยุดสุดสัปดาห์",
-          icon: "FTD",
-        };
-      }
+      formattedCode[key] = {
+        ...cur.classCode[language],
+        ...universalCode.universalCodes[language],
+      };
     });
 
     // const formattedCode: any = {};
@@ -593,11 +578,101 @@ export const getCode: RequestHandler = async (req, res, next) => {
 };
 
 export const socketRefresh: RequestHandler = (req, res, next) => {
-  socket.getIO().emit("glance", {
-    action: "refresh",
-    currentTime: curTime,
-  });
-  res.status(200).json({
-    message: "Successfully emitted.",
-  });
+  try {
+    socket.getIO().emit("glance", {
+      action: "refresh",
+      currentTime: curTime,
+    });
+    res.status(200).json({
+      message: "Successfully emitted.",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const newUniversalClass: RequestHandler = async (req, res, next) => {
+  try {
+    const newClassCode: string = req.body.code;
+    const newClassNameEN: string = req.body.ENName;
+    const newClassNameTH: string = req.body.THName;
+    const newClassIcon: string = req.body.icon;
+
+    const universalCodes = await UniversalCode.findOne();
+    if (!universalCodes) return newError(500, "Server-side Error");
+
+    // @ts-ignore
+    universalCodes.universalCodes.TH[newClassCode] = {
+      name: newClassNameTH,
+      icon: newClassIcon,
+    };
+    // @ts-ignore
+    universalCodes.universalCodes.EN[newClassCode] = {
+      name: newClassNameEN,
+      icon: newClassIcon,
+    };
+
+    console.log(universalCodes);
+    universalCodes.markModified("universalCodes");
+    await universalCodes.save();
+    res.status(201).json({
+      message: "success!",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getGlance: RequestHandler = async (req, res, next) => {
+  try {
+    const classNo = req.query.classNo;
+    const program = req.query.program;
+    const thisClassIndex = identifyCurrentClassIndex(curTime);
+
+    const timetable = await Timetable.findOne({
+      classNo: classNo,
+      program: program,
+    });
+
+    let nextClass;
+    let curClass;
+    if (curDay !== "weekend") {
+      if (thisClassIndex !== 6) {
+        nextClass =
+          // @ts-ignore
+          userTimetable?.timetableContent[curDay][thisClassIndex + 1];
+      } else if (thisClassIndex === 6) {
+        curWeekDay = curWeekDay + 1;
+        // let tmrDay;
+        // if (curWeekDay === 1) tmrDay = "monday";
+        // if (curWeekDay === 2) tmrDay = "tuesday";
+        // if (curWeekDay === 3) tmrDay = "wednesday";
+        // if (curWeekDay === 4) tmrDay = "thursday";
+        // if (curWeekDay === 5) tmrDay = "friday";
+        // console.log(curDay, tmrDay);
+        // nextClass =
+        //   // @ts-ignore
+        //   userTimetable?.timetableContent[tmrDay][0];
+        // console.log(nextClass);
+        nextClass = "FTD";
+      }
+
+      if (curTime < 1140 || curTime >= 1240) {
+        // @ts-ignore
+        curClass = userTimetable?.timetableContent[curDay][thisClassIndex];
+      }
+      if (curTime >= 1140 && curTime < 1240) curClass = "LUC";
+      if (curTime >= 1100 && curTime < 1140) nextClass = "LUC";
+      if (curTime < 830) curClass = "BFS";
+      if (curTime >= 1500) {
+        curClass = "FTD";
+        nextClass = "FTD";
+      }
+    } else {
+      curClass = "WKN";
+      nextClass = "WKN";
+    }
+  } catch (err) {
+    next(err);
+  }
 };
