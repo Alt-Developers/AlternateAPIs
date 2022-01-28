@@ -501,11 +501,11 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
           index:
             nextClassIndex < 7 ? nextClassIndex : tmrDay === "weekend" ? 10 : 1,
           day:
-            tmrDay === "weekend"
+            nextClassIndex < 7
+              ? curDay
+              : tmrDay === "weekend"
               ? "monday"
-              : thisClassIndex === 6
-              ? tmrDay
-              : curDay,
+              : tmrDay,
         },
       },
     });
