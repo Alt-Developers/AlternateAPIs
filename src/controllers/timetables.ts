@@ -499,7 +499,11 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
         },
         nextClass: {
           index:
-            nextClassIndex < 7 ? nextClassIndex : tmrDay === "weekend" ? 10 : 1,
+            nextClassIndex < 7 && nextClassIndex > 0
+              ? nextClassIndex
+              : tmrDay === "weekend"
+              ? 10
+              : 1,
           day:
             nextClassIndex < 7
               ? curDay
@@ -519,7 +523,7 @@ export const newProgram: RequestHandler = async (req, res, next) => {
   const programName = req.body.programName;
   const classCode = req.body.classCode;
 
-  console.log(classCode);
+  // console.log(classCode);
   const newCode = new Code({
     programCode: programCode,
     programName: programName,
@@ -527,7 +531,7 @@ export const newProgram: RequestHandler = async (req, res, next) => {
   });
 
   const result = await newCode.save();
-  console.log(result);
+  // console.log(result);
 
   res.json({
     result,
@@ -537,9 +541,9 @@ export const newProgram: RequestHandler = async (req, res, next) => {
 export const getCode: RequestHandler = async (req, res, next) => {
   const language = req.query.language;
   try {
-    console.log(language !== "EN");
-    console.log(language !== "TH");
-    console.log(language);
+    // console.log(language !== "EN");
+    // console.log(language !== "TH");
+    // console.log(language);
     // @ts-ignore
     if (language !== "EN" && language !== "TH")
       return newError(400, 'languages shall be "TH" or "EN"');
@@ -552,7 +556,7 @@ export const getCode: RequestHandler = async (req, res, next) => {
 
     codes.forEach((cur) => {
       const key: string = cur.programCode;
-      console.log(cur.classCode.EN);
+      // console.log(cur.classCode.EN);
       formattedCode[key] = {
         ...cur.classCode[language],
         ...universalCode.universalCodes[language],
@@ -612,7 +616,7 @@ export const newUniversalClass: RequestHandler = async (req, res, next) => {
       icon: newClassIcon,
     };
 
-    console.log(universalCodes);
+    // console.log(universalCodes);
     universalCodes.markModified("universalCodes");
     await universalCodes.save();
     res.status(201).json({
