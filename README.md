@@ -31,6 +31,8 @@ This API is used at System13 and more products coming later. We are planning to 
   - Added validation for adding players.
 - Version 3.0
   - All SS Account support and polish system13 APIs endpoints + expenses project.
+- Version 4.0
+  - All SS Timetables features
 
 ## Download
 
