@@ -361,7 +361,7 @@ export const createTimetable: RequestHandler = async (req, res, next) => {
     if (!timetableContent.friday) newError(400, "friday must be filled");
     const code = await Code.findOne({ programCode: program });
     if (!code) return newError(404, "Program not found.");
-    const subjectCode = Object.keys(code.classCode);
+    const subjectCode = Object.keys(code.classCode.EN);
 
     timetableContent.monday.forEach((cur) => {
       if (!subjectCode.includes(cur))
