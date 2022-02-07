@@ -464,7 +464,6 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
     if (!user.timetables?.preferredColor) color = thisTimetable.defaultColor;
 
     let thisClassIndex: number = identifyCurrentClassIndex(curTime);
-    let nextClassIndex: number = thisClassIndex + 1;
 
     let tmrDay;
     // @ts-ignore
@@ -479,7 +478,6 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
     }
 
     if (curTime >= 1140 && curTime < 1240) thisClassIndex = 3.5;
-    if (curTime >= 1100 && curTime < 1140) nextClassIndex = 3.5;
 
     // console.log(curWeekDay, curDay, tmrDay);
 
@@ -496,20 +494,6 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
         curClass: {
           index: curDay === "weekend" ? 10 : thisClassIndex,
           day: curDay === "weekend" ? "monday" : curDay,
-        },
-        nextClass: {
-          index:
-            nextClassIndex < 7 && nextClassIndex > 0
-              ? nextClassIndex
-              : tmrDay === "weekend"
-              ? 10
-              : 1,
-          day:
-            nextClassIndex < 7
-              ? curDay
-              : tmrDay === "weekend"
-              ? "monday"
-              : tmrDay,
         },
       },
     });
