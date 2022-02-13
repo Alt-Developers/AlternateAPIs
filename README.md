@@ -4,17 +4,35 @@ Welcome to SS APIs Repository, SS APIs is an APIs use across all of our products
 
 This API is used at System13 and more products coming later. We are planning to migrate data from products like Timetables and a currently unnamed blog project to these APIs
 
-## Features
+## Features 📝
+
+**_Auth_**
+
+- Login
+- Signup
+- Change password
+- Change profile picture
+- Change profile (Name, color, etc.)
 
 **_System 13_**
 
 - All the player data for System13
-- Add player (Waiting for frontend development)
-- Delete player (Waiting for frontend development)
+- Add player
+- Delete player
 
-**_Expenses_** (Early development)
+**_Expenses_** (HOLD)
 
-## Versions
+**_Timetables_**
+
+- Create timetables
+- Add timetable
+- Get timetables
+- Get user
+- Get glance
+- Create class
+- Get current class indicator
+
+## Versions 📜
 
 **_Current Version_ | Stable 4.1** <br/>
 
@@ -34,7 +52,7 @@ This API is used at System13 and more products coming later. We are planning to 
 - Version 4.0
   - All SS Timetables features
 
-## Download
+## Download ⬇️
 
 1.) **Download node_modules**
 
