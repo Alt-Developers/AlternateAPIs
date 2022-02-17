@@ -10,6 +10,9 @@ declare global {
   }
   interface Error {
     statusCode: number;
+    type?: string;
+    header?: string;
+    location?: string;
   }
 }
 

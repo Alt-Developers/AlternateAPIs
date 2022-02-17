@@ -7,6 +7,7 @@ import { deleteFile } from "../utilities/fileHelper";
 import User from "../models/authentication/user";
 import { validationResult } from "express-validator";
 import validationErrCheck from "../utilities/validationErrChecker";
+let maxFileSize = 8 * 1000 * 1000;
 
 export const signup: RequestHandler = async (req, res, next) => {
   try {
@@ -28,15 +29,31 @@ export const signup: RequestHandler = async (req, res, next) => {
       isDefault = false;
     }
 
+    if (req.file) {
+      if (req.file?.size > maxFileSize) {
+        deleteFile(req.file.path);
+        return newError(
+          422,
+          "Profile Picture Size too Large|Profile picture must be under 8MB"
+        );
+      }
+    }
+
     if (!email || !password || !firstName || !lastName) {
       if (!isDefault) deleteFile(avatarPath);
-      return newError(400, "Not all fields were filled.");
+      return newError(
+        400,
+        "Not All Fields Were Filled|All fields are required to create an account"
+      );
     }
 
     const user = await User.findOne({ email: email });
     if (user) {
       deleteFile(avatarPath);
-      return newError(409, "Email existed.");
+      return newError(
+        409,
+        "Existing Email|This email is already registered to a SS Account. Report to SS Developers if you are sure that the following email is your's"
+      );
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -68,10 +85,18 @@ export const login: RequestHandler = async (req, res, next) => {
     const password = req.body.pass;
 
     const user = await User.findOne({ email: email });
-    if (!user) return newError(404, "User not found.");
+    if (!user)
+      return newError(
+        404,
+        "User Not Founded|Doesn't seem like this email is registered to a SS Account"
+      );
 
     const isCorrectPassword = bcrypt.compare(password, user.password);
-    if (!isCorrectPassword) return newError(401, "Wrong Password.");
+    if (!isCorrectPassword)
+      return newError(
+        401,
+        "Incorrect Password|Enter the correct password to login"
+      );
 
     const token = jwt.sign(
       {
@@ -120,6 +145,13 @@ export const changeAvatar: RequestHandler = async (req, res, next) => {
     return newError(404, "User not found.");
   }
   const isDefault = user.avatar === "images/default.png";
+
+  if (req.file) {
+    if (req.file?.size > maxFileSize) {
+      deleteFile(req.file.path);
+      return newError(422, "Profile Picture too big (max 8MB)");
+    }
+  }
 
   if (!isDefault) deleteFile(user.avatar);
   user.avatar = newAvatarPath;

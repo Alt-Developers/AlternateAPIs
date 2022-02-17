@@ -1,5 +1,5 @@
 Arguments: 
-  /usr/bin/node /usr/bin/yarn add @types/working-time-calculator
+  /usr/bin/node /usr/bin/yarn add inquirerjs
 
 PATH: 
   /usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/var/lib/snapd/snap/bin
@@ -8,21 +8,21 @@ Yarn version:
   1.22.17
 
 Node version: 
-  17.3.0
+  17.4.0
 
 Platform: 
   linux x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/@types%2fworking-time-calculator: Not found
+  Error: https://registry.yarnpkg.com/inquirerjs: Not found
       at Request.params.callback [as _callback] (/usr/lib/node_modules/yarn/lib/cli.js:67029:18)
       at Request.self.callback (/usr/lib/node_modules/yarn/lib/cli.js:140883:22)
-      at Request.emit (node:events:390:28)
+      at Request.emit (node:events:520:28)
       at Request.<anonymous> (/usr/lib/node_modules/yarn/lib/cli.js:141855:10)
-      at Request.emit (node:events:390:28)
+      at Request.emit (node:events:520:28)
       at IncomingMessage.<anonymous> (/usr/lib/node_modules/yarn/lib/cli.js:141777:12)
-      at Object.onceWrapper (node:events:509:28)
-      at IncomingMessage.emit (node:events:402:35)
+      at Object.onceWrapper (node:events:639:28)
+      at IncomingMessage.emit (node:events:532:35)
       at endReadableNT (node:internal/streams/readable:1343:12)
       at processTicksAndRejections (node:internal/process/task_queues:83:21)
 

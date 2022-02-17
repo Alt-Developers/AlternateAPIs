@@ -9,15 +9,15 @@ const validationErrCheck = (req: any) => {
 
   // console.log(req.file, req.file.path.replace("\\", "/"));
   if (req.file) {
-    // deleteFile();
+    deleteFile(req.file.path);
   }
   // console.log(errors.array());
 
   newError(
     422,
-    `Validation Error | at : ${errors.array()[0].param} | reason : ${
-      errors.array()[0].msg
-    }`
+    `Something Went Wrong|${errors.array()[0].msg}`,
+    "Validation error",
+    errors.array()[0].param
   );
 };
 

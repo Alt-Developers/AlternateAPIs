@@ -8,8 +8,11 @@ const router = Router();
 router.post(
   "/login",
   [
-    body("email", "Email is invalid.").notEmpty().toLowerCase().isEmail(),
-    body("pass", "password must be filled.").notEmpty(),
+    body("email", "Invalid Email|Please input a valid email")
+      .notEmpty()
+      .toLowerCase()
+      .isEmail(),
+    body("pass", "Password Required|Password field is empty").notEmpty(),
   ],
   authController.login
 );
@@ -20,11 +23,14 @@ router.post(
     body("email").toLowerCase().isEmail(),
     body(
       "pass",
-      "Password should have at least eight characters one letter and one number."
+      "Unsecure Password|A secure password should have at least eight characters one letter and one number."
     ).matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, "i"),
     body("firstName").notEmpty().isLength({ max: 30, min: 2 }),
     body("lastName").notEmpty(),
-    body("primaryColor", "Primary Color not found.").notEmpty(),
+    body(
+      "primaryColor",
+      "Accent Color Required|An accent color is required to make an account"
+    ).notEmpty(),
   ],
   authController.signup
 );
