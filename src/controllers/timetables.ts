@@ -51,7 +51,6 @@ export default setInterval(() => {
     advanceTime === 142000 ||
     advanceTime === 150000
   ) {
-    console.log("emitting the message!");
     socket.getIO().emit("glance", {
       action: "refresh",
       currentTime: curTime,
@@ -365,27 +364,27 @@ export const createTimetable: RequestHandler = async (req, res, next) => {
 
     timetableContent.monday.forEach((cur) => {
       if (!subjectCode.includes(cur))
-        newError(400, "Wrong subject Code [MONDAY]");
+        newError(400, "Wrong subject Code|[MONDAY]", "validation");
     });
 
     timetableContent.tuesday.forEach((cur) => {
       if (!subjectCode.includes(cur))
-        newError(400, "Wrong subject Code [TUESDAY]");
+        newError(400, "Wrong subject Code|[TUESDAY]");
     });
 
     timetableContent.wednesday.forEach((cur) => {
       if (!subjectCode.includes(cur))
-        newError(400, "Wrong subject Code [WEDNESDAY]");
+        newError(400, "Wrong subject Code|[WEDNESDAY]");
     });
 
     timetableContent.thursday.forEach((cur) => {
       if (!subjectCode.includes(cur))
-        newError(400, "Wrong subject Code [THURSDAY]");
+        newError(400, "Wrong subject Code|[THURSDAY]");
     });
 
     timetableContent.friday.forEach((cur) => {
       if (!subjectCode.includes(cur))
-        newError(400, "Wrong subject Code [FRIDAY]");
+        newError(400, "Wrong subject Code|[FRIDAY]");
     });
 
     if (timetableContent) {

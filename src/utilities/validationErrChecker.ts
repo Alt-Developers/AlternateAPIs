@@ -11,12 +11,13 @@ const validationErrCheck = (req: any) => {
   if (req.file) {
     deleteFile(req.file.path);
   }
-  // console.log(errors.array());
 
   newError(
     422,
-    `Something Went Wrong|${errors.array()[0].msg}`,
-    "Validation error",
+    `${errors.array()[0].msg.split("|")[0]}|${
+      errors.array()[0].msg.split("|")[1]
+    }`,
+    "validation",
     errors.array()[0].param
   );
 };

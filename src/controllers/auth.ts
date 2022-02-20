@@ -34,7 +34,9 @@ export const signup: RequestHandler = async (req, res, next) => {
         deleteFile(req.file.path);
         return newError(
           422,
-          "Profile Picture Size too Large|Profile picture must be under 8MB"
+          "Profile Picture too big (max 8MB)",
+          "validation",
+          "picture"
         );
       }
     }
@@ -43,7 +45,8 @@ export const signup: RequestHandler = async (req, res, next) => {
       if (!isDefault) deleteFile(avatarPath);
       return newError(
         400,
-        "Not All Fields Were Filled|All fields are required to create an account"
+        "Not All Fields Were Filled|All fields are required to create an account",
+        "validation"
       );
     }
 
@@ -52,7 +55,8 @@ export const signup: RequestHandler = async (req, res, next) => {
       deleteFile(avatarPath);
       return newError(
         409,
-        "Existing Email|This email is already registered to a SS Account. Report to SS Developers if you are sure that the following email is your's"
+        "Existing Email|This email is already registered to a SS Account. Report to SS Developers if you are sure that the following email is your's",
+        "user"
       );
     }
 
@@ -88,15 +92,19 @@ export const login: RequestHandler = async (req, res, next) => {
     if (!user)
       return newError(
         404,
-        "User Not Founded|Doesn't seem like this email is registered to a SS Account"
+        "User Not Found|Doesn't seem like this email is registered to a SS Account",
+        "user"
       );
 
-    const isCorrectPassword = bcrypt.compare(password, user.password);
-    if (!isCorrectPassword)
+    const isCorrectPassword = await bcrypt.compare(password, user.password);
+    console.log(isCorrectPassword);
+    if (!isCorrectPassword) {
       return newError(
         401,
-        "Incorrect Password|Enter the correct password to login"
+        "Incorrect Password|Enter the correct password to login",
+        "user"
       );
+    }
 
     const token = jwt.sign(
       {
@@ -120,14 +128,14 @@ export const getUserData: RequestHandler = async (req, res, next) => {
 
     const userId = req.userId;
     const user = await User.findById(userId);
-    if (!user) return newError(404, "User not found.");
+    if (!user) return newError(404, "User not found.", "user");
 
     res.status(200).json({
-      token: req.authToken,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
       img: user.avatar,
+      color: user.preferredColor,
     });
   } catch (err) {
     next(err);
@@ -137,19 +145,25 @@ export const getUserData: RequestHandler = async (req, res, next) => {
 export const changeAvatar: RequestHandler = async (req, res, next) => {
   const userId = req.userId;
   const newAvatarPath = req.file?.path.replace("\\", "/");
-  if (!newAvatarPath) return newError(400, "Attachment not found.");
+  if (!newAvatarPath)
+    return newError(400, "Attachment not found.", "validation");
 
   const user = await User.findById(userId);
   if (!user) {
     deleteFile(newAvatarPath);
-    return newError(404, "User not found.");
+    return newError(404, "User not found.", "user");
   }
   const isDefault = user.avatar === "images/default.png";
 
   if (req.file) {
     if (req.file?.size > maxFileSize) {
       deleteFile(req.file.path);
-      return newError(422, "Profile Picture too big (max 8MB)");
+      return newError(
+        422,
+        "Profile Picture too big (max 8MB)",
+        "validation",
+        "picture"
+      );
     }
   }
 
@@ -163,94 +177,92 @@ export const changeAvatar: RequestHandler = async (req, res, next) => {
   });
 };
 
-// export const editAccount: RequestHandler = (req, res, next) => {
-//     const email = req.body.email;
-//     const firstName = req.body.firstName;
-//     const lastName = req.body.lastName;
-//     const password = req.body.password;
-//     const userId = req.userId;
-//     const errors = validationResult(req);
-//     let snapshot: any;
+export const editAccount: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = req.body.userId;
+    const firstName = req.body.firstName;
+    const lastName = req.body.lastName;
 
-//     if (password)
-//       return newError(
-//         400,
-//         "Can't change password in this endpoint / please select the right service."
-//       );
+    const user = await User.findById(userId);
+    if (!user)
+      return newError(
+        404,
+        "User not found|This token seems to be invalid so the password will not be changed.",
+        "user"
+      );
 
-//     if (!errors.isEmpty()) {
-//       const errMsg = `Validation Error: ${errors.array()[0].msg}.`;
-//       console.log(errMsg);
-//       return newError(422, errMsg);
-//     }
+    if (firstName.length > 2)
+      return newError(
+        404,
+        "Invalid First Name|First name must be at least 2 letters long.",
+        "validation",
+        "firstName"
+      );
+    if (lastName.length > 2)
+      return newError(
+        404,
+        "Invalid Last Name|Last name must be at least 2 letters long ",
+        "user",
+        "lastName"
+      );
 
-//     User.findById(userId)
-//       .then((user) => {
-//         if (!user) return newError(404, "user not found.");
-//         snapshot = user;
-//         if (email) user.email = email;
-//         if (firstName) user.firstName = firstName;
-//         if (lastName) user.lastName = lastName;
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
 
-//         return user.save();
-//       })
-//       .then((result) => {
-//         const updated: UnlockedObjectInterface = {};
-//         if (email) updated.email = result.email;
-//         if (firstName) updated.firstName = result.firstName;
-//         if (lastName) updated.lastName = result.lastName;
+    await user.save();
 
-//         res.status(201).json({
-//           message: "Successfully Updated a user",
-//           updated: updated,
-//         });
-//       })
-//       .catch((err) => {
-//         next(err);
-//       });
-//   };
+    res.status(201).json({
+      message: "Change successfully.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-//   export const editPassword: RequestHandler = (req, res, next) => {
-//     const userId = req.userId;
-//     const newPassword = req.body.newPassword;
-//     const ConfirmNewPassword = req.body.confirmNewPassword;
-//     const password = req.body.password;
+export const editPassword: RequestHandler = async (req, res, next) => {
+  validationErrCheck(req);
 
-//     let fetchedUser: UserInterface;
+  const userId = req.userId;
+  const newPassword = req.body.newPassword;
+  const ConfirmNewPassword = req.body.confirmNewPassword;
+  const password = req.body.password;
 
-//     if (newPassword !== ConfirmNewPassword)
-//       return newError(
-//         422,
-//         "newPassword and ConfirmNewPassword must be the same."
-//       );
+  try {
+    const user = await User.findById(userId);
+    if (!user)
+      return newError(
+        404,
+        "User not found|This token seems to be invalid so the password will not be changed.",
+        "user"
+      );
 
-//     User.findById(userId)
-//       .then((user) => {
-//         if (!user) return newError(404, "User not found.");
-//         fetchedUser = user;
-//         return bcrypt.compare(password, user.password);
-//       })
-//       .then((isCorrect) => {
-//         if (!isCorrect)
-//           return newError(
-//             403,
-//             "Wrong Old Password. / Not Authorized. / Forbidden."
-//           );
-//         bcrypt
-//           .hash(newPassword, 12)
-//           .then((hashedPassword) => {
-//             fetchedUser.password = hashedPassword;
-//             fetchedUser.save();
-//             return res.status(201).json({
-//               message: "Successfully Edited a password.",
-//             });
-//           })
-//           .catch((err) => {
-//             throw err;
-//           });
-//       })
-//       .catch((err) => next(err));
-//   };
+    if (newPassword !== ConfirmNewPassword) {
+      return newError(
+        422,
+        "Confirmation Password Not Matching|The confirmation password must be the same as the new password to change your password.",
+        "user"
+      );
+    }
+
+    const isCorrectPassword = await bcrypt.compare(password, user.password);
+    if (!isCorrectPassword)
+      return newError(
+        403,
+        "Old Password Incorrect|To change your password you need to enter your old password correctly.",
+        "user"
+      );
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+
+    user.password = hashedNewPassword;
+    await user.save();
+    res.status(201).json({
+      message: "Change Password Successfully.",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const editConfig: RequestHandler = async (req, res, next) => {
   try {
@@ -263,7 +275,7 @@ export const editConfig: RequestHandler = async (req, res, next) => {
     const showCovid: string = req.body.showCovid;
 
     const user = await User.findById(userId);
-    if (!user) return newError(404, "User not found.");
+    if (!user) return newError(404, "User not found.", "user");
 
     if (dateTime) user.preferredConfig.dateTime = dateTime;
     if (language) user.preferredConfig.language = language;

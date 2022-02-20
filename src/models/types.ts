@@ -13,6 +13,7 @@ declare global {
     type?: string;
     header?: string;
     location?: string;
+    modal?: boolean;
   }
 }
 

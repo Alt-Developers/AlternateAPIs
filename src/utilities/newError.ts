@@ -1,3 +1,5 @@
+let modalType = ["validation", "user"];
+
 const newError = (
   code: number,
   msg: string,
@@ -9,8 +11,11 @@ const newError = (
   }
   const error = new Error(msg);
   error.statusCode = code;
-  error.type = type;
+  error.type = type || "general";
   error.location = validationLocation;
+
+  if (modalType.includes(error.type)) error.modal = true;
+
   throw error;
 };
 

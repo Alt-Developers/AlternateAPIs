@@ -25,8 +25,13 @@ router.post(
       "pass",
       "Unsecure Password|A secure password should have at least eight characters one letter and one number."
     ).matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, "i"),
-    body("firstName").notEmpty().isLength({ max: 30, min: 2 }),
-    body("lastName").notEmpty(),
+    body(
+      "firstName",
+      "Invalid First Name|First name must be longer than 2 letters and shorter than 30 letters"
+    )
+      .notEmpty()
+      .isLength({ max: 30, min: 2 }),
+    body("lastName", "Invalid Last Name|Last name must be filled.").notEmpty(),
     body(
       "primaryColor",
       "Accent Color Required|An accent color is required to make an account"
@@ -36,17 +41,18 @@ router.post(
 );
 
 router.post("/updateUserProfilePicture", dCrypt, authController.changeAvatar);
-// router.post(
-//   "/updateUserInfo",
-//   [
-//     body("email", "Invalid Email").isEmail(),
-//     body("firstName"),
-//     body("lastName"),
-//   ],
-//   dCrypt,
-//   authController.editAccount
-// );
-// router.post("/changePassword", dCrypt, authController.editPassword);
+router.post("/updateUserInfo", dCrypt, authController.editAccount);
+router.post(
+  "/changePassword",
+  [
+    body(
+      "newPassword",
+      "Unsecure Password|A secure password should have at least eight characters one letter and one number."
+    ).matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, "i"),
+  ],
+  dCrypt,
+  authController.editPassword
+);
 
 router.get("/getUserData", dCrypt, authController.getUserData);
 router.post(
