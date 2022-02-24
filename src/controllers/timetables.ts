@@ -283,7 +283,11 @@ export const getUser: RequestHandler = async (req, res, next) => {
           }
           if (curTime >= 1140 && curTime < 1240) curClass = "LUC";
           if (curTime >= 1100 && curTime < 1140) nextClass = "LUC";
-          if (curTime < 830) curClass = "BFS";
+          if (thisClassIndex === 7) {
+            nextClass = "FTD";
+            curClass = "FTD";
+          }
+          if (thisClassIndex === -1) curClass = "BFS";
           if (curTime >= 1500) {
             curClass = "FTD";
             nextClass = "FTD";

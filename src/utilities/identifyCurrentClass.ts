@@ -2,7 +2,8 @@ import newError from "./newError";
 
 const identifyCurrentClassIndex = (curTime: number) => {
   let thisClassIndex;
-  if (curTime < 830) thisClassIndex = -1;
+  if (curTime < 800) thisClassIndex = 7;
+  if (curTime >= 800 && curTime < 830) thisClassIndex = -1;
   if (curTime >= 830 && curTime < 920) thisClassIndex = 0;
   if (curTime >= 920 && curTime < 1010) thisClassIndex = 1;
   if (curTime >= 1010 && curTime < 1100) thisClassIndex = 2;

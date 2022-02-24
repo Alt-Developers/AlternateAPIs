@@ -17,10 +17,10 @@ export const centralError: ErrorRequestHandler = (
   const code = err.statusCode || 500;
   console.log(`${err.statusCode} - ${err.message}`);
   res.status(code).json({
-    type: err.type || "server-side",
+    type: err.type || "general",
     modal: err.modal,
     location: err.location,
     message: err.message.split("|")[1] || err.message,
-    header: err.message.split("|")[0],
+    header: err.message.split("|")[1] ? err.message.split("|")[0] : undefined,
   });
 };

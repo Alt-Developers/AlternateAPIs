@@ -172,33 +172,34 @@ export const changeAvatar: RequestHandler = async (req, res, next) => {
   const result = await user.save();
 
   res.status(200).json({
-    message: "Successfully edited user's profile picture.",
+    message: "Successfully Changed User's Profile Picture",
     newAvatar: result.avatar,
   });
 };
 
 export const editAccount: RequestHandler = async (req, res, next) => {
   try {
-    const userId = req.body.userId;
+    const userId = req.userId;
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
+    const color = req.body.color;
 
     const user = await User.findById(userId);
     if (!user)
       return newError(
         404,
-        "User not found|This token seems to be invalid so the password will not be changed.",
+        "User not found|This token seems to be invalid so nothing will be changed.",
         "user"
       );
 
-    if (firstName.length > 2)
+    if (firstName.length < 2)
       return newError(
         404,
         "Invalid First Name|First name must be at least 2 letters long.",
         "validation",
         "firstName"
       );
-    if (lastName.length > 2)
+    if (lastName.length < 2)
       return newError(
         404,
         "Invalid Last Name|Last name must be at least 2 letters long ",
@@ -208,11 +209,17 @@ export const editAccount: RequestHandler = async (req, res, next) => {
 
     if (firstName) user.firstName = firstName;
     if (lastName) user.lastName = lastName;
+    if (color) user.preferredColor = color;
 
-    await user.save();
+    const result = await user.save();
 
     res.status(201).json({
       message: "Change successfully.",
+      curInfo: {
+        firstName: result.firstName,
+        lastName: result.lastName,
+        newColor: result.preferredColor,
+      },
     });
   } catch (error) {
     next(error);
@@ -255,9 +262,11 @@ export const editPassword: RequestHandler = async (req, res, next) => {
     const hashedNewPassword = await bcrypt.hash(newPassword, 12);
 
     user.password = hashedNewPassword;
-    await user.save();
+    const result = await user.save();
     res.status(201).json({
-      message: "Change Password Successfully.",
+      modal: true,
+      header: "Password Changed",
+      message: `Successfully Changed The Password. Your new password is ${result.password}`,
     });
   } catch (err) {
     next(err);
@@ -285,7 +294,7 @@ export const editConfig: RequestHandler = async (req, res, next) => {
 
     res.status(201).json({
       newConfig: result.preferredConfig,
-      message: "success!",
+      message: "Successfully Changed The Config.",
     });
   } catch (err) {
     next(err);

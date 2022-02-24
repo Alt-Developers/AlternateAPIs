@@ -156,7 +156,7 @@ export const getUserPlayer: RequestHandler = async (req, res, next) => {
       "",
       Player
     );
-    const playersList: any = populatedUser.system13;
+    const playersList: any = populatedUser!.system13;
 
     const userPlayer: any[] = [];
     playersList.forEach((cur: any) => {
