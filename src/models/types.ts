@@ -88,17 +88,18 @@ export interface TimetableContentInterface extends Object {
 
 export interface TimetableInterface extends Document {
   classNo: string;
+  year: string;
   program: string;
-  defaultColor: string;
+  school: string;
+  color: string;
   timetableContent: TimetableContentInterface;
   createdBy: ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface ClassesInterface extends Document {
   classNo: string;
   program: string;
+  school: string;
   timetable: ObjectId;
   primaryClassOf: ObjectId[];
   defaultColor: string;
@@ -107,6 +108,7 @@ export interface ClassesInterface extends Document {
 export interface codeInterface extends Document {
   programCode: string;
   programName: string;
+  school: string;
   classCode: {
     EN: Object;
     TH: Object;
@@ -114,6 +116,7 @@ export interface codeInterface extends Document {
 }
 
 export interface UniversalCodeInterface extends Document {
+  school: string;
   universalCodes: {
     EN: Object;
     TH: Object;

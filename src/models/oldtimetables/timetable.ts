@@ -15,6 +15,10 @@ const timetableSchema = new Schema(
       type: Types.ObjectId,
       required: true,
     },
+    school: {
+      type: String,
+      required: true,
+    },
     program: {
       required: true,
       type: String,

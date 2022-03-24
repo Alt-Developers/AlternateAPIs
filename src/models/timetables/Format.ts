@@ -13,6 +13,10 @@ const codeSchema = new Schema({
     type: String,
     required: true,
   },
+  school: {
+    type: String,
+    required: true,
+  },
   classCode: {
     EN: {
       type: Object,
@@ -23,6 +27,6 @@ const codeSchema = new Schema({
   },
 });
 
-const db = connection.useDb("ss_timetables");
+const db = connection.useDb("timetables");
 
-export default db.model<codeInterface>("code", codeSchema);
+export default db.model<codeInterface>("Format", codeSchema);

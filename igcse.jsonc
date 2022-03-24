@@ -1,0 +1,35 @@
+{
+  "programCode": "GCSE",
+  "programName": "IGCSE",
+  "school": "NEWTON",
+  "classCode": {
+    "EN": {
+      "ENF": "English A / Second Language",
+      "ICT": "ICT",
+      "PHY": "Physics",
+      "BIO": "Biology",
+      "CHM": "Chemistry",
+      "VRA": "Vocabsize / Reading / Academic Clinic",
+      "MAT": "Mathematics",
+      "SPT": "Sports",
+      "CSC": "Havard CS50 / Vocabsize",
+      "GLT": "Great Literature",
+      "CRE": "Creative Drama",
+      "MAX": "Max Planner"
+    },
+    "TH": {
+      "ENF": "ภาษาอังกฤษ",
+      "ICT": "คอมพิวเตอร์",
+      "PHY": "ฟิสิกส์",
+      "BIO": "ชีววิทยา",
+      "CHM": "เคมี",
+      "VRA": "เปล่งเสียง / การอ่าน / คลินิกวิชาการ",
+      "MAT": "คณิตศาสตร์",
+      "SPT": "กีฬา",
+      "CSC": "วิทยาการ คอมพิวเตอร์ / เปล่งเสียง / การอ่าน",
+      "GLT": "อ่านวรรณกรรมที่ยิ่งใหญ่",
+      "CRE": "การแสดง",
+      "MAX": "แม๊กแพลนเนอร์"
+    }
+  }
+}

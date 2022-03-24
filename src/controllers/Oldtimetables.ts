@@ -1,7 +1,7 @@
 import env from "dotenv";
-import Timetable from "../models/ss_timetables/timetable";
+import Timetable from "../models/oldtimetables/timetable";
 import User from "../models/authentication/user";
-import UserClass from "../models/ss_timetables/userClass";
+import UserClass from "../models/oldtimetables/userClass";
 import {
   TimetableContentInterface,
   TimetableInterface,
@@ -12,11 +12,11 @@ import newError from "../utilities/newError";
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 import validationErrCheck from "../utilities/validationErrChecker";
-import { programTypes, classTime } from "../models/ss_timetables/data";
-import Code from "../models/ss_timetables/code";
+import { programTypes, classTime } from "../models/oldtimetables/data";
+import Code from "../models/oldtimetables/code";
 import { DateTime, NumberUnitLength, Settings } from "luxon";
 import socket from "../socket";
-import UniversalCode from "../models/ss_timetables/universalCode";
+import UniversalCode from "../models/oldtimetables/universalCode";
 import identifyCurrentClassIndex from "../utilities/identifyCurrentClass";
 // const timeCalculator = require("working-time-calculator");
 
@@ -72,10 +72,8 @@ export const registerUserClass: RequestHandler = async (req, res, next) => {
     const classNo = req.body.classNo;
     const program = req.body.program;
     const color = req.body.program;
-    let isPrimary = req.body.isPrimary;
-
-    if (isPrimary === "true") isPrimary = true;
-    if (isPrimary === "false") isPrimary = false;
+    const isPrimary: boolean = req.body.isPrimary;
+    const school = req.body.school;
 
     let thisClass = await UserClass.findOne({
       classNo: classNo,
@@ -340,6 +338,7 @@ export const createTimetable: RequestHandler = async (req, res, next) => {
     const timetableContent: TimetableContentInterface = req.body.content;
     const defaultColor: string = req.body.color;
     const program: string = req.body.program;
+    const school: string = req.body.school;
 
     const user = await User.findById(userId);
     if (!user) return newError(404, "User not found.");
@@ -412,6 +411,7 @@ export const createTimetable: RequestHandler = async (req, res, next) => {
       const newUserClass = new UserClass({
         classNo: classNo,
         program: program,
+        school: school,
         defaultColor: defaultColor,
       });
       classResult = await newUserClass.save();
@@ -420,6 +420,7 @@ export const createTimetable: RequestHandler = async (req, res, next) => {
     const newTimetable = new Timetable({
       classNo: classNo,
       classId: classResult?._id,
+      school: school,
       program: program,
       defaultColor: defaultColor,
       timetableContent: timetableContent,
@@ -464,7 +465,7 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
       return newError(404, "this class timetable does not existed yet.");
 
     if (user.timetables?.preferredColor) color = user.timetables.preferredColor;
-    if (!user.timetables?.preferredColor) color = thisTimetable.defaultColor;
+    if (!user.timetables?.preferredColor) color = thisTimetable.color;
 
     let thisClassIndex: number = identifyCurrentClassIndex(curTime);
 
@@ -509,11 +510,13 @@ export const newProgram: RequestHandler = async (req, res, next) => {
   const programCode = req.body.code;
   const programName = req.body.programName;
   const classCode = req.body.classCode;
+  const school = req.body.school;
 
   // console.log(classCode);
   const newCode = new Code({
     programCode: programCode,
     programName: programName,
+    school: school,
     classCode: classCode,
   });
 

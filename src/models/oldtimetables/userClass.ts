@@ -14,6 +14,10 @@ const classSchema = new Schema(
       minlength: 4,
       maxlength: 4,
     },
+    school: {
+      required: true,
+      type: String,
+    },
     timetable: {
       type: Types.ObjectId,
       required: false,
