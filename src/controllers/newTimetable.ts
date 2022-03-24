@@ -3,6 +3,7 @@ import { DateTime, NumberUnitLength, Settings } from "luxon";
 import User from "../models/authentication/user";
 import Format from "../models/timetables/Format";
 import Timetables from "../models/timetables/Timetables";
+import UniversalFormat from "../models/timetables/UniversalFormat";
 import { TimetableContentInterface } from "../models/types";
 import newError from "../utilities/newError";
 import validationErrCheck from "../utilities/validationErrChecker";
@@ -65,6 +66,7 @@ export const newTimetable: RequestHandler = async (req, res, next) => {
     const program = req.body.program;
     const classNo = req.body.classNo;
     const color = req.body.color;
+    const year = req.body.year;
 
     if (!timetableContent.monday) newError(400, "monday must be filled");
     if (!timetableContent.tuesday) newError(400, "tuesday must be filled");
@@ -124,6 +126,7 @@ export const newTimetable: RequestHandler = async (req, res, next) => {
       color: color,
       timetableContent: timetableContent,
       createdBy: user._id,
+      year: year,
     });
 
     const savedTimetable = await newTimetable.save();
@@ -162,6 +165,55 @@ export const newFormat: RequestHandler = async (req, res, next) => {
   }
 };
 
+export const getFormat: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
+
+    const school: any = req.query.school || "";
+    const program: any = req.query.program || "";
+    const language = req.query.language || "EN";
+
+    if (language !== "TH" && language !== "EN") {
+      return newError(
+        400,
+        "Language Not Supported / Not Found|Try re-submit the request."
+      );
+    }
+
+    const schoolRegex = new RegExp(school, "g");
+    const programRegex = new RegExp(program, "g");
+
+    const format = await Format.find({
+      school: schoolRegex,
+      programCode: programRegex,
+    });
+    const universalFormat = await UniversalFormat.findOne()!;
+
+    const formattedFormat: any = {};
+
+    format.forEach((cur) => {
+      const key: string = cur.programCode;
+      const school: string = cur.school;
+
+      formattedFormat[school] = {
+        [key]: {
+          ...formattedFormat[school],
+          ...cur.classCode[language],
+          ...universalFormat?.universalCodes[language],
+        },
+      };
+
+      // console.log({})
+    });
+
+    res.status(200).json({
+      formattedFormat,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getClassFromSchool: RequestHandler = async (req, res, next) => {
   try {
     validationErrCheck(req);
@@ -169,13 +221,29 @@ export const getClassFromSchool: RequestHandler = async (req, res, next) => {
     const school = req.query.school;
 
     const schoolClasses = await Timetables.find({ school: school }).select(
-      "_id classNo program school"
+      "_id classNo program school year"
     );
 
-    const response = [];
+    const response: any = [];
 
-    response.push({
-      // name: `${}`
+    schoolClasses.forEach((cur) => {
+      console.log(cur);
+      response.push({
+        name: `${
+          cur.program === "ENPG"
+            ? "EP"
+            : cur.program === "GCSE"
+            ? "Year"
+            : cur.program === "ALVL"
+            ? "Year"
+            : "M"
+        } ${cur.year}${cur.school === "ASSUMPTION" ? "/" : "-"}${cur.classNo}`,
+        value: cur._id,
+      });
+    });
+
+    res.json({
+      response,
     });
   } catch (error) {
     next(error);

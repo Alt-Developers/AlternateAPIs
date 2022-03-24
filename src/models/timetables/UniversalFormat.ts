@@ -1,5 +1,5 @@
 import { Schema, Types, connection, model } from "mongoose";
-import { TimetableInterface } from "../types";
+import { TimetableInterface, UniversalCodeInterface } from "../types";
 
 const timetableSchema = new Schema(
   {
@@ -21,4 +21,7 @@ const timetableSchema = new Schema(
 
 const db = connection.useDb("timetables");
 
-export default db.model<TimetableInterface>("UniversalFormat", timetableSchema);
+export default db.model<UniversalCodeInterface>(
+  "UniversalFormat",
+  timetableSchema
+);

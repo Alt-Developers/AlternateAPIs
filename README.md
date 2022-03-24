@@ -34,7 +34,7 @@ This API is used at System13 and more products coming later. We are planning to 
 
 ## Versions 📜
 
-**_Current Version_ | 4.1.7** <br/>
+**_Current Version_ | 4.1.8** <br/>
 
 **_Previous Versions_**
 

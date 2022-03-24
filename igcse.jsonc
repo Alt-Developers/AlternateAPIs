@@ -4,32 +4,41 @@
   "school": "NEWTON",
   "classCode": {
     "EN": {
-      "ENF": "English A / Second Language",
-      "ICT": "ICT",
-      "PHY": "Physics",
-      "BIO": "Biology",
-      "CHM": "Chemistry",
-      "VRA": "Vocabsize / Reading / Academic Clinic",
-      "MAT": "Mathematics",
-      "SPT": "Sports",
-      "CSC": "Havard CS50 / Vocabsize",
-      "GLT": "Great Literature",
-      "CRE": "Creative Drama",
-      "MAX": "Max Planner"
+      "ENG": { "name": "English A / Second Language", "icon": "ENG" },
+      "ICT": { "name": "ICT", "icon": "TEC" },
+      "PHY": { "name": "Physics", "icon": "PHY" },
+      "BIO": { "name": "Biology", "icon": "SCI" },
+      "CHM": { "name": "Chemistry", "icon": "CHM" },
+      "VRA": {
+        "name": "Vocabsize / Reading / Academic Clinic",
+        "icon": "openBook"
+      },
+      "MAT": { "name": "Mathematics", "icon": "MAT" },
+      "SPT": { "name": "Sports", "icon": "PED" },
+      "CSC": { "name": "Havard CS50 / Vocabsize", "icon": "TEC" },
+      "GLT": { "name": "Great Literature", "icon": "HIS" },
+      "CRE": { "name": "Creative Drama", "icon": "ART" },
+      "MAX": { "name": "Max Planner", "icon": "MAX" }
     },
     "TH": {
-      "ENF": "ภาษาอังกฤษ",
-      "ICT": "คอมพิวเตอร์",
-      "PHY": "ฟิสิกส์",
-      "BIO": "ชีววิทยา",
-      "CHM": "เคมี",
-      "VRA": "เปล่งเสียง / การอ่าน / คลินิกวิชาการ",
-      "MAT": "คณิตศาสตร์",
-      "SPT": "กีฬา",
-      "CSC": "วิทยาการ คอมพิวเตอร์ / เปล่งเสียง / การอ่าน",
-      "GLT": "อ่านวรรณกรรมที่ยิ่งใหญ่",
-      "CRE": "การแสดง",
-      "MAX": "แม๊กแพลนเนอร์"
+      "ENG": { "name": "ภาษาอังกฤษ", "icon": "ENG" },
+      "ICT": { "name": "คอมพิวเตอร์", "icon:": "TEC" },
+      "PHY": { "name": "ฟิสิกส์", "icon:": "PHY" },
+      "BIO": { "name": "ชีววิทยา", "icon": "SCI" },
+      "CHM": { "name": "เคมี", "icon": "CHM" },
+      "VRA": {
+        "name": "เปล่งเสียง / การอ่าน / คลินิกวิชาการ",
+        "icon": "openBook"
+      },
+      "MAT": { "name": "คณิตศาสตร์", "icon": "MAT" },
+      "SPT": { "name": "กีฬา", "icon": "PED" },
+      "CSC": {
+        "name": "วิทยาการ คอมพิวเตอร์ / เปล่งเสียง / การอ่าน",
+        "icon": "TEC"
+      },
+      "GLT": { "name": "อ่านวรรณกรรมที่ยิ่งใหญ่", "icon": "HIS" },
+      "CRE": { "name": "การแสดง", "icon": "ART" },
+      "MAX": { "name": "แม็กซ์แพลนเนอร์", "icon": "MAX" }
     }
   }
 }
