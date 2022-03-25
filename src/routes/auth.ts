@@ -54,7 +54,7 @@ router.post(
   authController.editPassword
 );
 
-router.get("/getUserData", dCrypt, authController.getUserData);
+router.get("/getUser", dCrypt, authController.getUserData);
 router.post(
   "/editConfig",
   dCrypt,

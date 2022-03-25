@@ -133,9 +133,13 @@ export const getUserData: RequestHandler = async (req, res, next) => {
     res.status(200).json({
       firstName: user.firstName,
       lastName: user.lastName,
-      email: user.email,
-      img: user.avatar,
       color: user.preferredColor,
+      profilePicture: user.avatar,
+      config: {
+        dateTime: user.preferredConfig.dateTime || "24h",
+        showCovid: user.preferredConfig.showCovid || "covShow",
+        language: user.preferredConfig.language || "EN",
+      },
     });
   } catch (err) {
     next(err);

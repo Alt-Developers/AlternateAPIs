@@ -22,8 +22,8 @@ const timetableSchema = new Schema(
     program: {
       required: true,
       type: String,
-      minlength: 4,
-      maxlength: 4,
+      minlength: 5,
+      maxlength: 5,
     },
     timetableContent: {
       monday: [

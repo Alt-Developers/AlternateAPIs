@@ -1,4 +1,4 @@
-import { RequestHandler } from "express";
+import e, { RequestHandler } from "express";
 import { DateTime, NumberUnitLength, Settings } from "luxon";
 import User from "../models/authentication/user";
 import Format from "../models/timetables/Format";
@@ -7,46 +7,8 @@ import UniversalFormat from "../models/timetables/UniversalFormat";
 import { TimetableContentInterface } from "../models/types";
 import newError from "../utilities/newError";
 import validationErrCheck from "../utilities/validationErrChecker";
-
-let curTime: number;
-let curDay: string;
-let curWeekDay: number;
-Settings.defaultZone = "utc+7";
-
-export default setInterval(() => {
-  const now = DateTime.local();
-  const day = now.weekday;
-  const advanceTime = +`${now.hour}${
-    (now.minute < 10 ? "0" : "") + now.minute
-  }${(now.second < 10 ? "0" : "") + now.second}`;
-  curTime = +`${now.hour}${(now.minute < 10 ? "0" : "") + now.minute}`;
-  curWeekDay = day;
-  if (day === 1) curDay = "monday";
-  if (day === 2) curDay = "tuesday";
-  if (day === 3) curDay = "wednesday";
-  if (day === 4) curDay = "thursday";
-  if (day === 5) curDay = "friday";
-
-  if (day === 7 || day === 6) curDay = "weekend";
-
-  //   if (
-  //     advanceTime === 83000 ||
-  //     advanceTime === 92000 ||
-  //     advanceTime === 110000 ||
-  //     advanceTime === 114000 ||
-  //     advanceTime === 124000 ||
-  //     advanceTime === 133000 ||
-  //     advanceTime === 142000 ||
-  //     advanceTime === 150000
-  //   ) {
-  //     socket.getIO().emit("glance", {
-  //       action: "refresh",
-  //       currentTime: curTime,
-  //     });
-  //   }
-
-  // console.log(curDay, curWeekDay, advanceTime);
-}, 1000);
+import identifyCurClass from "../utilities/timetables/identifyCurClass";
+import getCurTime from "../utilities/timetables/getCurTime";
 
 export const newTimetable: RequestHandler = async (req, res, next) => {
   try {
@@ -218,23 +180,45 @@ export const getClassFromSchool: RequestHandler = async (req, res, next) => {
   try {
     validationErrCheck(req);
 
+    const userId = req.userId;
+    const user = await User.findById(userId);
+    if (!user)
+      return newError(
+        404,
+        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
+        "important"
+      );
+
     const school = req.query.school;
 
     const schoolClasses = await Timetables.find({ school: school }).select(
       "_id classNo program school year"
     );
 
+    const filteredClasses: any[] = [];
+    schoolClasses.forEach((cur) => {
+      if (!user.timetables?.starred.includes(cur._id)) {
+        filteredClasses.push({
+          _id: cur._id,
+          classNo: cur.classNo,
+          program: cur.program,
+          school: cur.school,
+          year: cur.year,
+        });
+      }
+    });
+
     const response: any = [];
 
-    schoolClasses.forEach((cur) => {
+    filteredClasses.forEach((cur) => {
       console.log(cur);
       response.push({
         name: `${
-          cur.program === "ENPG"
+          cur.program === "ENGPG"
             ? "EP"
-            : cur.program === "GCSE"
+            : cur.program === "IGCSE"
             ? "Year"
-            : cur.program === "ALVL"
+            : cur.program === "A-LVL"
             ? "Year"
             : "M"
         } ${cur.year}${cur.school === "ASSUMPTION" ? "/" : "-"}${cur.classNo}`,
@@ -244,6 +228,316 @@ export const getClassFromSchool: RequestHandler = async (req, res, next) => {
 
     res.json({
       response,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getTimetable: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
+
+    const classId = req.params.classId;
+
+    const timetableData = await Timetables.findById(classId);
+    if (!timetableData)
+      return newError(
+        404,
+        `Timetable Not Found|Can't find tiumetable with the id "${classId}"`,
+        "prompt"
+      );
+
+    const timetableFormat = await Format.findOne({
+      school: timetableData.school,
+      programCode: timetableData.program,
+    });
+    if (!timetableFormat)
+      return newError(
+        404,
+        `Format Not Found|Can't find Format of the school ${timetableData.school} program ${timetableData.program}`,
+        "prompt"
+      );
+
+    const now = getCurTime();
+    const curClass = identifyCurClass(now.curTime, timetableData.school);
+
+    // console.log(curClass);
+
+    res.status(200).json({
+      timetableData,
+      timetableFormat,
+      identifier: {
+        classIndex: curClass,
+        today: now.curDay,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getGlance: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const now = getCurTime();
+
+    const user = await User.findById(userId);
+    if (!user)
+      return newError(
+        404,
+        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
+        "important"
+      );
+
+    if (!user.timetables?.primaryClass) {
+      return res.status(200).json({
+        curClass: "AYC",
+        nextClass: "AYC",
+      });
+    }
+    const timetableData = await Timetables.findById(
+      user.timetables.primaryClass
+    );
+    if (!timetableData)
+      return newError(
+        404,
+        `Timetable Not Found|Server can't find timetable with id "${user.timetables.primaryClass}"`
+      );
+
+    const timetableFormat = await Format.findOne({
+      school: timetableData.school,
+      programCode: timetableData.program,
+    });
+    if (!timetableFormat)
+      return newError(
+        404,
+        `Format Not Found|Can't find Format of the school ${timetableData.school} program ${timetableData.program}`,
+        "prompt"
+      );
+
+    const classIndex = identifyCurClass(now.curTime, timetableData.school);
+    if (now.curDay === "weekend") {
+      return res.status(200).json({ curClass: "WKN", nextClass: "WKN" });
+    }
+    if (classIndex.classIndex === -1) {
+      //@ts-ignore
+      const nextClass = timetableData.timetableContent[now.curDay][0];
+
+      return res.status(200).json({ curClass: "BFS", nextClass: nextClass });
+    }
+    if (classIndex.classIndex === -2) {
+      return res.status(200).json({ curClass: "FTD", nextClass: "FTD" });
+    }
+    if (classIndex.classIndex === -70) {
+      console.log(classIndex.nextClassIndex);
+      //@ts-ignore
+      const nextClass =
+        //@ts-ignore
+        timetableData.timetableContent[now.curDay][classIndex.nextClassIndex];
+
+      return res.status(200).json({ curClass: "LUC", nextClass: nextClass });
+    }
+    //@ts-ignore
+    let nextClass =
+      //@ts-ignore
+      timetableData.timetableContent[now.curDay][classIndex.nextClassIndex] ||
+      "FTD";
+    //@ts-ignore
+    const curClass =
+      //@ts-ignore
+      timetableData.timetableContent[now.curDay][classIndex.classIndex];
+
+    let i = classIndex.nextClassIndex + 1;
+    while (curClass === nextClass) {
+      //@ts-ignore
+      nextClass = timetableData.timetableContent[now.curDay][i];
+      i = i + 1;
+    }
+
+    console.log({ nextClass, curClass });
+    return res.status(200).json({
+      curClass: curClass,
+      nextClass: nextClass,
+      format: timetableFormat,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const registerUserClass: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
+
+    const userId = req.userId;
+
+    const classId = req.body.classId;
+    const isPrimary = req.body.isPrimary;
+
+    const user = await User.findById(userId);
+    if (!user)
+      return newError(
+        404,
+        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
+        "important"
+      );
+
+    if (!user.timetables?.primaryClass && !isPrimary) {
+      return newError(
+        404,
+        "Primary Class Not Set|Before Setting anything please set primary class first.",
+        "user"
+      );
+    }
+    if (user.timetables?.starred.includes(classId) && !isPrimary) {
+      return newError(
+        409,
+        "Class Already Starred|This class has already been stared before this.",
+        "user"
+      );
+    }
+    if (classId === user.timetables?.primaryClass && isPrimary) {
+      return newError(
+        409,
+        "Already a primary Class|This class has already your primary class",
+        "user"
+      );
+    }
+    if (classId === user.timetables?.primaryClass && !isPrimary) {
+      return newError(
+        409,
+        "Can't Add Primary Class to the starred List|Due to system's limitation you need to change your primary class to other class first to ad this class to the starred list",
+        "user"
+      );
+    }
+    if (isPrimary) {
+      if (user.timetables?.starred.includes(classId)) {
+        const filtered = user.timetables.starred.filter(
+          (cur) => cur.toString() !== classId.toString()
+        );
+        user.timetables.starred = filtered;
+      }
+
+      user.timetables!.primaryClass = classId;
+    }
+    if (!isPrimary) {
+      user.timetables?.starred.push(classId);
+    }
+
+    const result = await user.save();
+
+    res.json({
+      result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const removeClassFromUser: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
+
+    const userId = req.userId;
+
+    const classId = req.body.classId;
+
+    const user = await User.findById(userId);
+    if (!user)
+      return newError(
+        404,
+        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
+        "important"
+      );
+
+    if (!user.timetables?.starred.includes(classId)) {
+      return newError(
+        409,
+        `Class' not on the list|The class with id ${classId} is not on the list at the first place.`,
+        "user"
+      );
+    }
+
+    const filtered = user.timetables.starred.filter(
+      (cur) => cur.toString() !== classId.toString()
+    );
+    user.timetables.starred = filtered;
+
+    const result = await user.save();
+
+    res.status(200).json({
+      result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMyClass: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
+
+    const userId = req.userId;
+
+    const user = await User.findById(userId);
+    if (!user)
+      return newError(
+        404,
+        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
+        "important"
+      );
+
+    const primaryClass = await Timetables.findById(
+      user.timetables?.primaryClass
+    );
+    if (!primaryClass)
+      return newError(
+        404,
+        "Critical Error Has Occured|Please contect system administrator immediately. CODE[PIMC001]",
+        "important"
+      );
+
+    const starredClasses =
+      (await Timetables.find({ _id: user.timetables?.starred })) || [];
+
+    const foramttedData: any[] = [];
+
+    starredClasses.forEach((cur) => {
+      foramttedData.push({
+        _id: cur.id,
+        school: cur.school,
+        className: `${
+          cur.program === "ENGPG"
+            ? "EP"
+            : cur.program === "IGCSE"
+            ? "Year"
+            : cur.program === "A-LVL"
+            ? "Year"
+            : "M"
+        } ${cur.year}${cur.school === "ASSUMPTION" ? "/" : "-"}${cur.classNo}`,
+        color: cur.color,
+      });
+    });
+
+    res.status(200).json({
+      primaryClass: {
+        _id: primaryClass._id,
+        school: primaryClass?.school,
+        className: `${
+          primaryClass.program === "ENGPG"
+            ? "EP"
+            : primaryClass.program === "IGCSE"
+            ? "Year"
+            : primaryClass.program === "A-LVL"
+            ? "Year"
+            : "M"
+        } ${primaryClass.year}${
+          primaryClass.school === "ASSUMPTION" ? "/" : "-"
+        }${primaryClass.classNo}`,
+        color: primaryClass.color,
+      },
+      starredClass: foramttedData,
     });
   } catch (error) {
     next(error);

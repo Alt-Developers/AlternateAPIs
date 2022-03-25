@@ -5,8 +5,8 @@ import { codeInterface } from "../types";
 const codeSchema = new Schema({
   programCode: {
     type: String,
-    minlength: 4,
-    maxlength: 4,
+    minlength: 5,
+    maxlength: 5,
     required: true,
   },
   programName: {
