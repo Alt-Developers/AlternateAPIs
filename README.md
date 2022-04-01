@@ -146,7 +146,7 @@ Basically this is the new timetables is the re-written version of Timetables.
 >              ^^^^ Change This
 > ```
 >
-> you can chnage it to any port you like.
+> you can change it to any port you like.
 
 ## **License** ⚖️
 
