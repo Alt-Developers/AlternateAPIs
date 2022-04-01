@@ -10,7 +10,8 @@ export default (time: number, school: string) => {
       LUC: [1200, 1300],
     },
     ESSENCE: [800, 830, 920, 1010, 1140, 1240, 1330, 1420, 1500],
-    ASSUMPTION: [800, 830, 920, 1010, 1140, 1240, 1330, 1420, 1500],
+    ASSUMPTION: [800, 830, 920, 1010, 1240, 1340, 1420, 1500],
+    BASSUMPTION: [1140, 1240],
   };
 
   let classIndex: number = -1;
@@ -25,7 +26,12 @@ export default (time: number, school: string) => {
   }
 
   schoolTimetables[school].forEach((cur, index, arr) => {
-    console.log(index);
+    // console.log({
+    //   index,
+    //   cur,
+    //   arr,
+    //   time,
+    // });
     if (cur <= time && time < arr[index + 1]) {
       classIndex = index;
       nextClassIndex = index + 1;
@@ -44,6 +50,14 @@ export default (time: number, school: string) => {
       schoolTimetables.BNEWTON.LUC[0] <= time &&
       time < schoolTimetables.BNEWTON.LUC[1] &&
       school === "NEWTON"
+    ) {
+      classIndex = -70;
+      nextClassIndex = 6;
+      return;
+    } else if (
+      schoolTimetables.ASSUMPTION[0] <= time &&
+      time < schoolTimetables.BASSUMPTION[1] &&
+      school === "ASSUMPTION"
     ) {
       classIndex = -70;
       nextClassIndex = 6;

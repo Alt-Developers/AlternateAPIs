@@ -240,7 +240,9 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
 
     const classId = req.params.classId;
 
-    const timetableData = await Timetables.findById(classId);
+    const timetableData = await Timetables.findById(classId).select(
+      "-createdAt -updatedAt -createdBy"
+    );
     if (!timetableData)
       return newError(
         404,
@@ -251,7 +253,7 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
     const timetableFormat = await Format.findOne({
       school: timetableData.school,
       programCode: timetableData.program,
-    });
+    }).select("-_id -programName -programCode -school -__v");
     if (!timetableFormat)
       return newError(
         404,
@@ -262,14 +264,53 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
     const now = getCurTime();
     const curClass = identifyCurClass(now.curTime, timetableData.school);
 
+    let classIndex: number = 0;
+
+    let curClassName =
+      // @ts-ignore
+      timetableData.timetableContent[now.curDay][+curClass.classIndex];
+
+    let nextClassName =
+      // @ts-ignore
+      timetableData.timetableContent[now.curDay][+curClass.nextClassIndex];
+
+    console.log({ curClassName, nextClassName });
+
+    let previous: string;
+    let thisClassIndex: number = 0;
+
+    // @ts-ignore
+    timetableData.timetableContent[now.curDay].forEach((cur) => {
+      console.log({ cur, curClassName, previous });
+      if (cur !== curClassName && cur !== previous) classIndex++;
+      previous = cur;
+      if (cur === curClassName) {
+        console.log("Found Index", classIndex);
+        thisClassIndex = classIndex;
+      }
+    });
+
+    console.log(thisClassIndex);
+
     // console.log(curClass);
 
     res.status(200).json({
       timetableData,
+      className: `${
+        timetableData.program === "ENGPG"
+          ? "EP"
+          : timetableData.program === "IGCSE"
+          ? "Year"
+          : timetableData.program === "A-LVL"
+          ? "Year"
+          : "M"
+      } ${timetableData.year}${
+        timetableData.school === "ASSUMPTION" ? "/" : "-"
+      }${timetableData.classNo}`,
       timetableFormat,
       identifier: {
-        classIndex: curClass,
-        today: now.curDay,
+        curClass: thisClassIndex,
+        today: now.curWeekDay,
       },
     });
   } catch (error) {
@@ -315,19 +356,51 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         `Format Not Found|Can't find Format of the school ${timetableData.school} program ${timetableData.program}`,
         "prompt"
       );
+    const universalFormat = await UniversalFormat.findOne();
+    if (!universalFormat)
+      return newError(
+        404,
+        `Format Not Found|Can't find Format of the school ${timetableData.school} program ${timetableData.program}`,
+        "prompt"
+      );
 
     const classIndex = identifyCurClass(now.curTime, timetableData.school);
+    const formattedFormat = {
+      classCode: {
+        TH: {
+          ...timetableFormat.classCode.TH,
+          ...universalFormat.universalCodes.TH,
+        },
+        EN: {
+          ...timetableFormat.classCode.EN,
+          ...universalFormat.universalCodes.EN,
+        },
+      },
+    };
+
     if (now.curDay === "weekend") {
-      return res.status(200).json({ curClass: "WKN", nextClass: "WKN" });
+      return res.status(200).json({
+        curClass: "WKN",
+        nextClass: "WKN",
+        format: formattedFormat,
+      });
     }
     if (classIndex.classIndex === -1) {
       //@ts-ignore
       const nextClass = timetableData.timetableContent[now.curDay][0];
 
-      return res.status(200).json({ curClass: "BFS", nextClass: nextClass });
+      return res.status(200).json({
+        curClass: "BFS",
+        nextClass: nextClass,
+        format: formattedFormat,
+      });
     }
     if (classIndex.classIndex === -2) {
-      return res.status(200).json({ curClass: "FTD", nextClass: "FTD" });
+      return res.status(200).json({
+        curClass: "FTD",
+        nextClass: "FTD",
+        format: formattedFormat,
+      });
     }
     if (classIndex.classIndex === -70) {
       console.log(classIndex.nextClassIndex);
@@ -336,8 +409,17 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         //@ts-ignore
         timetableData.timetableContent[now.curDay][classIndex.nextClassIndex];
 
-      return res.status(200).json({ curClass: "LUC", nextClass: nextClass });
+      return res.status(200).json({
+        curClass: "LUC",
+        nextClass: nextClass,
+        format: formattedFormat,
+      });
     }
+    // console.log({
+    //   classIndex,
+    //   school: timetableData.school,
+    //   timetable: timetableData.timetableContent,
+    // });
     //@ts-ignore
     let nextClass =
       //@ts-ignore
@@ -355,11 +437,10 @@ export const getGlance: RequestHandler = async (req, res, next) => {
       i = i + 1;
     }
 
-    console.log({ nextClass, curClass });
     return res.status(200).json({
       curClass: curClass,
       nextClass: nextClass,
-      format: timetableFormat,
+      format: formattedFormat,
     });
   } catch (error) {
     next(error);
@@ -397,14 +478,15 @@ export const registerUserClass: RequestHandler = async (req, res, next) => {
         "user"
       );
     }
-    if (classId === user.timetables?.primaryClass && isPrimary) {
+    if (classId === user.timetables?.primaryClass.toString() && isPrimary) {
       return newError(
         409,
         "Already a primary Class|This class has already your primary class",
         "user"
       );
     }
-    if (classId === user.timetables?.primaryClass && !isPrimary) {
+
+    if (classId === user.timetables?.primaryClass.toString()) {
       return newError(
         409,
         "Can't Add Primary Class to the starred List|Due to system's limitation you need to change your primary class to other class first to ad this class to the starred list",

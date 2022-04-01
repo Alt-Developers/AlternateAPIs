@@ -82,7 +82,7 @@ mongoose
   .connect(process.env.MONGOOSE_URI!)
   .then((result) => {
     console.log("Connected to the database.");
-    const server = app.listen(8080);
+    const server = app.listen(8000);
     // @ts-ignore
     io = socket.init(server);
     io.on("connection", (socket: any) => {

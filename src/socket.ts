@@ -4,7 +4,7 @@ export default {
   init: (httpServer: any) => {
     io = require("socket.io")(httpServer, {
       cors: {
-        origin: "http://localhost:3000",
+        origin: "*",
       },
       Credential: true,
     });

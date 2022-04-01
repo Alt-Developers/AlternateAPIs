@@ -135,6 +135,7 @@ export const getUserData: RequestHandler = async (req, res, next) => {
       lastName: user.lastName,
       color: user.preferredColor,
       profilePicture: user.avatar,
+      email: user.email,
       config: {
         dateTime: user.preferredConfig.dateTime || "24h",
         showCovid: user.preferredConfig.showCovid || "covShow",

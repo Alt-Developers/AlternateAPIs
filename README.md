@@ -1,10 +1,27 @@
 # SS APIs 💾
 
-Welcome to SS APIs Repository, SS APIs is an APIs use across all of our products
+## **Contents**
 
-This API is used at System13 and more products coming later. We are planning to migrate data from products like Timetables and a currently unnamed blog project to these APIs
+- [SS APIs 💾](#ss-apis-)
+  - [**Contents**](#contents)
+  - [**Introduction** 🖊️](#introduction-️)
+  - [**Features** 📝](#features-)
+  - [**Canceled / Legacy apis** 📦](#canceled--legacy-apis-)
+  - [**Versions** 📜](#versions-)
+  - [**Download** ⬇️](#download-️)
+  - [**License** ⚖️](#license-️)
 
-## Features 📝
+---
+
+## **Introduction** 🖊️
+
+Welcome to the SS APIs' Repository, SS APIs is an APIs used across all our products.
+
+This API is used for most of our latest products, like Timetables, Central Authentication and more.
+
+---
+
+## **Features** 📝
 
 **_Auth_**
 
@@ -13,16 +30,53 @@ This API is used at System13 and more products coming later. We are planning to 
 - Change password
 - Change profile picture
 - Change profile (Name, color, etc.)
+- Get user's configurations
 
 **_System 13_**
 
 - All the player data for System13
-- Add player
-- Delete player
+- Add players
+- Delete players
 
-**_Expenses_** (HOLD)
+**_Timetables v3_**
 
-**_Timetables_**
+Basically this is the new timetables is the re-written version of Timetables.
+
+- _Timetables Key Feature_
+  - Create Timetable
+  - Get Timetable
+    - Includes
+      - Timetable Format (format)
+      - Timetable Content (timetableData)
+      - Current Class Indicator (indicator)
+  - Get Glance (getGlance)
+    - Includes
+      - Current Class Code (curClass)
+      - Next Class Code (nextClass)
+      - Timetable Format (format)
+  - Get Format
+    - **If not** selected will return every format in the system.
+    - **Client Can** select what school / program client want.
+  - Get My Class
+    - Return user's primary class and a list of classes user have starred.
+- _Adding Or Remove Class From User_
+  - Get Class From School
+    - return a class that user still dont have from the school selected.
+  - Register Class
+  - Remove Class
+    <br />
+
+> **Notes**
+>
+> The timetalbe format send with every endpoints but getFormat are selected for that school and program, client just need to select the language.
+
+---
+
+## **Canceled / Legacy apis** 📦
+
+**_Expenses_** (CANCELED)
+
+**_Timetables v2_** (Legacy)
 
 - Create timetables
 - Add timetable
@@ -32,9 +86,11 @@ This API is used at System13 and more products coming later. We are planning to 
 - Create class
 - Get current class indicator
 
-## Versions 📜
+---
 
-**_Current Version_ | 4.1.8** <br/>
+## **Versions** 📜
+
+**_Current Version_ | 4.9** <br/>
 
 **_Previous Versions_**
 
@@ -43,24 +99,35 @@ This API is used at System13 and more products coming later. We are planning to 
 - Version 1.1
   - Added errors handling (central error handling middleware).
 - Version 1.2
-  - Started return errors message with the response for the client.
-  - Remove some bugs behind the scene.
+  - Returned errors messages with the response for the client.
+  - Remove behind the scene bugs.
 - Version 2.0
   - Added validation for adding players.
 - Version 3.0
-  - All SS Account support and polish system13 APIs endpoints + expenses project.
+  - SS Account support and polished system13's API endpoints + expenses project.
 - Version 4.0
-  - All SS Timetables features
+  - SS Timetables v2.0 features.
+- Version 4.6 > 4.7
+  - Modal from backend system
+  - Re-written the API for better optimization.
+- Version 4.8 > Present
+  - Timetable v3.0 (or in SS APIs **new Timetable**)
 
-## Download ⬇️
+## **Download** ⬇️
 
-1.) **Download node_modules**
+**After cloning the git repository**
+
+1.) **Install all dependencies**
 
 ```zsh
 > npm install
+
+// or
+
+> yarn install
 ```
 
-2.) **Run the program using**
+2.) **Locally run the program**
 
 ```zsh
 > npm start
@@ -70,7 +137,18 @@ This API is used at System13 and more products coming later. We are planning to 
 > nodemon
 ```
 
-## License
+> **Notes:**
+>
+> You can change the server's port in `./src/app.ts`
+>
+> ```ts
+>   app.listen(8000)
+>              ^^^^ Change This
+> ```
+>
+> you can chnage it to any port you like.
+
+## **License** ⚖️
 
 This project is protected under
 
@@ -80,4 +158,4 @@ Mozilla Public License v2.0
 
 To read the full license [Click here](LICENSE)
 
-MPL 2.0 © 2021-2022 Prawich & Jirat
+MPL 2.0 © 2021-2022 Prawich Thawansakdivudhi & Jirat Chutrakul (SS Developers)
