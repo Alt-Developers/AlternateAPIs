@@ -1,5 +1,7 @@
 # SS APIs 💾
 
+An APIs wrritten a typescript for SS Developers' products
+
 ## **Contents**
 
 - [SS APIs 💾](#ss-apis-)
