@@ -153,9 +153,9 @@ Basically this is the new timetables is the re-written version of Timetables.
 This project is protected under
 
 ```sh
-Mozilla Public License v2.0
+GNU General Public License v2.0
 ```
 
 To read the full license [Click here](LICENSE)
 
-MPL 2.0 © 2021-2022 Prawich Thawansakdivudhi & Jirat Chutrakul (SS Developers)
+GNU General Public License v2.0 © 2021-2022 Prawich Thawansakdivudhi & Jirat Chutrakul (SS Developers)
