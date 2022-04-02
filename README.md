@@ -5,8 +5,6 @@
 
 ---
 
-An APIs wrritten a typescript for SS Developers' products
-
 ## **Contents**
 
 - [**Contents**](#contents)
