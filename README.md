@@ -1,6 +1,6 @@
 <div align="center">
     <img src="./images/logo%20long.png" alt="SS APIs Logos" width="400px" />
-    <p>An APIs wrritten a typescript for SS Developers' products</p>
+    <p>An APIs written in typescript for SS Developers' products</p>
 </div>
 
 ---
