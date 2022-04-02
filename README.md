@@ -1,17 +1,21 @@
-# SS APIs 💾
+<div align="center">
+    <img src="./images/logo%20long.png" alt="SS APIs Logos" width="400px" />
+    <p>An APIs wrritten a typescript for SS Developers' products</p>
+</div>
+
+---
 
 An APIs wrritten a typescript for SS Developers' products
 
 ## **Contents**
 
-- [SS APIs 💾](#ss-apis-)
-  - [**Contents**](#contents)
-  - [**Introduction** 🖊️](#introduction-️)
-  - [**Features** 📝](#features-)
-  - [**Canceled / Legacy apis** 📦](#canceled--legacy-apis-)
-  - [**Versions** 📜](#versions-)
-  - [**Download** ⬇️](#download-️)
-  - [**License** ⚖️](#license-️)
+- [**Contents**](#contents)
+- [**Introduction** 🖊️](#introduction-️)
+- [**Features** 📝](#features-)
+- [**Canceled / Legacy apis** 📦](#canceled--legacy-apis-)
+- [**Versions** 📜](#versions-)
+- [**Download** ⬇️](#download-️)
+- [**License** ⚖️](#license-️)
 
 ---
 
