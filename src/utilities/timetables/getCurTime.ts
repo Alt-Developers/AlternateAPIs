@@ -18,10 +18,11 @@ export default () => {
   if (day === 4) curDay = "thursday";
   if (day === 5) curDay = "friday";
 
-  if (day === 7 || day === 6) curDay = "weekend";
+  if (day === 6 || day === 0) curDay = "weekend";
+  console.log({ curDay, day });
 
   return {
-    curTime: 1425,
+    curTime,
     curDay,
     curWeekDay,
   };

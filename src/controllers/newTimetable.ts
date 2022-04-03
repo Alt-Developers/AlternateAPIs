@@ -243,10 +243,11 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
     const timetableData = await Timetables.findById(classId).select(
       "-createdAt -updatedAt -createdBy"
     );
+
     if (!timetableData)
       return newError(
         404,
-        `Timetable Not Found|Can't find tiumetable with the id "${classId}"`,
+        `Timetable Not Found|Can't find timetable with the id "${classId}"`,
         "prompt"
       );
 
@@ -377,7 +378,6 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         },
       },
     };
-
     if (now.curDay === "weekend") {
       return res.status(200).json({
         curClass: "WKN",
@@ -573,12 +573,12 @@ export const getMyClass: RequestHandler = async (req, res, next) => {
     const primaryClass = await Timetables.findById(
       user.timetables?.primaryClass
     );
-    if (!primaryClass)
-      return newError(
-        404,
-        "Critical Error Has Occured|Please contect system administrator immediately. CODE[PIMC001]",
-        "important"
-      );
+    if (!primaryClass) {
+      return res.json({
+        primaryClass: false,
+        starredClasses: false,
+      });
+    }
 
     const starredClasses =
       (await Timetables.find({ _id: user.timetables?.starred })) || [];
