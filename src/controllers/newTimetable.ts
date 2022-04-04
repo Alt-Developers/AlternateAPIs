@@ -356,6 +356,22 @@ export const getGlance: RequestHandler = async (req, res, next) => {
       return res.status(200).json({
         curClass: "AYC",
         nextClass: "AYC",
+        format: {
+          classCode: {
+            TH: {
+              AYC: {
+                name: "เพิ่มห้องของคุณ",
+                icon: "FTD",
+              },
+            },
+            EN: {
+              AYC: {
+                name: "Add Your Class",
+                icon: "FTD",
+              },
+            },
+          },
+        },
       });
     }
     const timetableData = await Timetables.findById(
@@ -486,34 +502,36 @@ export const registerUserClass: RequestHandler = async (req, res, next) => {
         "important"
       );
 
-    if (!user.timetables?.primaryClass && !isPrimary) {
-      return newError(
-        404,
-        "Primary Class Not Set|Before Setting anything please set primary class first.",
-        "user"
-      );
-    }
-    if (user.timetables?.starred.includes(classId) && !isPrimary) {
-      return newError(
-        409,
-        "Class Already Starred|This class has already been stared before this.",
-        "user"
-      );
-    }
-    if (classId === user.timetables?.primaryClass.toString() && isPrimary) {
-      return newError(
-        409,
-        "Already a primary Class|This class has already your primary class",
-        "user"
-      );
-    }
+    if (user.timetables?.primaryClass) {
+      if (!user.timetables?.primaryClass && !isPrimary) {
+        return newError(
+          404,
+          "Primary Class Not Set|Before Setting anything please set primary class first.",
+          "user"
+        );
+      }
+      if (user.timetables?.starred.includes(classId) && !isPrimary) {
+        return newError(
+          409,
+          "Class Already Starred|This class has already been stared before this.",
+          "user"
+        );
+      }
+      if (classId === user.timetables?.primaryClass.toString() && isPrimary) {
+        return newError(
+          409,
+          "Already a primary Class|This class has already your primary class",
+          "user"
+        );
+      }
 
-    if (classId === user.timetables?.primaryClass.toString()) {
-      return newError(
-        409,
-        "Can't Add Primary Class to the starred List|Due to system's limitation you need to change your primary class to other class first to ad this class to the starred list",
-        "user"
-      );
+      if (classId === user.timetables?.primaryClass.toString()) {
+        return newError(
+          409,
+          "Can't Add Primary Class to the starred List|Due to system's limitation you need to change your primary class to other class first to ad this class to the starred list",
+          "user"
+        );
+      }
     }
     if (isPrimary) {
       if (user.timetables?.starred.includes(classId)) {
