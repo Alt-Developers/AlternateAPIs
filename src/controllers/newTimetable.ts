@@ -7,7 +7,9 @@ import UniversalFormat from "../models/timetables/UniversalFormat";
 import { TimetableContentInterface } from "../models/types";
 import newError from "../utilities/newError";
 import validationErrCheck from "../utilities/validationErrChecker";
-import identifyCurClass from "../utilities/timetables/identifyCurClass";
+import identifyCurClass, {
+  schoolTimetables,
+} from "../utilities/timetables/identifyCurClass";
 import getCurTime from "../utilities/timetables/getCurTime";
 
 export const newTimetable: RequestHandler = async (req, res, next) => {
@@ -269,7 +271,7 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
 
     let curClassName =
       // @ts-ignore
-      timetableData.timetableContent[now.curDay][+curClass.classIndex];
+      timetableData.timetableContent[now.curDay][+curClass.classIndex] || "FTD";
 
     let nextClassName =
       // @ts-ignore
@@ -279,6 +281,9 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
 
     let previous: string;
     let thisClassIndex: number = 0;
+
+    // @ts-ignore
+    timetableData.timetableContent[now.curDay].push("FTD");
 
     // @ts-ignore
     timetableData.timetableContent[now.curDay].forEach((cur) => {
@@ -294,6 +299,18 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
     console.log(thisClassIndex);
 
     // console.log(curClass);
+    // @ts-ignore
+    const processedTimetableTime = schoolTimetables[timetableData.school].map(
+      (cur: number) => {
+        return cur + "00";
+      }
+    );
+    // @ts-ignore
+    const processedTimetableBreakTime = schoolTimetables[
+      `B${timetableData.school}`
+    ].map((cur: number) => {
+      return cur + "00";
+    });
 
     res.status(200).json({
       timetableData,
@@ -313,6 +330,9 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
         curClass: thisClassIndex,
         today: now.curWeekDay,
       },
+      refresher: [
+        ...new Set([...processedTimetableTime, ...processedTimetableBreakTime]),
+      ],
     });
   } catch (error) {
     next(error);
@@ -415,26 +435,28 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         format: formattedFormat,
       });
     }
-    // console.log({
-    //   classIndex,
-    //   school: timetableData.school,
-    //   timetable: timetableData.timetableContent,
-    // });
-    //@ts-ignore
+
     let nextClass =
       //@ts-ignore
       timetableData.timetableContent[now.curDay][classIndex.nextClassIndex] ||
       "FTD";
     //@ts-ignore
-    const curClass =
+    let curClass =
       //@ts-ignore
-      timetableData.timetableContent[now.curDay][classIndex.classIndex];
-
-    let i = classIndex.nextClassIndex + 1;
-    while (curClass === nextClass) {
-      //@ts-ignore
-      nextClass = timetableData.timetableContent[now.curDay][i];
-      i = i + 1;
+      timetableData.timetableContent[now.curDay][classIndex.classIndex] ||
+      "FTD";
+    if (
+      // @ts-ignore
+      timetableData.timetableContent[now.curDay].length > classIndex.classIndex
+    ) {
+      let i = classIndex.nextClassIndex + 1;
+      while (curClass === nextClass) {
+        //@ts-ignore
+        nextClass = timetableData.timetableContent[now.curDay][i];
+        i = i + 1;
+      }
+    } else {
+      curClass = "FTD";
     }
 
     return res.status(200).json({

@@ -1,19 +1,16 @@
 import newError from "../newError";
+export const schoolTimetables = {
+  NEWTON: [
+    900, 930, 1000, 1030, 1100, 1130, 1300, 1330, 1400, 1430, 1500, 1530, 1600,
+    1630, 1700, 1730,
+  ],
+  BNEWTON: [1200, 1300],
+  ESSENCE: [800, 830, 920, 1010, 1140, 1240, 1330, 1420, 1500],
+  ASSUMPTION: [800, 830, 920, 1010, 1240, 1340, 1420, 1500],
+  BASSUMPTION: [1140, 1240],
+};
 
 export default (time: number, school: string) => {
-  const schoolTimetables = {
-    NEWTON: [
-      900, 930, 1000, 1030, 1100, 1130, 1300, 1330, 1400, 1430, 1500, 1530,
-      1600, 1630, 1700, 1730,
-    ],
-    BNEWTON: {
-      LUC: [1200, 1300],
-    },
-    ESSENCE: [800, 830, 920, 1010, 1140, 1240, 1330, 1420, 1500],
-    ASSUMPTION: [800, 830, 920, 1010, 1240, 1340, 1420, 1500],
-    BASSUMPTION: [1140, 1240],
-  };
-
   let classIndex: number = -1;
   let nextClassIndex: number = -1;
 
@@ -47,8 +44,8 @@ export default (time: number, school: string) => {
       nextClassIndex = 0;
       return;
     } else if (
-      schoolTimetables.BNEWTON.LUC[0] <= time &&
-      time < schoolTimetables.BNEWTON.LUC[1] &&
+      schoolTimetables.BNEWTON[0] <= time &&
+      time < schoolTimetables.BNEWTON[1] &&
       school === "NEWTON"
     ) {
       classIndex = -70;

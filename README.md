@@ -94,7 +94,7 @@ Basically this is the new timetables is the re-written version of Timetables.
 
 ## **Versions** 📜
 
-**_Current Version_ | 4.9** <br/>
+**_Current Version_ | 4.9.1** <br/>
 
 **_Previous Versions_**
 

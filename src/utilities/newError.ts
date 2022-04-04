@@ -9,6 +9,7 @@ const newError = (
   if (!msg.endsWith("." || "!" || "?")) {
     msg = `${msg}.`;
   }
+
   const error = new Error(msg);
   error.statusCode = code;
   error.type = type || "general";
