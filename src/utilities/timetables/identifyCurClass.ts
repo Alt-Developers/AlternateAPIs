@@ -23,12 +23,13 @@ export default (time: number, school: string) => {
   }
 
   schoolTimetables[school].forEach((cur, index, arr) => {
-    // console.log({
-    //   index,
-    //   cur,
-    //   arr,
-    //   time,
-    // });
+    console.log({
+      index,
+      cur,
+      arr,
+      time,
+      isThis: cur <= time && time <= arr[index + 1],
+    });
     if (cur <= time && time < arr[index + 1]) {
       classIndex = index;
       nextClassIndex = index + 1;
@@ -59,6 +60,10 @@ export default (time: number, school: string) => {
       classIndex = -70;
       nextClassIndex = 6;
       return;
+    } else if (!arr[index + 1] && cur) {
+      console.log(arr[arr.length - 1]);
+      classIndex = arr.findIndex((cur) => cur === arr[arr.length - 1]);
+      nextClassIndex = -2;
     }
   });
   console.log({ classIndex, nextClassIndex });

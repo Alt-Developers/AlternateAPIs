@@ -401,6 +401,19 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         "prompt"
       );
 
+    // @ts-ignore
+    const processedTimetableTime = schoolTimetables[timetableData.school].map(
+      (cur: number) => {
+        return cur + "00";
+      }
+    );
+    // @ts-ignore
+    const processedTimetableBreakTime = schoolTimetables[
+      `B${timetableData.school}`
+    ].map((cur: number) => {
+      return cur + "00";
+    });
+
     const classIndex = identifyCurClass(now.curTime, timetableData.school);
     const formattedFormat = {
       classCode: {
@@ -419,6 +432,7 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         curClass: "WKN",
         nextClass: "WKN",
         format: formattedFormat,
+        refresher: ["000010"],
       });
     }
     if (classIndex.classIndex === -1) {
@@ -429,6 +443,12 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         curClass: "BFS",
         nextClass: nextClass,
         format: formattedFormat,
+        refresher: [
+          ...new Set([
+            ...processedTimetableTime,
+            ...processedTimetableBreakTime,
+          ]),
+        ],
       });
     }
     if (classIndex.classIndex === -2) {
@@ -436,6 +456,12 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         curClass: "FTD",
         nextClass: "FTD",
         format: formattedFormat,
+        refresher: [
+          ...new Set([
+            ...processedTimetableTime,
+            ...processedTimetableBreakTime,
+          ]),
+        ],
       });
     }
     if (classIndex.classIndex === -70) {
@@ -449,6 +475,12 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         curClass: "LUC",
         nextClass: nextClass,
         format: formattedFormat,
+        refresher: [
+          ...new Set([
+            ...processedTimetableTime,
+            ...processedTimetableBreakTime,
+          ]),
+        ],
       });
     }
 
@@ -477,8 +509,11 @@ export const getGlance: RequestHandler = async (req, res, next) => {
 
     return res.status(200).json({
       curClass: curClass,
-      nextClass: nextClass,
+      nextClass: nextClass || "FTD",
       format: formattedFormat,
+      refresher: [
+        ...new Set([...processedTimetableTime, ...processedTimetableBreakTime]),
+      ],
     });
   } catch (error) {
     next(error);
