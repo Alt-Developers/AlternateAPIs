@@ -415,6 +415,41 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     });
 
     const classIndex = identifyCurClass(now.curTime, timetableData.school);
+    console.log("Class Index: ", classIndex);
+    const refersherData = [
+      ...new Set([...processedTimetableTime, ...processedTimetableBreakTime]),
+    ];
+
+    let thisClassTime = processedTimetableTime[classIndex.classIndex];
+    let nextClassTime = processedTimetableTime[classIndex.nextClassIndex];
+    let isConditional = false;
+
+    if (now.curDay === "weekend") {
+      thisClassTime = false;
+      nextClassTime = false;
+      isConditional = true;
+    } else if (classIndex.classIndex === -1) {
+      thisClassTime = false;
+      nextClassTime = processedTimetableTime[0];
+      isConditional = true;
+    } else if (classIndex.classIndex === -2) {
+      thisClassTime = false;
+      nextClassTime = false;
+      isConditional = true;
+    } else if (classIndex.classIndex === -70) {
+      thisClassTime = processedTimetableBreakTime[0];
+      nextClassTime = processedTimetableBreakTime[1];
+      isConditional = true;
+    }
+
+    console.log({
+      timetable: processedTimetableTime[4],
+      time: {
+        thisClassTime,
+        nextClassTime,
+      },
+    });
+
     const formattedFormat = {
       classCode: {
         TH: {
@@ -433,6 +468,10 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         nextClass: "WKN",
         format: formattedFormat,
         refresher: ["000010"],
+        time: {
+          thisClassTime,
+          nextClassTime,
+        },
       });
     }
     if (classIndex.classIndex === -1) {
@@ -443,12 +482,11 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         curClass: "BFS",
         nextClass: nextClass,
         format: formattedFormat,
-        refresher: [
-          ...new Set([
-            ...processedTimetableTime,
-            ...processedTimetableBreakTime,
-          ]),
-        ],
+        refresher: refersherData,
+        time: {
+          thisClassTime,
+          nextClassTime,
+        },
       });
     }
     if (classIndex.classIndex === -2) {
@@ -456,12 +494,11 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         curClass: "FTD",
         nextClass: "FTD",
         format: formattedFormat,
-        refresher: [
-          ...new Set([
-            ...processedTimetableTime,
-            ...processedTimetableBreakTime,
-          ]),
-        ],
+        refresher: refersherData,
+        time: {
+          thisClassTime,
+          nextClassTime,
+        },
       });
     }
     if (classIndex.classIndex === -70) {
@@ -475,12 +512,11 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         curClass: "LUC",
         nextClass: nextClass,
         format: formattedFormat,
-        refresher: [
-          ...new Set([
-            ...processedTimetableTime,
-            ...processedTimetableBreakTime,
-          ]),
-        ],
+        refresher: refersherData,
+        time: {
+          thisClassTime,
+          nextClassTime,
+        },
       });
     }
 
@@ -499,8 +535,15 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     ) {
       let i = classIndex.nextClassIndex + 1;
       while (curClass === nextClass) {
+        console.log({
+          curClass,
+          nextClass,
+        });
         //@ts-ignore
         nextClass = timetableData.timetableContent[now.curDay][i];
+        if (!isConditional) {
+          nextClassTime = processedTimetableTime[i];
+        }
         i = i + 1;
       }
     } else {
@@ -511,9 +554,11 @@ export const getGlance: RequestHandler = async (req, res, next) => {
       curClass: curClass,
       nextClass: nextClass || "FTD",
       format: formattedFormat,
-      refresher: [
-        ...new Set([...processedTimetableTime, ...processedTimetableBreakTime]),
-      ],
+      refresher: refersherData,
+      time: {
+        thisClassTime,
+        nextClassTime,
+      },
     });
   } catch (error) {
     next(error);
