@@ -21,7 +21,7 @@ export default (time: number, school: string) => {
       "prompt"
     );
   }
-
+  let isConditional = false;
   schoolTimetables[school].forEach((cur, index, arr) => {
     console.log({
       index,
@@ -39,10 +39,13 @@ export default (time: number, school: string) => {
     ) {
       classIndex = -2;
       nextClassIndex = -2;
+      isConditional = true;
       return;
     } else if (time < schoolTimetables[school][0]) {
       classIndex = -1;
       nextClassIndex = 0;
+      isConditional = true;
+
       return;
     } else if (
       schoolTimetables.BNEWTON[0] <= time &&
@@ -51,6 +54,7 @@ export default (time: number, school: string) => {
     ) {
       classIndex = -70;
       nextClassIndex = 6;
+      isConditional = true;
       return;
     } else if (
       schoolTimetables.ASSUMPTION[0] <= time &&
@@ -58,10 +62,11 @@ export default (time: number, school: string) => {
       school === "ASSUMPTION"
     ) {
       classIndex = -70;
-      nextClassIndex = 6;
+      nextClassIndex = 4;
+      isConditional = true;
       return;
-    } else if (!arr[index + 1] && cur) {
-      console.log(arr[arr.length - 1]);
+    } else if (!arr[classIndex + 1] && cur && !isConditional) {
+      console.log("curClass: ", arr[index]);
       classIndex = arr.findIndex((cur) => cur === arr[arr.length - 1]);
       nextClassIndex = -2;
     }
