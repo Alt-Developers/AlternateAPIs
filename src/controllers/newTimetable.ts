@@ -449,6 +449,38 @@ export const getGlance: RequestHandler = async (req, res, next) => {
       isConditional = true;
     }
 
+    let thisClassTimeClassName =
+      // @ts-ignore
+      timetableData.timetableContent[now.curDay][classIndex.classIndex];
+    let previousClassName =
+      // @ts-ignore
+      timetableData.timetableContent[now.curDay][classIndex.classIndex - 1];
+
+    const thisClassTimeClassNameBefore = thisClassTimeClassName;
+
+    let classTimeNewIndex = classIndex.classIndex;
+
+    while (thisClassTimeClassName === previousClassName) {
+      thisClassTime = processedTimetableTime[classTimeNewIndex];
+
+      thisClassTimeClassName =
+        // @ts-ignore
+        timetableData.timetableContent[now.curDay][classTimeNewIndex];
+
+      previousClassName =
+        // @ts-ignore
+        timetableData.timetableContent[now.curDay][classTimeNewIndex - 1];
+
+      classTimeNewIndex = classTimeNewIndex - 1;
+    }
+
+    if (thisClassTimeClassNameBefore !== thisClassTimeClassName)
+      return newError(
+        500,
+        "Internal server error|Please contact system administators CODE[GLAN001]",
+        "important"
+      );
+
     console.log({
       classIndex: classIndex,
       timetable: processedTimetableTime,

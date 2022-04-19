@@ -80,13 +80,19 @@ app.use("/", errorController.notFound404);
 app.use(errorController.centralError);
 
 let io;
+
+// Get port form the .env file if not found use default
+const port = process.env.PORT || 8000;
+
 mongoose
   .connect(process.env.MONGOOSE_URI!)
   .then((result) => {
     console.log("Connected to the database.");
-    const server = app.listen(process.env.PORT!);
+    const server = app.listen(port);
+    console.log(`Started listening at port (${port})`);
     // @ts-ignore
     io = socket.init(server);
+    console.log("Socket.IO has been Initialized.");
     io.on("connection", (socket: any) => {
       console.log(`Client connected | ID ${socket.id}`);
       socket.emit(
