@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Schema, Types, connection, model } from "mongoose";
-import { codeInterface } from "../types";
+import { codeInterface } from "../types/modelType";
 
 const codeSchema = new Schema({
   programCode: {

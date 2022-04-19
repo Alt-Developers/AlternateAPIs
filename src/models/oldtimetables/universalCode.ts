@@ -1,5 +1,5 @@
 import { Schema, Types, connection, model } from "mongoose";
-import { UniversalCodeInterface } from "../types";
+import { UniversalCodeInterface } from "../types/modelType";
 const UniversalCodeSchema = new Schema(
   {
     universalCodes: {

@@ -1,5 +1,5 @@
 import { model, Schema, connection } from "mongoose";
-import { ExpensesInterface } from "../types";
+import { ExpensesInterface } from "../types/modelType";
 
 const expensesSchema = new Schema(
   {

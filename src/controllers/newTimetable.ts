@@ -1,16 +1,23 @@
-import e, { RequestHandler } from "express";
+import { RequestHandler } from "express";
 import { DateTime, NumberUnitLength, Settings } from "luxon";
 import User from "../models/authentication/user";
 import Format from "../models/timetables/Format";
 import Timetables from "../models/timetables/Timetables";
 import UniversalFormat from "../models/timetables/UniversalFormat";
-import { TimetableContentInterface } from "../models/types";
+import { TimetableContentInterface } from "../models/types/modelType";
 import newError from "../utilities/newError";
 import validationErrCheck from "../utilities/validationErrChecker";
 import identifyCurClass, {
   schoolTimetables,
 } from "../utilities/timetables/identifyCurClass";
 import getCurTime from "../utilities/timetables/getCurTime";
+
+const classPrefixFormat = {
+  ENGPG: "EP",
+  IGCSE: "Year",
+  A_LVL: "Year",
+  PREIG: "Year",
+};
 
 export const newTimetable: RequestHandler = async (req, res, next) => {
   try {
@@ -443,7 +450,8 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     }
 
     console.log({
-      timetable: processedTimetableTime[4],
+      classIndex: classIndex,
+      timetable: processedTimetableTime,
       time: {
         thisClassTime,
         nextClassTime,
@@ -706,35 +714,28 @@ export const getMyClass: RequestHandler = async (req, res, next) => {
     const foramttedData: any[] = [];
 
     starredClasses.forEach((cur) => {
+      // @ts-ignore
+      const thisClassPrefix: string = classPrefixFormat[cur.program] || "M";
+
       foramttedData.push({
         _id: cur.id,
         school: cur.school,
-        className: `${
-          cur.program === "ENGPG"
-            ? "EP"
-            : cur.program === "IGCSE"
-            ? "Year"
-            : cur.program === "A-LVL"
-            ? "Year"
-            : "M"
-        } ${cur.year}${cur.school === "ASSUMPTION" ? "/" : "-"}${cur.classNo}`,
+        className: `${thisClassPrefix} ${cur.year}${
+          cur.school === "ASSUMPTION" ? "/" : "-"
+        }${cur.classNo}`,
         color: cur.color,
       });
     });
+
+    const primaryClassPrefix: string =
+      // @ts-ignore
+      classPrefixFormat[primaryClass.program] || "M";
 
     res.status(200).json({
       primaryClass: {
         _id: primaryClass._id,
         school: primaryClass?.school,
-        className: `${
-          primaryClass.program === "ENGPG"
-            ? "EP"
-            : primaryClass.program === "IGCSE"
-            ? "Year"
-            : primaryClass.program === "A-LVL"
-            ? "Year"
-            : "M"
-        } ${primaryClass.year}${
+        className: `${primaryClassPrefix} ${primaryClass.year}${
           primaryClass.school === "ASSUMPTION" ? "/" : "-"
         }${primaryClass.classNo}`,
         color: primaryClass.color,

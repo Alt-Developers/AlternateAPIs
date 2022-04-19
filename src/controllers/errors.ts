@@ -1,5 +1,5 @@
 import express, { RequestHandler } from "express";
-import { ErrorRequestHandler, Middleware } from "../models/types";
+import { ErrorRequestHandler, Middleware } from "../models/types/modelType";
 
 export const notFound404: RequestHandler = (req, res, next) => {
   res.status(404).json({

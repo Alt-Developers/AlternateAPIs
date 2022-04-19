@@ -1,6 +1,6 @@
 import express from "express";
 import { model, Types, Schema, connection } from "mongoose";
-import { UserInterface } from "../types";
+import { UserInterface } from "../types/modelType";
 
 const userSchema = new Schema(
   {

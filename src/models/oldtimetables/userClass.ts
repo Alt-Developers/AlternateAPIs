@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Schema, Types, connection, model } from "mongoose";
-import { ClassesInterface } from "../types";
+import { ClassesInterface } from "../types/modelType";
 
 const classSchema = new Schema(
   {

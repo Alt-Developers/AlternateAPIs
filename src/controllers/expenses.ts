@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import Expenses from "../models/expenses/expenses";
 import User from "../models/authentication/user";
-import { UserInterface } from "../models/types";
+import { UserInterface } from "../models/types/modelType";
 import { validationResult } from "express-validator";
 import newError from "../utilities/newError";
 

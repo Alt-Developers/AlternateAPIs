@@ -94,7 +94,7 @@ Basically this is the new timetables is the re-written version of Timetables.
 
 ## **Versions** 📜
 
-**_Current Version_ | 4.9.1** <br/>
+**_Current Version_ | 5.0** <br/>
 
 **_Previous Versions_**
 
@@ -114,7 +114,7 @@ Basically this is the new timetables is the re-written version of Timetables.
 - Version 4.6 > 4.7
   - Modal from backend system
   - Re-written the API for better optimization.
-- Version 4.8 > Present
+- Version 4.8 > 5.0
   - Timetable v3.0 (or in SS APIs **new Timetable**)
 
 ## **Download** ⬇️

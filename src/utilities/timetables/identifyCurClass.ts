@@ -57,7 +57,7 @@ export default (time: number, school: string) => {
       isConditional = true;
       return;
     } else if (
-      schoolTimetables.ASSUMPTION[0] <= time &&
+      schoolTimetables.BASSUMPTION[0] <= time &&
       time < schoolTimetables.BASSUMPTION[1] &&
       school === "ASSUMPTION"
     ) {

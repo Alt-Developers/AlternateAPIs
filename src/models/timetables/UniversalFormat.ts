@@ -1,5 +1,5 @@
 import { Schema, Types, connection, model } from "mongoose";
-import { TimetableInterface, UniversalCodeInterface } from "../types";
+import { TimetableInterface, UniversalCodeInterface } from "../types/modelType";
 
 const timetableSchema = new Schema(
   {

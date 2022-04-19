@@ -65,11 +65,13 @@ app.use(
 app.use(cors());
 
 // Find Endpoint
+
 app.use("/images", express.static("./images"));
 app.use("/expenses", expensesRoutes);
 app.use("/auth", authRoutes);
 app.use("/system13", systemRoutes);
 app.use("/timetables", timetablesRoutes);
+// app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Can't find Endpoint
 app.use("/", errorController.notFound404);
@@ -82,7 +84,7 @@ mongoose
   .connect(process.env.MONGOOSE_URI!)
   .then((result) => {
     console.log("Connected to the database.");
-    const server = app.listen(8000);
+    const server = app.listen(process.env.PORT!);
     // @ts-ignore
     io = socket.init(server);
     io.on("connection", (socket: any) => {
@@ -91,6 +93,12 @@ mongoose
         "welcome",
         "You have been connected to SS-APIs websocket Network."
       );
+
+      socket.on("how", (msg: string) => {
+        console.log(msg);
+
+        socket.emit("msg", "Message have reached the server.");
+      });
     });
   })
   .catch((err) => console.log(err));

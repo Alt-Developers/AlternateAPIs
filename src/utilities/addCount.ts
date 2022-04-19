@@ -1,5 +1,5 @@
 import Count from "../models/system13/count";
-import { Count as CountTypes } from "../models/types";
+import { Count as CountTypes } from "../models/types/modelType";
 
 export default function addCount(apiName: string) {
   Count.findOne({ apiName: apiName }).then((api: any) => {

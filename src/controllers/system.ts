@@ -1,6 +1,6 @@
 import express, { RequestHandler } from "express";
 import Player from "../models/system13/player";
-import { Middleware, PlayerInterface } from "../models/types";
+import { Middleware, PlayerInterface } from "../models/types/modelType";
 import addCount from "../utilities/addCount";
 import { validationResult } from "express-validator";
 import User from "../models/authentication/user";
