@@ -5,8 +5,8 @@
   "main": "./src/app.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon",
-    "server": "node ./dist/app.js"
+    "start": "node ./dist/app.js",
+    "start:dev": "nodemon"
   },
   "repository": "git+https://github.com/SS-Developers/SS-APIs.git",
   "author": "Prawich Thawansakdivudhi",
@@ -16,6 +16,7 @@
   },
   "homepage": "https://github.com/SS-Developers/SS-APIs#readme",
   "dependencies": {
+    "@sendgrid/mail": "^7.6.2",
     "@types/luxon": "^2.0.9",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",

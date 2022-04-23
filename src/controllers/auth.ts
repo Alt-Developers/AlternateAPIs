@@ -8,6 +8,9 @@ import User from "../models/authentication/user";
 import { validationResult } from "express-validator";
 import validationErrCheck from "../utilities/validationErrChecker";
 let maxFileSize = 8 * 1000 * 1000;
+import sgMail from "@sendgrid/mail";
+
+sgMail.setApiKey(process.env.SEND_GRID_API!);
 
 export const signup: RequestHandler = async (req, res, next) => {
   try {
@@ -72,6 +75,25 @@ export const signup: RequestHandler = async (req, res, next) => {
     });
 
     const result = await newUser.save();
+
+    sgMail
+      .send({
+        from: "support@ssdevelopers.xyz",
+        templateId: "d-b5bc3c206eb743babc6b540e5f96b090",
+        to: result.email,
+        dynamicTemplateData: {
+          name: result.firstName + " " + result.lastName,
+          email: result.email,
+          // @ts-ignore
+          createdAt: result.createdAt,
+        },
+      })
+      .then(() => {
+        console.log("Email sent");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
 
     res.status(201).json({
       message: "Successfully Created an account.",

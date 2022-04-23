@@ -1,4 +1,4 @@
-import { RequestHandler } from "express";
+import e, { RequestHandler } from "express";
 import { DateTime, NumberUnitLength, Settings } from "luxon";
 import User from "../models/authentication/user";
 import Format from "../models/timetables/Format";
@@ -273,31 +273,39 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
 
     const now = getCurTime();
     const curClass = identifyCurClass(now.curTime, timetableData.school);
+    const isConditional = now.curDay === "weekend";
 
     let classIndex: number = 0;
 
-    let curClassName =
-      // @ts-ignore
-      timetableData.timetableContent[now.curDay][+curClass.classIndex] || "FTD";
+    let [curClassName, nextClassName] = ["FTD", "FTD"];
+    if (!isConditional) {
+      curClassName =
+        // @ts-ignore
+        timetableData.timetableContent[now.curDay][+curClass.classIndex] ||
+        "FTD";
 
-    let nextClassName =
-      // @ts-ignore
-      timetableData.timetableContent[now.curDay][+curClass.nextClassIndex];
-
+      nextClassName =
+        // @ts-ignore
+        timetableData.timetableContent[now.curDay][+curClass.nextClassIndex];
+    }
     console.log({ curClassName, nextClassName });
 
     let previous: string;
-    let thisClassIndex: number = 0;
+    let thisClassIndex: number = -1;
+
+    const processedTimetableTodayData =
+      // @ts-ignore
+      timetableData.timetableContent[now.curDay] || [];
 
     // @ts-ignore
-    timetableData.timetableContent[now.curDay].push("FTD");
+    processedTimetableTodayData.push("FTD");
 
     // @ts-ignore
-    timetableData.timetableContent[now.curDay].forEach((cur) => {
+    processedTimetableTodayData.forEach((cur) => {
       console.log({ cur, curClassName, previous });
       if (cur !== curClassName && cur !== previous) classIndex++;
       previous = cur;
-      if (cur === curClassName) {
+      if (cur === curClassName && !isConditional) {
         console.log("Found Index", classIndex);
         thisClassIndex = classIndex;
       }
@@ -449,12 +457,22 @@ export const getGlance: RequestHandler = async (req, res, next) => {
       isConditional = true;
     }
 
-    let thisClassTimeClassName =
+    let thisClassTimeClassName: string;
+    let previousClassName: string;
+    if (isConditional) {
+      thisClassTimeClassName = "CN1";
+
+      previousClassName = "CN2";
+    } else {
+      thisClassTimeClassName = "CN1";
       // @ts-ignore
-      timetableData.timetableContent[now.curDay][classIndex.classIndex];
-    let previousClassName =
-      // @ts-ignore
-      timetableData.timetableContent[now.curDay][classIndex.classIndex - 1];
+      timetableData.timetableContent[now.curDay][classIndex.classIndex] ||
+        "FT1";
+      previousClassName =
+        // @ts-ignore
+        timetableDta.timetableContent[now.curDay][classIndex.classIndex - 1] ||
+        "FT2";
+    }
 
     const thisClassTimeClassNameBefore = thisClassTimeClassName;
 
@@ -481,14 +499,14 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         "important"
       );
 
-    console.log({
-      classIndex: classIndex,
-      timetable: processedTimetableTime,
-      time: {
-        thisClassTime,
-        nextClassTime,
-      },
-    });
+    // console.log({
+    //   classIndex: classIndex,
+    //   timetable: processedTimetableTime,
+    //   time: {
+    //     thisClassTime,
+    //     nextClassTime,
+    //   },
+    // });
 
     const formattedFormat = {
       classCode: {

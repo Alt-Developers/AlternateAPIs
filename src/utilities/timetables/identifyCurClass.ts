@@ -23,13 +23,13 @@ export default (time: number, school: string) => {
   }
   let isConditional = false;
   schoolTimetables[school].forEach((cur, index, arr) => {
-    console.log({
-      index,
-      cur,
-      arr,
-      time,
-      isThis: cur <= time && time <= arr[index + 1],
-    });
+    // console.log({
+    //   index,
+    //   cur,
+    //   arr,
+    //   time,
+    //   isThis: cur <= time && time <= arr[index + 1],
+    // });
     if (cur <= time && time < arr[index + 1]) {
       classIndex = index;
       nextClassIndex = index + 1;
@@ -66,11 +66,11 @@ export default (time: number, school: string) => {
       isConditional = true;
       return;
     } else if (!arr[classIndex + 1] && cur && !isConditional) {
-      console.log("curClass: ", arr[index]);
+      // console.log("curClass: ", arr[index]);
       classIndex = arr.findIndex((cur) => cur === arr[arr.length - 1]);
-      nextClassIndex = -2;
+      nextClassIndex = 10000;
     }
   });
-  console.log({ classIndex, nextClassIndex });
+  // console.log({ classIndex, nextClassIndex });
   return { classIndex, nextClassIndex };
 };
