@@ -328,3 +328,48 @@ export const editConfig: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
+export const apiLogin: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
+
+    const email = req.body.email;
+    const password = req.body.password;
+
+    if (!email || !password)
+      return newError(
+        400,
+        "Email or Password not found|We need both email and password to process the login",
+        "prompt"
+      );
+
+    const user = await User.findOne({ email: email });
+    if (!user)
+      return newError(
+        404,
+        "User Not Found|Please recheck the email.",
+        "prompt"
+      );
+
+    const isCorrectPassword = await bcrypt.compare(password, user.password);
+
+    if (!isCorrectPassword)
+      return newError(
+        401,
+        "Incorrect Password|Enter the correct password to login."
+      );
+
+    return res.status(200).json({
+      ssAccId: user._id,
+      userInfo: {
+        fName: user.firstName,
+        lName: user.lastName,
+        color: user.preferredColor,
+        email: user.email,
+        profile: `https://apis.ssdevelopers.xyz/${user.avatar}`,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
