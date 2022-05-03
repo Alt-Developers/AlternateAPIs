@@ -1,5 +1,4 @@
 import express, { Request, Response, NextFunction } from "express";
-import { SetProfilingLevelOptions, Timestamp } from "mongodb";
 import { Document, ObjectId } from "mongoose";
 
 declare global {

@@ -14,7 +14,6 @@ export const centralError: ErrorRequestHandler = (
   res,
   next
 ) => {
-  console.log(err);
   const code = err.statusCode || 500;
   console.log(`${err.statusCode} - ${err.message}`);
   res.status(code).json({

@@ -119,7 +119,6 @@ export const login: RequestHandler = async (req, res, next) => {
       );
 
     const isCorrectPassword = await bcrypt.compare(password, user.password);
-    console.log(isCorrectPassword);
     if (!isCorrectPassword) {
       return newError(
         401,

@@ -45,10 +45,10 @@ export const newTimetable: RequestHandler = async (req, res, next) => {
     if (!timetableContent.thursday) newError(400, "thursday must be filled");
     if (!timetableContent.friday) newError(400, "friday must be filled");
 
-    console.log({ school, timetableContent, program, classNo, color });
+    // console.log({ school, timetableContent, program, classNo, color });
 
     const allCode = await Format.find();
-    console.log({ allCode });
+    // console.log({ allCode });
 
     const code = await Format.findOne({ programCode: program });
     if (!code) return newError(404, "Program not found.");
@@ -220,7 +220,7 @@ export const getClassFromSchool: RequestHandler = async (req, res, next) => {
     const response: any = [];
 
     filteredClasses.forEach((cur) => {
-      console.log(cur);
+      // console.log(cur);
       response.push({
         name: `${
           cur.program === "ENGPG"
@@ -288,7 +288,7 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
         // @ts-ignore
         timetableData.timetableContent[now.curDay][+curClass.nextClassIndex];
     }
-    console.log({ curClassName, nextClassName });
+    // console.log({ curClassName, nextClassName });
 
     let previous: string;
     let thisClassIndex: number = -1;
@@ -302,16 +302,16 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
 
     // @ts-ignore
     processedTimetableTodayData.forEach((cur) => {
-      console.log({ cur, curClassName, previous });
+      // console.log({ cur, curClassName, previous });
       if (cur !== curClassName && cur !== previous) classIndex++;
       previous = cur;
       if (cur === curClassName && !isConditional) {
-        console.log("Found Index", classIndex);
+        // console.log("Found Index", classIndex);
         thisClassIndex = classIndex;
       }
     });
 
-    console.log(thisClassIndex);
+    // console.log(thisClassIndex);
 
     // console.log(curClass);
     // @ts-ignore
@@ -430,7 +430,7 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     });
 
     const classIndex = identifyCurClass(now.curTime, timetableData.school);
-    console.log("Class Index: ", classIndex);
+    // console.log("Class Index: ", classIndex);
     const refersherData = [
       ...new Set([...processedTimetableTime, ...processedTimetableBreakTime]),
     ];
@@ -464,13 +464,13 @@ export const getGlance: RequestHandler = async (req, res, next) => {
 
       previousClassName = "CN2";
     } else {
-      thisClassTimeClassName = "CN1";
-      // @ts-ignore
-      timetableData.timetableContent[now.curDay][classIndex.classIndex] ||
+      thisClassTimeClassName =
+        // @ts-ignore
+        timetableData.timetableContent[now.curDay][classIndex.classIndex] ||
         "FT1";
       previousClassName =
         // @ts-ignore
-        timetableDta.timetableContent[now.curDay][classIndex.classIndex - 1] ||
+        timetableData.timetableContent[now.curDay][classIndex.classIndex - 1] ||
         "FT2";
     }
 
@@ -478,6 +478,11 @@ export const getGlance: RequestHandler = async (req, res, next) => {
 
     let classTimeNewIndex = classIndex.classIndex;
 
+    // console.log({
+    //   thisClassTimeClassName,
+    //   previousClassName,
+    //   thisClassTimeClassNameBefore,
+    // });
     while (thisClassTimeClassName === previousClassName) {
       thisClassTime = processedTimetableTime[classTimeNewIndex];
 
@@ -560,7 +565,7 @@ export const getGlance: RequestHandler = async (req, res, next) => {
       });
     }
     if (classIndex.classIndex === -70) {
-      console.log(classIndex.nextClassIndex);
+      // console.log(classIndex.nextClassIndex);
       //@ts-ignore
       const nextClass =
         //@ts-ignore
@@ -606,6 +611,15 @@ export const getGlance: RequestHandler = async (req, res, next) => {
       }
     } else {
       curClass = "FTD";
+    }
+
+    if (timetableData.school === "NEWTON") {
+      // @ts-ignore
+      const classBeforeLunch = timetableData.timetableContent[now.curDay][5];
+      if (curClass === classBeforeLunch) {
+        nextClass = "LUC";
+        nextClassTime = processedTimetableBreakTime[0];
+      }
     }
 
     return res.status(200).json({
