@@ -41,6 +41,10 @@ const userSchema = new Schema(
       dateTime: String,
       showCovid: String,
     },
+    accType: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );

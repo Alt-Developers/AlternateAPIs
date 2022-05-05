@@ -16,40 +16,11 @@ import authRoutes from "./routes/auth";
 import expensesRoutes from "./routes/expenses";
 import timetablesRoutes from "./routes/timetables";
 import socket from "./socket";
+import * as multerConfig from "./multerConfig";
 
 let curTime: any;
 let curDay: any;
 Settings.defaultZone = "utc+7";
-const fileStorage = multer.diskStorage({
-  destination: (req: any, file: any, cb: any) => {
-    cb(null, "images");
-  },
-  filename: (req, file, cb) => {
-    const sanitizedOriginalName = file.originalname.replace(/ /g, "_");
-    const dateAdded = DateTime.local();
-    cb(
-      null,
-      `${dateAdded.day}${
-        dateAdded.month < 10 ? "0" + dateAdded.month : dateAdded.month
-      }${dateAdded.year}-${uuidv4()}.${
-        file.mimetype.endsWith("png")
-          ? ".png"
-          : file.mimetype.endsWith("jpg")
-          ? ".jpg"
-          : ".jpeg"
-      }`
-    );
-  },
-});
-
-const fileFilter = (req: any, file: any, cb: any) => {
-  const fileType: string = file.mimetype;
-  if (fileType.startsWith("image")) {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-};
 
 const app = express();
 
@@ -58,13 +29,21 @@ app.use(bodyParser.json());
 
 // get an Image form the file
 app.use(
-  multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
+  multer({
+    storage: multerConfig.docFileStorage,
+    fileFilter: multerConfig.docFileFilter,
+  }).single("image")
 );
 
 // Cross Origins Handler
 app.use(cors());
 
 // Find Endpoint
+
+app.use((req, res, next) => {
+  console.log("path", req.path);
+  next();
+});
 
 app.use("/images", express.static("./images"));
 app.use("/expenses", expensesRoutes);

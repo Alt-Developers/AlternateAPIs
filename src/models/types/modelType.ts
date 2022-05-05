@@ -48,6 +48,7 @@ export interface UserInterface extends Document {
   lastName: string;
   avatar: string;
   DOB?: Date;
+  accType: "developer" | "user";
   system13?: ObjectId[];
   expenses?: ObjectId[];
   preferredColor: string;
@@ -120,4 +121,19 @@ export interface UniversalCodeInterface extends Document {
     EN: Object;
     TH: Object;
   };
+}
+
+export interface HolidayInterface extends Document {
+  type: "specific" | "public";
+  school: "ALL" | "ASSUMPTION" | "NEWTON" | "ESSENCE" | string;
+  name: {
+    TH: string;
+    EN: string;
+  };
+  desc: {
+    TH: string;
+    EN: string;
+  };
+  date: string;
+  addedBy: ObjectId;
 }

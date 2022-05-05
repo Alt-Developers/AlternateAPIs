@@ -4,13 +4,17 @@ import User from "../models/authentication/user";
 import Format from "../models/timetables/Format";
 import Timetables from "../models/timetables/Timetables";
 import UniversalFormat from "../models/timetables/UniversalFormat";
-import { TimetableContentInterface } from "../models/types/modelType";
+import {
+  HolidayInterface,
+  TimetableContentInterface,
+} from "../models/types/modelType";
 import newError from "../utilities/newError";
 import validationErrCheck from "../utilities/validationErrChecker";
 import identifyCurClass, {
   schoolTimetables,
 } from "../utilities/timetables/identifyCurClass";
 import getCurTime from "../utilities/timetables/getCurTime";
+import Holiday from "../models/timetables/Holiday";
 
 const classPrefixFormat = {
   ENGPG: "EP",
@@ -416,6 +420,42 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         "prompt"
       );
 
+    const curDate = new Date();
+
+    const simplifiedDate = `${curDate.getDate()}${
+      curDate.getMonth() + 1
+    }${curDate.getFullYear()}`;
+
+    let holiday: HolidayInterface | null | undefined;
+
+    holiday = await Holiday.findOne({
+      date: simplifiedDate,
+      type: "public",
+    });
+
+    console.log({ holiday, simplifiedDate });
+
+    if (!holiday) {
+      holiday = await Holiday.findOne({
+        date: simplifiedDate,
+        type: "specific",
+        school: timetableData.school,
+      });
+    }
+
+    if (holiday) {
+      return res.status(200).json({
+        curClass: holiday.type === "specific" ? "SSH" : "PHD",
+        nextClass: holiday.type === "specific" ? "SSH" : "PHD",
+        name: {
+          TH: holiday.name.TH,
+          EN: holiday.name.EN,
+        },
+        format: { classCode: { universalFormat } },
+        refresher: ["000010"],
+      });
+    }
+
     // @ts-ignore
     const processedTimetableTime = schoolTimetables[timetableData.school].map(
       (cur: number) => {
@@ -805,6 +845,56 @@ export const getMyClass: RequestHandler = async (req, res, next) => {
         color: primaryClass.color,
       },
       starredClass: foramttedData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const setHoliday: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
+
+    const { type, name, date, school } = req.body;
+
+    const userId = req.userId;
+    const user = await User.findById(userId);
+    if (!user)
+      return newError(
+        404,
+        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
+        "important"
+      );
+
+    if (user.accType !== "developer")
+      return newError(401, "Unauthorized", "user");
+
+    const holidayDate = new Date(date);
+
+    const simplifiedDate = `${holidayDate.getDate()}${
+      holidayDate.getMonth() + 1
+    }${holidayDate.getFullYear()}`;
+
+    const holiday = new Holiday({
+      type: type,
+      name: {
+        TH: name.TH,
+        EN: name.EN,
+      },
+      desc: {
+        TH: "",
+        EN: ""
+      },
+      date: simplifiedDate,
+      school: school,
+      addedBy: user._id,
+    });
+
+    const saved = await holiday.save();
+
+    res.status(200).json({
+      result: saved,
+      createdBy: `${user.firstName} ${user.lastName} - ${user.accType}`,
     });
   } catch (error) {
     next(error);

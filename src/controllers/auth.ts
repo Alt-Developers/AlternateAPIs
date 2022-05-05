@@ -163,6 +163,7 @@ export const getUserData: RequestHandler = async (req, res, next) => {
         showCovid: user.preferredConfig.showCovid || "covShow",
         language: user.preferredConfig.language || "EN",
       },
+      type: user.accType,
     });
   } catch (err) {
     next(err);

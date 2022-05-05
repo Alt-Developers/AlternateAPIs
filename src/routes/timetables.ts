@@ -25,5 +25,6 @@ router.post(
   systemController.registerUserClass
 );
 router.post("/removeUserClass", dCrypt, systemController.removeClassFromUser);
+router.post("/setNewHoliday", dCrypt, systemController.setHoliday);
 
 export default router;
