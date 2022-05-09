@@ -20,7 +20,12 @@ router.post(
 router.post(
   "/signup",
   [
-    body("email").toLowerCase().isEmail(),
+    body(
+      "email",
+      "Invalid Email|Email is invalid Please check your email and try agian."
+    )
+      .toLowerCase()
+      .isEmail(),
     body(
       "pass",
       "Unsecure Password|A secure password should have at least eight characters one letter and one number."

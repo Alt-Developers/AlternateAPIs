@@ -39,12 +39,6 @@ app.use(
 app.use(cors());
 
 // Find Endpoint
-
-app.use((req, res, next) => {
-  console.log("path", req.path);
-  next();
-});
-
 app.use("/images", express.static("./images"));
 app.use("/expenses", expensesRoutes);
 app.use("/auth", authRoutes);

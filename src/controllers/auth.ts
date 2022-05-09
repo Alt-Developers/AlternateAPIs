@@ -72,6 +72,7 @@ export const signup: RequestHandler = async (req, res, next) => {
       email: email,
       avatar: avatarPath,
       preferredColor: color,
+      accType: "user",
     });
 
     const result = await newUser.save();
