@@ -7,11 +7,18 @@ assignees: SEN-SENSATION
 
 ---
 
-**Describe the bug**
-<!-- A clear and concise description of what the bug is. -->
+## **Describe the bug 🔎**
 
-**Error Code**
-<!-- Screen Shots / Text -->
+How is this bug affecting the experience
 
-**How? (Optional)**
-<!-- If you have any idea how the error happens please describe it. -->
+## **To Reproduce 🧪**
+
+Clear steps on how to reproduce this bug / behavior
+
+## **Expected behavior 🔥**
+
+What is expected to happen instead of a bug
+
+## **Screenshot 🖼️ (optional)**
+
+A screenshot of the website or the console
