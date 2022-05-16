@@ -27,7 +27,9 @@ export const docFileStorage = multer.diskStorage({
         req.path === "/timetables/newIcon" ||
         req.path === "/timetables/setNewHoliday"
       ) {
-        cb(null, "documents");
+        cb(null, "icons");
+      } else if (req.path === "/timetables/uploadTimetable") {
+        cb(null, "timetables");
       } else {
         cb(null, "images");
       }

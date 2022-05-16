@@ -5,8 +5,11 @@ import Format from "../models/timetables/Format";
 import Timetables from "../models/timetables/Timetables";
 import UniversalFormat from "../models/timetables/UniversalFormat";
 import {
+  AvaliableSchool,
+  ClassInfoInterface,
   HolidayInterface,
   TimetableContentInterface,
+  TimetableRequestInterface,
 } from "../models/types/modelType";
 import newError from "../utilities/newError";
 import validationErrCheck from "../utilities/validationErrChecker";
@@ -15,6 +18,9 @@ import identifyCurClass, {
 } from "../utilities/timetables/identifyCurClass";
 import getCurTime from "../utilities/timetables/getCurTime";
 import Holiday from "../models/timetables/Holiday";
+import TimetableRequest from "../models/timetables/TimetableRequest";
+import user from "../models/authentication/user";
+import TimeLayout from "../models/timetables/TimeLayout";
 
 const classPrefixFormat = {
   ENGPG: "EP",
@@ -34,6 +40,13 @@ export const newTimetable: RequestHandler = async (req, res, next) => {
         404,
         "Critical Error Has Occured|Please contect system administrator immediately.",
         "important"
+      );
+
+    if (user.accType !== "developer")
+      return newError(
+        403,
+        "Forbidden|You do not have sufficient rights to access this resource",
+        "user"
       );
 
     const school = req.body.school;
@@ -102,6 +115,7 @@ export const newTimetable: RequestHandler = async (req, res, next) => {
       timetableContent: timetableContent,
       createdBy: user._id,
       year: year,
+      status: "uptodate",
     });
 
     const savedTimetable = await newTimetable.save();
@@ -117,6 +131,22 @@ export const newTimetable: RequestHandler = async (req, res, next) => {
 export const newFormat: RequestHandler = async (req, res, next) => {
   try {
     validationErrCheck(req);
+
+    const userId = req.userId;
+    const user = await User.findById(userId);
+    if (!user)
+      return newError(
+        404,
+        "Critical Error Has Occured|Please contect system administrator immediately.",
+        "important"
+      );
+
+    if (user.accType !== "developer")
+      return newError(
+        403,
+        "Forbidden|You do not have sufficient rights to access this resource",
+        "user"
+      );
 
     const programCode = req.body.programCode;
     const programName = req.body.programName;
@@ -252,6 +282,15 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
     validationErrCheck(req);
 
     const classId = req.params.classId;
+    const userId = req.userId;
+
+    const user = await User.findById(userId);
+    if (!user)
+      return newError(
+        404,
+        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
+        "important"
+      );
 
     const timetableData = await Timetables.findById(classId).select(
       "-createdAt -updatedAt -createdBy"
@@ -262,6 +301,17 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
         404,
         `Timetable Not Found|Can't find timetable with the id "${classId}"`,
         "prompt"
+      );
+
+    const timetableTimeLayout = await TimeLayout.findOne({
+      school: timetableData.school,
+      program: timetableData.program,
+    });
+    if (!timetableTimeLayout)
+      return newError(
+        404,
+        "Time Layout Not Found|Critical Error Has Occurred Timetable Time Layout Not Found.",
+        "important"
       );
 
     const timetableFormat = await Format.findOne({
@@ -331,8 +381,18 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
       return cur + "00";
     });
 
+    let isPrimaryClass: boolean = false;
+
+    if (
+      user.timetables?.primaryClass.toString() === timetableData._id.toString()
+    ) {
+      isPrimaryClass = true;
+    }
+
     res.status(200).json({
       timetableData,
+      timetableTimeLayout: timetableTimeLayout.time,
+      isPrimaryClass: isPrimaryClass,
       className: `${
         timetableData.program === "ENGPG"
           ? "EP"
@@ -352,6 +412,7 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
       refresher: [
         ...new Set([...processedTimetableTime, ...processedTimetableBreakTime]),
       ],
+      status: timetableData.status,
     });
   } catch (error) {
     next(error);
@@ -433,8 +494,6 @@ export const getGlance: RequestHandler = async (req, res, next) => {
       type: "public",
     });
 
-    console.log({ holiday, simplifiedDate });
-
     if (!holiday) {
       holiday = await Holiday.findOne({
         date: simplifiedDate,
@@ -451,7 +510,16 @@ export const getGlance: RequestHandler = async (req, res, next) => {
           TH: holiday.name.TH,
           EN: holiday.name.EN,
         },
-        format: { classCode: { universalFormat } },
+        desc: {
+          TH: holiday.desc.TH,
+          EN: holiday.desc.EN,
+        },
+        format: {
+          classCode: {
+            EN: universalFormat.universalCodes.EN,
+            TH: universalFormat.universalCodes.TH,
+          },
+        },
         refresher: ["000010"],
       });
     }
@@ -468,6 +536,21 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     ].map((cur: number) => {
       return cur + "00";
     });
+
+    // @ts-ignore
+    if (schoolTimetables[timetableData.school][0] - 100 > now.curTime) {
+      return res.status(200).json({
+        curClass: "FTD",
+        nextClass: "FTD",
+        format: {
+          classCode: {
+            EN: universalFormat.universalCodes.EN,
+            TH: universalFormat.universalCodes.TH,
+          },
+        },
+        refresher: [`${processedTimetableTime[0] - 10000}`],
+      });
+    }
 
     const classIndex = identifyCurClass(now.curTime, timetableData.school);
     // console.log("Class Index: ", classIndex);
@@ -815,13 +898,13 @@ export const getMyClass: RequestHandler = async (req, res, next) => {
     const starredClasses =
       (await Timetables.find({ _id: user.timetables?.starred })) || [];
 
-    const foramttedData: any[] = [];
+    const formattedData: any[] = [];
 
     starredClasses.forEach((cur) => {
       // @ts-ignore
       const thisClassPrefix: string = classPrefixFormat[cur.program] || "M";
 
-      foramttedData.push({
+      formattedData.push({
         _id: cur.id,
         school: cur.school,
         className: `${thisClassPrefix} ${cur.year}${
@@ -844,7 +927,7 @@ export const getMyClass: RequestHandler = async (req, res, next) => {
         }${primaryClass.classNo}`,
         color: primaryClass.color,
       },
-      starredClass: foramttedData,
+      starredClass: formattedData,
     });
   } catch (error) {
     next(error);
@@ -855,7 +938,7 @@ export const setHoliday: RequestHandler = async (req, res, next) => {
   try {
     validationErrCheck(req);
 
-    const { type, name, date, school } = req.body;
+    const { type, name, desc, date, school } = req.body;
 
     const userId = req.userId;
     const user = await User.findById(userId);
@@ -867,7 +950,11 @@ export const setHoliday: RequestHandler = async (req, res, next) => {
       );
 
     if (user.accType !== "developer")
-      return newError(401, "Unauthorized", "user");
+      return newError(
+        403,
+        "Forbidden|You do not have sufficient rights to access this resource",
+        "user"
+      );
 
     const holidayDate = new Date(date);
 
@@ -882,8 +969,8 @@ export const setHoliday: RequestHandler = async (req, res, next) => {
         EN: name.EN,
       },
       desc: {
-        TH: "",
-        EN: ""
+        TH: desc.TH,
+        EN: desc.EN,
       },
       date: simplifiedDate,
       school: school,
@@ -895,6 +982,121 @@ export const setHoliday: RequestHandler = async (req, res, next) => {
     res.status(200).json({
       result: saved,
       createdBy: `${user.firstName} ${user.lastName} - ${user.accType}`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const uploadTimetable: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
+
+    const userId = req.userId;
+    const user = await User.findById(userId);
+    if (!user)
+      return newError(
+        404,
+        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
+        "important"
+      );
+    if (!req.file)
+      return newError(
+        422,
+        "Image not found|Timetable Image is require when uploading new timetable."
+      );
+
+    const type = req.body.type;
+
+    const classInfo: ClassInfoInterface = {
+      classNo: req.body.classNo,
+      year: req.body.year,
+      school: req.body.school,
+      program: req.body.program,
+    };
+
+    const existingTimetableRequest = await TimetableRequest.findOne({
+      status: "open",
+      classInfo: {
+        year: classInfo.year,
+        classNo: classInfo.classNo,
+        school: classInfo.school,
+        program: classInfo.program,
+      },
+    });
+    if (existingTimetableRequest)
+      return newError(
+        409,
+        "Request Existed|Thank you for your co-operation but we have already recived a request for this class timetable from another user.",
+        "user"
+      );
+
+    const newTimetableRequest = new TimetableRequest({
+      type: type,
+      status: "open",
+      classInfo: {
+        year: classInfo.year,
+        classNo: classInfo.classNo,
+        school: classInfo.school,
+        program: classInfo.program,
+      },
+      timetableImagePath: req.file.path,
+      uploadedBy: user._id,
+    });
+
+    const result = await newTimetableRequest.save();
+
+    return res.status(201).json({
+      modal: true,
+      header: "Success!",
+      message:
+        "Your request has been successfully submitted thank you for making Timetable a better tool for everyone.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const newTimetableTimeLayout: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    validationErrCheck(req);
+
+    const userId = req.userId;
+    const user = await User.findById(userId);
+    if (!user)
+      return newError(
+        404,
+        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
+        "important"
+      );
+
+    if (user.accType !== "developer")
+      return newError(
+        403,
+        "Forbidden|You do not have sufficient rights to access this resource",
+        "user"
+      );
+
+    const timeList: string[] = req.body.timeList;
+    const school: AvaliableSchool = req.body.school;
+    const program: string = req.body.program;
+
+    const newTimeLayout = new TimeLayout({
+      school: school,
+      program: program,
+      time: timeList,
+    });
+
+    const result = await newTimeLayout.save();
+
+    return res.status(201).json({
+      modal: true,
+      header: "Successfully Created New Time Layout",
+      message: `Successfully created new time layout for (${result.program}) of (${result.school})`,
     });
   } catch (error) {
     next(error);

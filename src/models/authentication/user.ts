@@ -40,6 +40,7 @@ const userSchema = new Schema(
       language: String,
       dateTime: String,
       showCovid: String,
+      tmrPref: String,
     },
     accType: {
       type: String,

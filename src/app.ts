@@ -40,6 +40,7 @@ app.use(cors());
 
 // Find Endpoint
 app.use("/images", express.static("./images"));
+app.use("/icons", express.static("./icons"));
 app.use("/expenses", expensesRoutes);
 app.use("/auth", authRoutes);
 app.use("/system13", systemRoutes);

@@ -58,6 +58,10 @@ Basically this is the new timetables is the re-written version of Timetables.
       - Current Class Code (curClass)
       - Next Class Code (nextClass)
       - Timetable Format (format)
+    - Holiday
+      - Will return PHD (Public Holiday) with name and description of the holiday.
+      - For spesific school holiday will return SSH (Specific School Holiday) with name and desc.
+  - Timetable Request
   - Get Format
     - **If not** selected will return every format in the system.
     - **Client Can** select what school / program client want.
@@ -94,7 +98,7 @@ Basically this is the new timetables is the re-written version of Timetables.
 
 ## **Versions** 📜
 
-**_Current Version_ | 5.0** <br/>
+**_Current Version_ | 5.2** <br/>
 
 **_Previous Versions_**
 

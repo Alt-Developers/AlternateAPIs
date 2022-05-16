@@ -71,6 +71,7 @@ const timetableSchema = new Schema(
       type: Types.ObjectId,
       required: true,
     },
+    status: { type: String, required: true },
   },
   { timestamps: true }
 );

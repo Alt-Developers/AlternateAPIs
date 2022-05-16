@@ -7,12 +7,12 @@ const router = Router();
 
 router.get("/getFormat", systemController.getFormat);
 router.get("/getClassFromSchool", dCrypt, systemController.getClassFromSchool);
-router.get("/getTimetable/:classId", systemController.getTimetable);
+router.get("/getTimetable/:classId", dCrypt, systemController.getTimetable);
 router.get("/getGlance", dCrypt, systemController.getGlance);
 router.get("/getMyClass", dCrypt, systemController.getMyClass);
 
 router.post("/newTimetable", dCrypt, systemController.newTimetable);
-router.post("/newFormat", systemController.newFormat);
+router.post("/newFormat", dCrypt, systemController.newFormat);
 router.post(
   "/registerUserClass",
   dCrypt,
@@ -26,5 +26,12 @@ router.post(
 );
 router.post("/removeUserClass", dCrypt, systemController.removeClassFromUser);
 router.post("/setNewHoliday", dCrypt, systemController.setHoliday);
+
+router.post("/uploadTimetable", dCrypt, systemController.uploadTimetable);
+router.post(
+  "/newTimetableTimeLayout",
+  dCrypt,
+  systemController.newTimetableTimeLayout
+);
 
 export default router;

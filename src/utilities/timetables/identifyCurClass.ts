@@ -5,9 +5,10 @@ export const schoolTimetables = {
     1630, 1700, 1730,
   ],
   BNEWTON: [1200, 1300],
-  ESSENCE: [800, 830, 920, 1010, 1140, 1240, 1330, 1420, 1500],
-  ASSUMPTION: [800, 830, 920, 1010, 1240, 1340, 1420, 1500],
-  BASSUMPTION: [1140, 1240],
+  ESSENCE: [900, 1000, 1100, 1300, 1400, 1500, 1600],
+  ASSUMPTION: [830, 920, 1020, 1210, 1300, 1400, 1450, 1540],
+  BASSUMPTION: [1110, 1210],
+  BESSENCE: [1200, 1300],
 };
 
 export default (time: number, school: string) => {
@@ -60,6 +61,15 @@ export default (time: number, school: string) => {
       schoolTimetables.BASSUMPTION[0] <= time &&
       time < schoolTimetables.BASSUMPTION[1] &&
       school === "ASSUMPTION"
+    ) {
+      classIndex = -70;
+      nextClassIndex = 4;
+      isConditional = true;
+      return;
+    } else if (
+      schoolTimetables.BESSENCE[0] <= time &&
+      time < schoolTimetables.BESSENCE[1] &&
+      school === "ESSENCE"
     ) {
       classIndex = -70;
       nextClassIndex = 4;

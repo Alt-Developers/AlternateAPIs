@@ -1,5 +1,6 @@
 import express, { RequestHandler } from "express";
 import { ErrorRequestHandler, Middleware } from "../models/types/modelType";
+import { deleteFile } from "../utilities/fileHelper";
 
 export const notFound404: RequestHandler = (req, res, next) => {
   res.status(404).json({
@@ -16,6 +17,9 @@ export const centralError: ErrorRequestHandler = (
 ) => {
   const code = err.statusCode || 500;
   console.log(`${err.statusCode} - ${err.message}`);
+
+  if (req.file) deleteFile(req.file.path);
+
   res.status(code).json({
     type: err.type || "general",
     modal: err.modal,

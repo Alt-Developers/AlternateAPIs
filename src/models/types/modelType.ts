@@ -16,6 +16,8 @@ declare global {
   }
 }
 
+export type AvaliableSchool = "ASSUMPTION" | "NEWTON" | "ESSENCE" | string;
+
 export type ErrorRequestHandler = (
   err: any,
   req: Request,
@@ -59,9 +61,10 @@ export interface UserInterface extends Document {
     created: ObjectId[];
   };
   preferredConfig: {
-    language: string;
-    dateTime: string;
-    showCovid: string;
+    language: "TH" | "EN" | string;
+    dateTime: "24h" | "12h" | string;
+    showCovid: "showCov" | "hideCov" | string;
+    tmrPref: "subject" | "book" | "hide" | string;
   };
 }
 
@@ -94,6 +97,7 @@ export interface TimetableInterface extends Document {
   color: string;
   timetableContent: TimetableContentInterface;
   createdBy: ObjectId;
+  status: "outdated" | "uptodate";
 }
 
 export interface ClassesInterface extends Document {
@@ -136,4 +140,25 @@ export interface HolidayInterface extends Document {
   };
   date: string;
   addedBy: ObjectId;
+}
+
+export interface ClassInfoInterface {
+  year: string;
+  classNo: string;
+  school: "ASSUMPTION" | "NEWTON" | "ESSENCE" | string;
+  program: string;
+}
+
+export interface TimetableRequestInterface extends Document {
+  status: "closed" | "open" | "rejected" | string;
+  type: "new" | "update";
+  classInfo: ClassInfoInterface;
+  timetableImagePath: string;
+  uploadedBy: ObjectId;
+}
+
+export interface TimeLayoutInterface extends Document {
+  school: AvaliableSchool;
+  program: string;
+  time: string[];
 }
