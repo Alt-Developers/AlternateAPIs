@@ -22,8 +22,8 @@ export default () => {
   // console.log({ curDay, day });
 
   return {
-    curTime: 100,
-    curDay: "monday",
+    curTime,
+    curDay,
     curWeekDay,
   };
 };
