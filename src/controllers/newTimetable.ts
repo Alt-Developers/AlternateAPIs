@@ -736,13 +736,40 @@ export const getGlance: RequestHandler = async (req, res, next) => {
       curClass = "FTD";
     }
 
-    if (timetableData.school === "NEWTON") {
+    const lunchTime =
       // @ts-ignore
-      const classBeforeLunch = timetableData.timetableContent[now.curDay][5];
-      if (curClass === classBeforeLunch) {
-        nextClass = "LUC";
-        nextClassTime = processedTimetableBreakTime[0];
-      }
+      schoolTimetables[`B${timetableData.school}`][0];
+
+    const thisSchoolTimetable =
+      //@ts-ignore
+      schoolTimetables[timetableData.school];
+
+    const thisClassSimpleTime =
+      //@ts-ignore
+      schoolTimetables[timetableData.school][classIndex.classIndex];
+
+    const nextClassSimpleTime =
+      //@ts-ignore
+      schoolTimetables[timetableData.school][classIndex.nextClassIndex];
+
+    // console.log({
+    //   now: now.curTime,
+    //   lunchTime,
+    //   simpleTime: {
+    //     thisClassSimpleTime,
+    //     nextClassSimpleTime,
+    //   },
+    //   isBeforeLunch: now.curTime > thisClassSimpleTime,
+    //   isClassBeforeLunch:
+    //     now.curTime > thisClassSimpleTime && now.curTime < lunchTime,
+    // });
+
+    const isClassBeforeLunch =
+      now.curTime > thisClassSimpleTime && now.curTime < lunchTime;
+
+    if (isClassBeforeLunch) {
+      nextClass = "LUC";
+      nextClassTime = processedTimetableBreakTime[0];
     }
 
     return res.status(200).json({
