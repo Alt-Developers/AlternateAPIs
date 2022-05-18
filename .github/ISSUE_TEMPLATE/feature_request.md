@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest new feature for SS APIs
 title: ''
-labels: feature request
+labels: feature request, unclassified
 assignees: SEN-SENSATION
 
 ---
