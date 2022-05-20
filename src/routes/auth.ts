@@ -81,6 +81,7 @@ router.post(
         } else return Promise.resolve();
       }),
     body("language", "LANGUAGE").toUpperCase().isLength({ min: 2, max: 2 }),
+    body("tmrPref", "TMRPREF").isString().toLowerCase(),
   ],
   authController.editConfig
 );

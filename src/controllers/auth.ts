@@ -311,6 +311,7 @@ export const editConfig: RequestHandler = async (req, res, next) => {
     const dateTime: string = req.body.dateTime;
     const language: string = req.body.language;
     const showCovid: string = req.body.showCovid;
+    const tmrPref: string = req.body.tmrPref;
 
     const user = await User.findById(userId);
     if (!user) return newError(404, "User not found.", "user");
@@ -318,6 +319,7 @@ export const editConfig: RequestHandler = async (req, res, next) => {
     if (dateTime) user.preferredConfig.dateTime = dateTime;
     if (language) user.preferredConfig.language = language;
     if (showCovid) user.preferredConfig.showCovid = showCovid;
+    if (tmrPref) user.preferredConfig.tmrPref = tmrPref;
 
     const result = await user.save();
 

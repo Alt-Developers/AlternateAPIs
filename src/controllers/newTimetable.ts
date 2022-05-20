@@ -29,6 +29,16 @@ const classPrefixFormat = {
   PREIG: "Year",
 };
 
+const days = [
+  "weekend",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "weekend",
+];
+
 export const newTimetable: RequestHandler = async (req, res, next) => {
   try {
     validationErrCheck(req);
@@ -539,7 +549,7 @@ export const getGlance: RequestHandler = async (req, res, next) => {
 
     // @ts-ignore
     if (schoolTimetables[timetableData.school][0] - 100 > now.curTime) {
-      return res.status(200).json({
+      res.status(200).json({
         curClass: "FTD",
         nextClass: "FTD",
         format: {
@@ -550,6 +560,81 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         },
         refresher: [`${processedTimetableTime[0] - 10000}`],
       });
+
+      if (user.preferredConfig.tmrPref === "book") {
+        const toRemove: any = [
+          ...new Set(
+            // @ts-ignore
+            timetableData.timetableContent[days[now.curWeekDay - 1]]
+          ),
+        ].map(
+          (cur) =>
+            //@ts-ignore
+            formattedFormat.classCode[user.preferredConfig.language][cur]
+        );
+
+        const toAdd: any =
+          //@ts-ignore
+          [...new Set(timetableData.timetableContent[now.curDay])].map(
+            (cur) =>
+              //@ts-ignore
+              formattedFormat.classCode[user.preferredConfig.language][cur]
+          );
+
+        return res.status(200).json({
+          curClass: "FTD",
+          nextClass: "FTD",
+          format: {
+            classCode: {
+              EN: universalFormat.universalCodes.EN,
+              TH: universalFormat.universalCodes.TH,
+            },
+          },
+          refresher: [`${processedTimetableTime[0] + 50}`],
+          prepType: "book",
+          prep: {
+            toRemove: toRemove,
+            toAdd: toAdd,
+          },
+        });
+      } else if (user.preferredConfig.tmrPref === "subject") {
+        const toAdd: any =
+          //@ts-ignore
+          [...new Set(timetableData.timetableContent[now.curDay])].map(
+            (cur) =>
+              //@ts-ignore
+              formattedFormat.classCode[user.preferredConfig.language][cur]
+          );
+
+        return res.status(200).json({
+          curClass: "FTD",
+          nextClass: "FTD",
+          format: {
+            classCode: {
+              EN: universalFormat.universalCodes.EN,
+              TH: universalFormat.universalCodes.TH,
+            },
+          },
+          refresher: [`${processedTimetableTime[0] + 50}`],
+          prepType: "subject",
+          prep: {
+            toAdd: toAdd,
+          },
+        });
+      } else {
+        return res.status(200).json({
+          curClass: "FTD",
+          nextClass: "FTD",
+          format: {
+            classCode: {
+              EN: universalFormat.universalCodes.EN,
+              TH: universalFormat.universalCodes.TH,
+            },
+          },
+          refresher: [`${processedTimetableTime[0] + 50}`],
+          prepType: "hide",
+        });
+      }
     }
 
     const classIndex = identifyCurClass(now.curTime, timetableData.school);
@@ -668,7 +753,7 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     }
     if (classIndex.classIndex === -1) {
       //@ts-ignore
-      const nextClass = timetableData.timetableContent[now.curDay][0];
+      const nextClass = timetableData[now.curDay][0];
 
       return res.status(200).json({
         curClass: "BFS",
@@ -682,16 +767,77 @@ export const getGlance: RequestHandler = async (req, res, next) => {
       });
     }
     if (classIndex.classIndex === -2) {
-      return res.status(200).json({
-        curClass: "FTD",
-        nextClass: "FTD",
-        format: formattedFormat,
-        refresher: refersherData,
-        time: {
-          thisClassTime,
-          nextClassTime,
-        },
-      });
+      if (user.preferredConfig.tmrPref === "book") {
+        const toRemove: any = [
+          ...new Set(
+            // @ts-ignore
+            timetableData.timetableContent[days[now.curWeekDay - 1]]
+          ),
+        ].map(
+          (cur) =>
+            //@ts-ignore
+            formattedFormat.classCode[user.preferredConfig.language][cur]
+        );
+
+        const toAdd: any =
+          //@ts-ignore
+          [...new Set(timetableData.timetableContent[now.curDay])].map(
+            (cur) =>
+              //@ts-ignore
+              formattedFormat.classCode[user.preferredConfig.language][cur]
+          );
+
+        return res.status(200).json({
+          curClass: "FTD",
+          nextClass: "FTD",
+          format: formattedFormat,
+          refresher: refersherData,
+          prepType: "book",
+          prep: {
+            toRemove: toRemove,
+            toAdd: toAdd,
+          },
+          time: {
+            thisClassTime,
+            nextClassTime,
+          },
+        });
+      } else if (user.preferredConfig.tmrPref === "subject") {
+        const toAdd: any =
+          //@ts-ignore
+          [...new Set(timetableData.timetableContent[now.curDay])].map(
+            (cur) =>
+              //@ts-ignore
+              formattedFormat.classCode[user.preferredConfig.language][cur]
+          );
+
+        return res.status(200).json({
+          curClass: "FTD",
+          nextClass: "FTD",
+          format: formattedFormat,
+          refresher: refersherData,
+          prepType: "subject",
+          prep: {
+            toAdd: toAdd,
+          },
+          time: {
+            thisClassTime,
+            nextClassTime,
+          },
+        });
+      } else {
+        return res.status(200).json({
+          curClass: "FTD",
+          nextClass: "FTD",
+          format: formattedFormat,
+          refresher: refersherData,
+          prepType: "hide",
+          time: {
+            thisClassTime,
+            nextClassTime,
+          },
+        });
+      }
     }
     if (classIndex.classIndex === -70) {
       // console.log(classIndex.nextClassIndex);
