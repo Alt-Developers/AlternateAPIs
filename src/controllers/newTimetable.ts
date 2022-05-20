@@ -600,6 +600,9 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     const thisClassTimeClassNameBefore = thisClassTimeClassName;
 
     let classTimeNewIndex = classIndex.classIndex;
+    let thisClassInitialSimpleTime: number =
+      //@ts-ignore
+      schoolTimetables[timetableData.school][classTimeNewIndex];
 
     // console.log({
     //   thisClassTimeClassName,
@@ -608,6 +611,9 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     // });
     while (thisClassTimeClassName === previousClassName) {
       thisClassTime = processedTimetableTime[classTimeNewIndex];
+      thisClassInitialSimpleTime =
+        //@ts-ignore
+        schoolTimetables[timetableData.school][classTimeNewIndex];
 
       thisClassTimeClassName =
         // @ts-ignore
@@ -744,28 +750,29 @@ export const getGlance: RequestHandler = async (req, res, next) => {
       //@ts-ignore
       schoolTimetables[timetableData.school];
 
-    const thisClassSimpleTime =
+    // let : string;
+    let previousClass: string =
       //@ts-ignore
-      schoolTimetables[timetableData.school][classIndex.classIndex];
+      timetableData.timetableContent[now.curDay][classIndex.classIndex - 1];
 
     const nextClassSimpleTime =
       //@ts-ignore
       schoolTimetables[timetableData.school][classIndex.nextClassIndex];
 
-    // console.log({
-    //   now: now.curTime,
-    //   lunchTime,
-    //   simpleTime: {
-    //     thisClassSimpleTime,
-    //     nextClassSimpleTime,
-    //   },
-    //   isBeforeLunch: now.curTime > thisClassSimpleTime,
-    //   isClassBeforeLunch:
-    //     now.curTime > thisClassSimpleTime && now.curTime < lunchTime,
-    // });
+    console.log({
+      now: now.curTime,
+      lunchTime,
+      simpleTime: {
+        thisClassInitialSimpleTime,
+        nextClassSimpleTime,
+      },
+      isBeforeLunch: now.curTime > thisClassInitialSimpleTime,
+      isClassBeforeLunch:
+        now.curTime > thisClassInitialSimpleTime && now.curTime < lunchTime,
+    });
 
     const isClassBeforeLunch =
-      now.curTime > thisClassSimpleTime && now.curTime < lunchTime;
+      now.curTime > thisClassInitialSimpleTime && now.curTime < lunchTime;
 
     if (isClassBeforeLunch) {
       nextClass = "LUC";

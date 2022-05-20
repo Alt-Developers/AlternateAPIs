@@ -69,7 +69,7 @@ Basically this is the new timetables is the re-written version of Timetables.
     - Return user's primary class and a list of classes user have starred.
 - _Adding Or Remove Class From User_
   - Get Class From School
-    - return a class that user still dont have from the school selected.
+    - return a class that user still dont have from the school selected.live
   - Register Class
   - Remove Class
     <br />
