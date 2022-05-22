@@ -37,6 +37,7 @@ const days = [
   "thursday",
   "friday",
   "weekend",
+  "monday",
 ];
 
 export const newTimetable: RequestHandler = async (req, res, next) => {
@@ -547,39 +548,60 @@ export const getGlance: RequestHandler = async (req, res, next) => {
       return cur + "00";
     });
 
+    const formattedFormat = {
+      classCode: {
+        TH: {
+          ...timetableFormat.classCode.TH,
+          ...universalFormat.universalCodes.TH,
+        },
+        EN: {
+          ...timetableFormat.classCode.EN,
+          ...universalFormat.universalCodes.EN,
+        },
+      },
+    };
+
     // @ts-ignore
     if (schoolTimetables[timetableData.school][0] - 100 > now.curTime) {
-      res.status(200).json({
-        curClass: "FTD",
-        nextClass: "FTD",
-        format: {
-          classCode: {
-            EN: universalFormat.universalCodes.EN,
-            TH: universalFormat.universalCodes.TH,
-          },
-        },
-        refresher: [`${processedTimetableTime[0] - 10000}`],
-      });
-
       if (user.preferredConfig.tmrPref === "book") {
-        const toRemove: any = [
-          ...new Set(
-            // @ts-ignore
-            timetableData.timetableContent[days[now.curWeekDay - 1]]
-          ),
+        const today =
+          days[now.curWeekDay] === "weekend" ? "monday" : days[now.curWeekDay];
+
+        const yesterday =
+          days[now.curWeekDay - 1] === "weekend"
+            ? "friday"
+            : days[now.curWeekDay - 1];
+
+        const tmrDay =
+          days[now.curWeekDay + 1] === "weekend"
+            ? "monday"
+            : days[now.curWeekDay + 1];
+
+        const toAdd: any = [
+          //@ts-ignore
+          ...new Set(timetableData.timetableContent[today]),
         ].map(
           (cur) =>
             //@ts-ignore
             formattedFormat.classCode[user.preferredConfig.language][cur]
         );
 
-        const toAdd: any =
-          //@ts-ignore
-          [...new Set(timetableData.timetableContent[now.curDay])].map(
+        const toAddNameArr = toAdd.map(
+          (cur: { icon: string; name: string }) => cur.name
+        );
+
+        const toRemove: any = [
+          ...new Set(
+            // @ts-ignore
+            timetableData.timetableContent[yesterday]
+          ),
+        ]
+          .map(
             (cur) =>
               //@ts-ignore
               formattedFormat.classCode[user.preferredConfig.language][cur]
-          );
+          )
+          .filter((cur: any) => !toAddNameArr.includes(cur.name));
 
         return res.status(200).json({
           curClass: "FTD",
@@ -598,9 +620,22 @@ export const getGlance: RequestHandler = async (req, res, next) => {
           },
         });
       } else if (user.preferredConfig.tmrPref === "subject") {
+        const today =
+          days[now.curWeekDay] === "weekend" ? "monday" : days[now.curWeekDay];
+
+        const yesterday =
+          days[now.curWeekDay - 1] === "weekend"
+            ? "friday"
+            : days[now.curWeekDay - 1];
+
+        const tmrDay =
+          days[now.curWeekDay + 1] === "weekend"
+            ? "monday"
+            : days[now.curWeekDay + 1];
+
         const toAdd: any =
           //@ts-ignore
-          [...new Set(timetableData.timetableContent[now.curDay])].map(
+          [...new Set(timetableData.timetableContent[today])].map(
             (cur) =>
               //@ts-ignore
               formattedFormat.classCode[user.preferredConfig.language][cur]
@@ -727,18 +762,6 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     //   },
     // });
 
-    const formattedFormat = {
-      classCode: {
-        TH: {
-          ...timetableFormat.classCode.TH,
-          ...universalFormat.universalCodes.TH,
-        },
-        EN: {
-          ...timetableFormat.classCode.EN,
-          ...universalFormat.universalCodes.EN,
-        },
-      },
-    };
     if (now.curDay === "weekend") {
       return res.status(200).json({
         curClass: "WKN",
@@ -768,24 +791,48 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     }
     if (classIndex.classIndex === -2) {
       if (user.preferredConfig.tmrPref === "book") {
-        const toRemove: any = [
-          ...new Set(
-            // @ts-ignore
-            timetableData.timetableContent[days[now.curWeekDay - 1]]
-          ),
-        ].map(
-          (cur) =>
-            //@ts-ignore
-            formattedFormat.classCode[user.preferredConfig.language][cur]
-        );
+        const today =
+          days[now.curWeekDay] === "weekend" ? "friday" : days[now.curWeekDay];
+
+        const yesterday =
+          days[now.curWeekDay - 1] === "weekend"
+            ? "friday"
+            : days[now.curWeekDay - 1];
+
+        const tmrDay =
+          days[now.curWeekDay + 1] === "weekend"
+            ? "monday"
+            : days[now.curWeekDay + 1];
 
         const toAdd: any =
           //@ts-ignore
-          [...new Set(timetableData.timetableContent[now.curDay])].map(
+          [
+            ...new Set(
+              // @ts-ignore
+              timetableData.timetableContent[tmrDay]
+            ),
+          ].map(
             (cur) =>
               //@ts-ignore
               formattedFormat.classCode[user.preferredConfig.language][cur]
           );
+
+        const toAddNameArr = toAdd.map(
+          (cur: { icon: string; name: string }) => cur.name
+        );
+
+        const toRemove: any = [
+          ...new Set(
+            // @ts-ignore
+            timetableData.timetableContent[today]
+          ),
+        ]
+          .map(
+            (cur) =>
+              //@ts-ignore
+              formattedFormat.classCode[user.preferredConfig.language][cur]
+          )
+          .filter((cur) => !toAddNameArr.includes(cur.name));
 
         return res.status(200).json({
           curClass: "FTD",
@@ -803,13 +850,16 @@ export const getGlance: RequestHandler = async (req, res, next) => {
           },
         });
       } else if (user.preferredConfig.tmrPref === "subject") {
-        const toAdd: any =
-          //@ts-ignore
-          [...new Set(timetableData.timetableContent[now.curDay])].map(
-            (cur) =>
-              //@ts-ignore
-              formattedFormat.classCode[user.preferredConfig.language][cur]
-          );
+        const toAdd: any = [
+          ...new Set(
+            //@ts-ignore
+            timetableData.timetableContent[days[now.curWeekDay + 1]]
+          ),
+        ].map(
+          (cur) =>
+            //@ts-ignore
+            formattedFormat.classCode[user.preferredConfig.language][cur]
+        );
 
         return res.status(200).json({
           curClass: "FTD",
@@ -957,6 +1007,14 @@ export const registerUserClass: RequestHandler = async (req, res, next) => {
         "important"
       );
 
+    const timetableData = await Timetables.findById(classId);
+    if (!timetableData)
+      return newError(
+        404,
+        `Timetable Not Found|Can not find timetable with the ID (${classId})`,
+        `user`
+      );
+
     if (user.timetables?.primaryClass) {
       if (!user.timetables?.primaryClass && !isPrimary) {
         return newError(
@@ -989,6 +1047,10 @@ export const registerUserClass: RequestHandler = async (req, res, next) => {
       }
     }
     if (isPrimary) {
+      if (!user.timetables?.primaryClass) {
+        user.preferredConfig.tmrPref =
+          timetableData.school === "ASSUMPTION" ? "book" : "hide";
+      }
       if (user.timetables?.starred.includes(classId)) {
         const filtered = user.timetables.starred.filter(
           (cur) => cur.toString() !== classId.toString()

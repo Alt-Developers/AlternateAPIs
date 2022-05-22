@@ -163,6 +163,7 @@ export const getUserData: RequestHandler = async (req, res, next) => {
         dateTime: user.preferredConfig.dateTime || "24h",
         showCovid: user.preferredConfig.showCovid || "covShow",
         language: user.preferredConfig.language || "EN",
+        tmrPref: user.preferredConfig.tmrPref || "hide",
       },
       type: user.accType,
     });
