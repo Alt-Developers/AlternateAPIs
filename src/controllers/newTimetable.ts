@@ -724,6 +724,10 @@ export const getGlance: RequestHandler = async (req, res, next) => {
       //@ts-ignore
       schoolTimetables[timetableData.school][classTimeNewIndex];
 
+    const thisClassSimpleTime: number =
+      // @ts-ignore
+      schoolTimetables[timetableData.school][classTimeNewIndex];
+
     // console.log({
     //   thisClassTimeClassName,
     //   previousClassName,
@@ -776,7 +780,7 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     }
     if (classIndex.classIndex === -1) {
       //@ts-ignore
-      const nextClass = timetableData[now.curDay][0];
+      const nextClass = timetableData.timetableContent[now.curDay][0];
 
       return res.status(200).json({
         curClass: "BFS",
@@ -955,20 +959,50 @@ export const getGlance: RequestHandler = async (req, res, next) => {
       //@ts-ignore
       schoolTimetables[timetableData.school][classIndex.nextClassIndex];
 
-    console.log({
-      now: now.curTime,
-      lunchTime,
-      simpleTime: {
-        thisClassInitialSimpleTime,
-        nextClassSimpleTime,
-      },
-      isBeforeLunch: now.curTime > thisClassInitialSimpleTime,
-      isClassBeforeLunch:
-        now.curTime > thisClassInitialSimpleTime && now.curTime < lunchTime,
-    });
+    // const classBeforeLunchName = timetableData.timetableContent[now.curDay]
 
-    const isClassBeforeLunch =
-      now.curTime > thisClassInitialSimpleTime && now.curTime < lunchTime;
+    let isBeforeLunch = true;
+    let beforeLunchTimeClassName: string = "FTD";
+    let beforeLunchIndex: number = 0;
+
+    while (isBeforeLunch) {
+      const curClassTime =
+        // @ts-ignore
+        schoolTimetables[timetableData.school][beforeLunchIndex];
+      isBeforeLunch =
+        // @ts-ignore
+        curClassTime < lunchTime;
+
+      // console.log({ lunchTime, curClassTime, isBeforeLunch });
+
+      if (isBeforeLunch) {
+        beforeLunchTimeClassName =
+          //@ts-ignore
+          timetableData.timetableContent[now.curDay][beforeLunchIndex];
+      }
+
+      beforeLunchIndex++;
+
+      // console.log({
+      //   beforeLunchIndex,
+      //   isBeforeLunch,
+      //   beforeLunchTimeClassName,
+      // });
+    }
+
+    // console.log({
+    //   now: now.curTime,
+    //   lunchTime,
+    //   simpleTime: {
+    //     thisClassInitialSimpleTime,
+    //     nextClassSimpleTime,
+    //   },
+    //   isBeforeLunch: now.curTime > thisClassInitialSimpleTime,
+    //   isClassBeforeLunch:
+    //     now.curTime > thisClassInitialSimpleTime && now.curTime < lunchTime,
+    // });
+
+    const isClassBeforeLunch = beforeLunchTimeClassName === curClass;
 
     if (isClassBeforeLunch) {
       nextClass = "LUC";

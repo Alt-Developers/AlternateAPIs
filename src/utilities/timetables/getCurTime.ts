@@ -22,7 +22,7 @@ export default () => {
   // console.log({ curDay, day });
 
   return {
-    curTime,
+    curTime: 850,
     curDay,
     curWeekDay,
   };
