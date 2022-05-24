@@ -264,18 +264,16 @@ export const getClassFromSchool: RequestHandler = async (req, res, next) => {
 
     const response: any = [];
 
+    const primaryClassPrefix: string =
+      //@ts-ignore
+      classPrefixFormat[primaryClass.program] || "M";
+
     filteredClasses.forEach((cur) => {
       // console.log(cur);
       response.push({
-        name: `${
-          cur.program === "ENGPG"
-            ? "EP"
-            : cur.program === "IGCSE"
-            ? "Year"
-            : cur.program === "A-LVL"
-            ? "Year"
-            : "M"
-        } ${cur.year}${cur.school === "ASSUMPTION" ? "/" : "-"}${cur.classNo}`,
+        name: `${primaryClassPrefix} ${cur.year}${
+          cur.school === "ASSUMPTION" ? "/" : "-"
+        }${cur.classNo}`,
         value: cur._id,
       });
     });
@@ -400,19 +398,15 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
       isPrimaryClass = true;
     }
 
+    const primaryClassPrefix: string =
+      // @ts-ignore
+      classPrefixFormat[primaryClass.program] || "M";
+
     res.status(200).json({
       timetableData,
       timetableTimeLayout: timetableTimeLayout.time,
       isPrimaryClass: isPrimaryClass,
-      className: `${
-        timetableData.program === "ENGPG"
-          ? "EP"
-          : timetableData.program === "IGCSE"
-          ? "Year"
-          : timetableData.program === "A-LVL"
-          ? "Year"
-          : "M"
-      } ${timetableData.year}${
+      className: `${primaryClassPrefix} ${timetableData.year}${
         timetableData.school === "ASSUMPTION" ? "/" : "-"
       }${timetableData.classNo}`,
       timetableFormat,
