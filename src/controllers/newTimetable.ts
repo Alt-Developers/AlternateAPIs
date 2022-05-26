@@ -1,9 +1,20 @@
 import e, { RequestHandler } from "express";
-import { DateTime, NumberUnitLength, Settings } from "luxon";
 import User from "../models/authentication/user";
 import Format from "../models/timetables/Format";
 import Timetables from "../models/timetables/Timetables";
 import UniversalFormat from "../models/timetables/UniversalFormat";
+import newError from "../utilities/newError";
+import validationErrCheck from "../utilities/validationErrChecker";
+import getCurTime from "../utilities/timetables/getCurTime";
+import Holiday from "../models/timetables/Holiday";
+import TimetableRequest from "../models/timetables/TimetableRequest";
+import user from "../models/authentication/user";
+import TimeLayout from "../models/timetables/TimeLayout";
+
+import { DateTime, NumberUnitLength, Settings } from "luxon";
+import identifyCurClass, {
+  schoolTimetables,
+} from "../utilities/timetables/identifyCurClass";
 import {
   AvaliableSchool,
   ClassInfoInterface,
@@ -11,16 +22,6 @@ import {
   TimetableContentInterface,
   TimetableRequestInterface,
 } from "../models/types/modelType";
-import newError from "../utilities/newError";
-import validationErrCheck from "../utilities/validationErrChecker";
-import identifyCurClass, {
-  schoolTimetables,
-} from "../utilities/timetables/identifyCurClass";
-import getCurTime from "../utilities/timetables/getCurTime";
-import Holiday from "../models/timetables/Holiday";
-import TimetableRequest from "../models/timetables/TimetableRequest";
-import user from "../models/authentication/user";
-import TimeLayout from "../models/timetables/TimeLayout";
 
 const classPrefixFormat = {
   ENGPG: "EP",
@@ -249,26 +250,32 @@ export const getClassFromSchool: RequestHandler = async (req, res, next) => {
       "_id classNo program school year"
     );
 
+    const primaryClassId = user.timetables?.primaryClass || "";
+
     const filteredClasses: any[] = [];
     schoolClasses.forEach((cur) => {
       if (!user.timetables?.starred.includes(cur._id)) {
-        filteredClasses.push({
-          _id: cur._id,
-          classNo: cur.classNo,
-          program: cur.program,
-          school: cur.school,
-          year: cur.year,
-        });
+        if (cur._id.toString() !== primaryClassId.toString()) {
+          filteredClasses.push({
+            _id: cur._id,
+            classNo: cur.classNo,
+            program: cur.program,
+            school: cur.school,
+            year: cur.year,
+          });
+        }
       }
     });
 
+    filteredClasses.filter((cur) => {});
+
     const response: any = [];
 
-    const primaryClassPrefix: string =
-      //@ts-ignore
-      classPrefixFormat[primaryClass.program] || "M";
-
     filteredClasses.forEach((cur) => {
+      const primaryClassPrefix: string =
+        //@ts-ignore
+        classPrefixFormat[cur.program] || "M";
+
       // console.log(cur);
       response.push({
         name: `${primaryClassPrefix} ${cur.year}${
@@ -398,15 +405,15 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
       isPrimaryClass = true;
     }
 
-    const primaryClassPrefix: string =
+    const classPrefix: string =
       // @ts-ignore
-      classPrefixFormat[primaryClass.program] || "M";
+      classPrefixFormat[timetableData.program] || "M";
 
     res.status(200).json({
       timetableData,
       timetableTimeLayout: timetableTimeLayout.time,
       isPrimaryClass: isPrimaryClass,
-      className: `${primaryClassPrefix} ${timetableData.year}${
+      className: `${classPrefix} ${timetableData.year}${
         timetableData.school === "ASSUMPTION" ? "/" : "-"
       }${timetableData.classNo}`,
       timetableFormat,
@@ -1184,7 +1191,7 @@ export const getMyClass: RequestHandler = async (req, res, next) => {
       });
     });
 
-    const primaryClassPrefix: string =
+    const classPrefix: string =
       // @ts-ignore
       classPrefixFormat[primaryClass.program] || "M";
 
@@ -1192,7 +1199,7 @@ export const getMyClass: RequestHandler = async (req, res, next) => {
       primaryClass: {
         _id: primaryClass._id,
         school: primaryClass?.school,
-        className: `${primaryClassPrefix} ${primaryClass.year}${
+        className: `${classPrefix} ${primaryClass.year}${
           primaryClass.school === "ASSUMPTION" ? "/" : "-"
         }${primaryClass.classNo}`,
         color: primaryClass.color,
