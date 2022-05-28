@@ -22,6 +22,8 @@ import {
   TimetableContentInterface,
   TimetableRequestInterface,
 } from "../models/types/modelType";
+import formatClassName from "../utilities/timetables/formatClassName";
+import bookToAdd from "../utilities/timetables/bookToAdd";
 
 const classPrefixFormat = {
   ENGPG: "EP",
@@ -565,44 +567,12 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     // @ts-ignore
     if (schoolTimetables[timetableData.school][0] - 100 > now.curTime) {
       if (user.preferredConfig.tmrPref === "book") {
-        const today =
-          days[now.curWeekDay] === "weekend" ? "monday" : days[now.curWeekDay];
-
-        const yesterday =
-          days[now.curWeekDay - 1] === "weekend"
-            ? "friday"
-            : days[now.curWeekDay - 1];
-
-        const tmrDay =
-          days[now.curWeekDay + 1] === "weekend"
-            ? "monday"
-            : days[now.curWeekDay + 1];
-
-        const toAdd: any = [
-          //@ts-ignore
-          ...new Set(timetableData.timetableContent[today]),
-        ].map(
-          (cur) =>
-            //@ts-ignore
-            formattedFormat.classCode[user.preferredConfig.language][cur]
+        const { toAdd, toRemove } = bookToAdd(
+          now,
+          user.preferredConfig.language,
+          formattedFormat,
+          timetableData
         );
-
-        const toAddNameArr = toAdd.map(
-          (cur: { icon: string; name: string }) => cur.name
-        );
-
-        const toRemove: any = [
-          ...new Set(
-            // @ts-ignore
-            timetableData.timetableContent[yesterday]
-          ),
-        ]
-          .map(
-            (cur) =>
-              //@ts-ignore
-              formattedFormat.classCode[user.preferredConfig.language][cur]
-          )
-          .filter((cur: any) => !toAddNameArr.includes(cur.name));
 
         return res.status(200).json({
           curClass: "FTD",
@@ -617,43 +587,6 @@ export const getGlance: RequestHandler = async (req, res, next) => {
           prepType: "book",
           prep: {
             toRemove: toRemove,
-            toAdd: toAdd,
-          },
-        });
-      } else if (user.preferredConfig.tmrPref === "subject") {
-        const today =
-          days[now.curWeekDay] === "weekend" ? "monday" : days[now.curWeekDay];
-
-        const yesterday =
-          days[now.curWeekDay - 1] === "weekend"
-            ? "friday"
-            : days[now.curWeekDay - 1];
-
-        const tmrDay =
-          days[now.curWeekDay + 1] === "weekend"
-            ? "monday"
-            : days[now.curWeekDay + 1];
-
-        const toAdd: any =
-          //@ts-ignore
-          [...new Set(timetableData.timetableContent[today])].map(
-            (cur) =>
-              //@ts-ignore
-              formattedFormat.classCode[user.preferredConfig.language][cur]
-          );
-
-        return res.status(200).json({
-          curClass: "FTD",
-          nextClass: "FTD",
-          format: {
-            classCode: {
-              EN: universalFormat.universalCodes.EN,
-              TH: universalFormat.universalCodes.TH,
-            },
-          },
-          refresher: [`${processedTimetableTime[0] + 50}`],
-          prepType: "subject",
-          prep: {
             toAdd: toAdd,
           },
         });
@@ -767,6 +700,45 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     //   },
     // });
 
+    if (classIndex.classIndex === -2) {
+      if (user.preferredConfig.tmrPref === "book") {
+        const { toAdd, toRemove } = bookToAdd(
+          now,
+          user.preferredConfig.language,
+          formattedFormat,
+          timetableData
+        );
+
+        return res.status(200).json({
+          curClass: "FTD",
+          nextClass: "FTD",
+          format: formattedFormat,
+          refresher: refersherData,
+          prepType: "book",
+          prep: {
+            toRemove: toRemove,
+            toAdd: toAdd,
+          },
+          time: {
+            thisClassTime,
+            nextClassTime,
+          },
+        });
+      } else {
+        return res.status(200).json({
+          curClass: "FTD",
+          nextClass: "FTD",
+          format: formattedFormat,
+          refresher: refersherData,
+          prepType: "hide",
+          time: {
+            thisClassTime,
+            nextClassTime,
+          },
+        });
+      }
+    }
+
     if (now.curDay === "weekend") {
       return res.status(200).json({
         curClass: "WKN",
@@ -794,106 +766,7 @@ export const getGlance: RequestHandler = async (req, res, next) => {
         },
       });
     }
-    if (classIndex.classIndex === -2) {
-      if (user.preferredConfig.tmrPref === "book") {
-        const today =
-          days[now.curWeekDay] === "weekend" ? "friday" : days[now.curWeekDay];
 
-        const yesterday =
-          days[now.curWeekDay - 1] === "weekend"
-            ? "friday"
-            : days[now.curWeekDay - 1];
-
-        const tmrDay =
-          days[now.curWeekDay + 1] === "weekend"
-            ? "monday"
-            : days[now.curWeekDay + 1];
-
-        const toAdd: any =
-          //@ts-ignore
-          [
-            ...new Set(
-              // @ts-ignore
-              timetableData.timetableContent[tmrDay]
-            ),
-          ].map(
-            (cur) =>
-              //@ts-ignore
-              formattedFormat.classCode[user.preferredConfig.language][cur]
-          );
-
-        const toAddNameArr = toAdd.map(
-          (cur: { icon: string; name: string }) => cur.name
-        );
-
-        const toRemove: any = [
-          ...new Set(
-            // @ts-ignore
-            timetableData.timetableContent[today]
-          ),
-        ]
-          .map(
-            (cur) =>
-              //@ts-ignore
-              formattedFormat.classCode[user.preferredConfig.language][cur]
-          )
-          .filter((cur) => !toAddNameArr.includes(cur.name));
-
-        return res.status(200).json({
-          curClass: "FTD",
-          nextClass: "FTD",
-          format: formattedFormat,
-          refresher: refersherData,
-          prepType: "book",
-          prep: {
-            toRemove: toRemove,
-            toAdd: toAdd,
-          },
-          time: {
-            thisClassTime,
-            nextClassTime,
-          },
-        });
-      } else if (user.preferredConfig.tmrPref === "subject") {
-        const toAdd: any = [
-          ...new Set(
-            //@ts-ignore
-            timetableData.timetableContent[days[now.curWeekDay + 1]]
-          ),
-        ].map(
-          (cur) =>
-            //@ts-ignore
-            formattedFormat.classCode[user.preferredConfig.language][cur]
-        );
-
-        return res.status(200).json({
-          curClass: "FTD",
-          nextClass: "FTD",
-          format: formattedFormat,
-          refresher: refersherData,
-          prepType: "subject",
-          prep: {
-            toAdd: toAdd,
-          },
-          time: {
-            thisClassTime,
-            nextClassTime,
-          },
-        });
-      } else {
-        return res.status(200).json({
-          curClass: "FTD",
-          nextClass: "FTD",
-          format: formattedFormat,
-          refresher: refersherData,
-          prepType: "hide",
-          time: {
-            thisClassTime,
-            nextClassTime,
-          },
-        });
-      }
-    }
     if (classIndex.classIndex === -70) {
       // console.log(classIndex.nextClassIndex);
       //@ts-ignore
