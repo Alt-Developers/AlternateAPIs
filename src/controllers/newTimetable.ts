@@ -567,7 +567,7 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     // @ts-ignore
     if (schoolTimetables[timetableData.school][0] - 100 > now.curTime) {
       if (user.preferredConfig.tmrPref === "book") {
-        const { toAdd, toRemove } = bookToAdd(
+        const { toAdd, toRemove, alrInBag } = bookToAdd(
           now,
           user.preferredConfig.language,
           formattedFormat,
@@ -588,6 +588,7 @@ export const getGlance: RequestHandler = async (req, res, next) => {
           prep: {
             toRemove: toRemove,
             toAdd: toAdd,
+            alrInBag: alrInBag,
           },
         });
       } else {
@@ -702,7 +703,7 @@ export const getGlance: RequestHandler = async (req, res, next) => {
 
     if (classIndex.classIndex === -2) {
       if (user.preferredConfig.tmrPref === "book") {
-        const { toAdd, toRemove } = bookToAdd(
+        const { toAdd, toRemove, alrInBag } = bookToAdd(
           now,
           user.preferredConfig.language,
           formattedFormat,
@@ -718,6 +719,7 @@ export const getGlance: RequestHandler = async (req, res, next) => {
           prep: {
             toRemove: toRemove,
             toAdd: toAdd,
+            alrInBag: alrInBag,
           },
           time: {
             thisClassTime,

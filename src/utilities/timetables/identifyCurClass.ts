@@ -11,7 +11,18 @@ export const schoolTimetables = {
   ASSUMPTION: [830, 920, 1020, 1210, 1300, 1400, 1450, 1540],
   BASSUMPTION: [1110, 1210],
   BESSENCE: [1200, 1300],
+
+  SATHIT_PATHUMWAN: [810, 900, 950, 1040, 1220, 1310, 1400, 1450, 1530],
+  BSATHIT_PATHUMWAN: [1120, 1220],
 };
+
+const schoolList = [
+  "NEWTON",
+  "ESSENCE",
+  "ASSUMPTION",
+  "ESSENCEP",
+  "SATHIT_PATHUMWAN",
+];
 
 export default (time: number, school: string) => {
   let classIndex: number = -1;
@@ -21,7 +32,8 @@ export default (time: number, school: string) => {
     school !== "NEWTON" &&
     school !== "ESSENCE" &&
     school !== "ASSUMPTION" &&
-    school !== "ESSENCEP"
+    school !== "ESSENCEP" &&
+    school !== "SATHIT_PATHUMWAN"
   ) {
     return newError(
       500,
@@ -86,6 +98,14 @@ export default (time: number, school: string) => {
       schoolTimetables.BESSENCEP[0] <= time &&
       time < schoolTimetables.BESSENCEP[1] &&
       school === "ESSENCEP"
+    ) {
+      classIndex = -70;
+      nextClassIndex = 4;
+      isConditional = true;
+    } else if (
+      schoolTimetables.BSATHIT_PATHUMWAN[0] <= time &&
+      time < schoolTimetables.BSATHIT_PATHUMWAN[1] &&
+      school === "SATHIT_PATHUMWAN"
     ) {
       classIndex = -70;
       nextClassIndex = 4;

@@ -67,18 +67,27 @@ const bookToAdd = (
     );
 
     const finalToAdd = [];
+    const finalAlrInBag = [];
 
     for (const className of toAdd) {
       const formattedPeriod = formatClassName(className, lang, formattedFormat);
 
-      finalToAdd.push({
-        name: formattedPeriod.name,
-        icon: formattedPeriod.icon,
-        status: alrInBag.includes(className) ? "inBag" : "toAdd",
-      });
+      if (alrInBag.includes(className)) {
+        finalAlrInBag.push({
+          name: formattedPeriod.name,
+          icon: formattedPeriod.icon,
+          status: alrInBag.includes(className) ? "inBag" : "toAdd",
+        });
+      } else {
+        finalToAdd.push({
+          name: formattedPeriod.name,
+          icon: formattedPeriod.icon,
+          status: alrInBag.includes(className) ? "inBag" : "toAdd",
+        });
+      }
     }
 
-    return { toAdd: finalToAdd, toRemove: toRemove };
+    return { toAdd: finalToAdd, toRemove: toRemove, alrInBag: finalAlrInBag };
   } else {
     const today =
       days[now.curWeekDay] === "weekend" ? "monday" : days[now.curWeekDay];
@@ -124,18 +133,26 @@ const bookToAdd = (
     );
 
     const finalToAdd = [];
+    const finalAlrInBag = [];
 
     for (const className of toAdd) {
       const formattedPeriod = formatClassName(className, lang, formattedFormat);
 
-      finalToAdd.push({
-        name: formattedPeriod.name,
-        icon: formattedPeriod.icon,
-        status: alrInBag.includes(className) ? "inBag" : "toAdd",
-      });
+      if (alrInBag.includes(className)) {
+        finalAlrInBag.push({
+          name: formattedPeriod.name,
+          icon: formattedPeriod.icon,
+          status: alrInBag.includes(className) ? "inBag" : "toAdd",
+        });
+      } else {
+        finalToAdd.push({
+          name: formattedPeriod.name,
+          icon: formattedPeriod.icon,
+          status: alrInBag.includes(className) ? "inBag" : "toAdd",
+        });
+      }
     }
-
-    return { toAdd: finalToAdd, toRemove: toRemove };
+    return { toAdd: finalToAdd, toRemove: toRemove, alrInBag: finalAlrInBag };
   }
 };
 

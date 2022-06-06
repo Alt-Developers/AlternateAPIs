@@ -137,6 +137,7 @@ export const login: RequestHandler = async (req, res, next) => {
     );
 
     res.status(200).json({
+      accType: user.accType,
       token: token,
       isNewUser: user.timetables?.primaryClass ? false : true,
     });
