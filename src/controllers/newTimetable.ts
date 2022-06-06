@@ -1244,3 +1244,121 @@ export const newTimetableTimeLayout: RequestHandler = async (
     next(error);
   }
 };
+
+export const previewGetTimetable: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
+
+    const classId = req.params.classId;
+
+    const timetableData = await Timetables.findById(classId).select(
+      "-createdAt -updatedAt -createdBy"
+    );
+
+    if (!timetableData)
+      return newError(
+        404,
+        `Timetable Not Found|Can't find timetable with the id "${classId}"`,
+        "prompt"
+      );
+
+    const timetableTimeLayout = await TimeLayout.findOne({
+      school: timetableData.school,
+      program: timetableData.program,
+    });
+    if (!timetableTimeLayout)
+      return newError(
+        404,
+        "Time Layout Not Found|Critical Error Has Occurred Timetable Time Layout Not Found.",
+        "important"
+      );
+
+    const timetableFormat = await Format.findOne({
+      school: timetableData.school,
+      programCode: timetableData.program,
+    }).select("-_id -programName -programCode -school -__v");
+    if (!timetableFormat)
+      return newError(
+        404,
+        `Format Not Found|Can't find Format of the school ${timetableData.school} program ${timetableData.program}`,
+        "prompt"
+      );
+
+    const now = getCurTime();
+    const curClass = identifyCurClass(now.curTime, timetableData.school);
+    const isConditional = now.curDay === "weekend";
+
+    let classIndex: number = 0;
+
+    let [curClassName, nextClassName] = ["FTD", "FTD"];
+    if (!isConditional) {
+      curClassName =
+        // @ts-ignore
+        timetableData.timetableContent[now.curDay][+curClass.classIndex] ||
+        "FTD";
+
+      nextClassName =
+        // @ts-ignore
+        timetableData.timetableContent[now.curDay][+curClass.nextClassIndex];
+    }
+    // console.log({ curClassName, nextClassName });
+
+    let previous: string;
+    let thisClassIndex: number = -1;
+
+    const processedTimetableTodayData =
+      // @ts-ignore
+      timetableData.timetableContent[now.curDay] || [];
+
+    // @ts-ignore
+    processedTimetableTodayData.push("FTD");
+
+    // @ts-ignore
+    processedTimetableTodayData.forEach((cur) => {
+      // console.log({ cur, curClassName, previous });
+      if (cur !== curClassName && cur !== previous) classIndex++;
+      previous = cur;
+      if (cur === curClassName && !isConditional) {
+        // console.log("Found Index", classIndex);
+        thisClassIndex = classIndex;
+      }
+    });
+
+    // console.log(thisClassIndex);
+
+    // console.log(curClass);
+    // @ts-ignore
+    const processedTimetableTime = schoolTimetables[timetableData.school].map(
+      (cur: number) => {
+        return cur + "00";
+      }
+    );
+    // @ts-ignore
+    const processedTimetableBreakTime = schoolTimetables[
+      `B${timetableData.school}`
+    ].map((cur: number) => {
+      return cur + "00";
+    });
+
+    res.status(200).json({
+      timetableData,
+      timetableTimeLayout: timetableTimeLayout.time,
+      className: toClassName({
+        school: timetableData.school,
+        program: timetableData.program,
+        year: timetableData.year,
+        classNo: timetableData.classNo,
+      }),
+      timetableFormat,
+      identifier: {
+        curClass: thisClassIndex,
+        today: now.curWeekDay,
+      },
+      refresher: [
+        ...new Set([...processedTimetableTime, ...processedTimetableBreakTime]),
+      ],
+    });
+  } catch (error) {
+    next(error);
+  }
+};

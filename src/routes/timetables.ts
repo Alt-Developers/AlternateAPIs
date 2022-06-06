@@ -34,4 +34,10 @@ router.post(
   systemController.newTimetableTimeLayout
 );
 
+// Preview Endpoint
+router.get(
+  "/previewGetTimetable/:classId",
+  systemController.previewGetTimetable
+);
+
 export default router;
