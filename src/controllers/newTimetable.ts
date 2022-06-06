@@ -269,7 +269,12 @@ export const getClassFromSchool: RequestHandler = async (req, res, next) => {
 
     filteredClasses.forEach((cur) => {
       response.push({
-        name: toClassName(cur.school, cur.program, cur.year, cur.classNo),
+        name: toClassName({
+          school: cur.school,
+          program: cur.program,
+          year: cur.year,
+          classNo: cur.classNo,
+        }),
         value: cur._id,
       });
     });
@@ -398,12 +403,12 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
       timetableData,
       timetableTimeLayout: timetableTimeLayout.time,
       isPrimaryClass: isPrimaryClass,
-      className: toClassName(
-        timetableData.school,
-        timetableData.program,
-        timetableData.year,
-        timetableData.classNo
-      ),
+      className: toClassName({
+        school: timetableData.school,
+        program: timetableData.program,
+        year: timetableData.year,
+        classNo: timetableData.classNo,
+      }),
       timetableFormat,
       identifier: {
         curClass: thisClassIndex,
@@ -1042,7 +1047,12 @@ export const getMyClass: RequestHandler = async (req, res, next) => {
       formattedData.push({
         _id: cur.id,
         school: cur.school,
-        className: toClassName(cur.school, cur.program, cur.year, cur.classNo),
+        className: toClassName({
+          school: cur.school,
+          program: cur.program,
+          year: cur.year,
+          classNo: cur.classNo,
+        }),
         color: cur.color,
       });
     });
@@ -1051,12 +1061,12 @@ export const getMyClass: RequestHandler = async (req, res, next) => {
       primaryClass: {
         _id: primaryClass._id,
         school: primaryClass?.school,
-        className: toClassName(
-          primaryClass.school,
-          primaryClass.program,
-          primaryClass.year,
-          primaryClass.classNo
-        ),
+        className: toClassName({
+          school: primaryClass.school,
+          program: primaryClass.program,
+          year: primaryClass.year,
+          classNo: primaryClass.classNo,
+        }),
         color: primaryClass.color,
       },
       starredClass: formattedData,

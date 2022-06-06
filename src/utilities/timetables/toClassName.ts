@@ -10,14 +10,20 @@ const specialDividers = {
   A_LVL: "-",
   PREIG: "-",
   MOEPG: "-",
+  SAPPG: "-",
 };
 
-const toClassName = (
-  school: string,
-  program: string,
-  year: string,
-  classNo: string
-): string => {
+const toClassName = ({
+  school,
+  program,
+  year,
+  classNo,
+}: {
+  school: string;
+  program: string;
+  year: string;
+  classNo: string;
+}): string => {
   const classPrefix: string = specialPrefixes[program] || "M";
   const divider: string = specialDividers[program] || "/";
 
