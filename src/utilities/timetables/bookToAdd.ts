@@ -66,8 +66,8 @@ const bookToAdd = (
       formattedFormat
     );
 
-    const finalToAdd = [];
-    const finalAlrInBag = [];
+    const finalToAdd: { name: any; icon: any; status: any }[] = [];
+    const finalAlrInBag: { name: any; icon: any; status: any }[] = [];
 
     for (const className of toAdd) {
       const formattedPeriod = formatClassName(className, lang, formattedFormat);
@@ -132,8 +132,8 @@ const bookToAdd = (
       formattedFormat
     );
 
-    const finalToAdd = [];
-    const finalAlrInBag = [];
+    const finalToAdd: { name: any; icon: any; status: any }[] = [];
+    const finalAlrInBag: { name: any; icon: any; status: any }[] = [];
 
     for (const className of toAdd) {
       const formattedPeriod = formatClassName(className, lang, formattedFormat);

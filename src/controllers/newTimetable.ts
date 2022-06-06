@@ -24,13 +24,7 @@ import {
 } from "../models/types/modelType";
 import formatClassName from "../utilities/timetables/formatClassName";
 import bookToAdd from "../utilities/timetables/bookToAdd";
-
-const classPrefixFormat = {
-  ENGPG: "EP",
-  IGCSE: "Year",
-  A_LVL: "Year",
-  PREIG: "Year",
-};
+import toClassName from "../utilities/timetables/toClassName";
 
 const days = [
   "weekend",
@@ -274,15 +268,8 @@ export const getClassFromSchool: RequestHandler = async (req, res, next) => {
     const response: any = [];
 
     filteredClasses.forEach((cur) => {
-      const primaryClassPrefix: string =
-        //@ts-ignore
-        classPrefixFormat[cur.program] || "M";
-
-      // console.log(cur);
       response.push({
-        name: `${primaryClassPrefix} ${cur.year}${
-          cur.school === "ASSUMPTION" ? "/" : "-"
-        }${cur.classNo}`,
+        name: toClassName(cur.school, cur.program, cur.year, cur.classNo),
         value: cur._id,
       });
     });
@@ -407,17 +394,16 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
       isPrimaryClass = true;
     }
 
-    const classPrefix: string =
-      // @ts-ignore
-      classPrefixFormat[timetableData.program] || "M";
-
     res.status(200).json({
       timetableData,
       timetableTimeLayout: timetableTimeLayout.time,
       isPrimaryClass: isPrimaryClass,
-      className: `${classPrefix} ${timetableData.year}${
-        timetableData.school === "ASSUMPTION" ? "/" : "-"
-      }${timetableData.classNo}`,
+      className: toClassName(
+        timetableData.school,
+        timetableData.program,
+        timetableData.year,
+        timetableData.classNo
+      ),
       timetableFormat,
       identifier: {
         curClass: thisClassIndex,
@@ -1053,30 +1039,24 @@ export const getMyClass: RequestHandler = async (req, res, next) => {
     const formattedData: any[] = [];
 
     starredClasses.forEach((cur) => {
-      // @ts-ignore
-      const thisClassPrefix: string = classPrefixFormat[cur.program] || "M";
-
       formattedData.push({
         _id: cur.id,
         school: cur.school,
-        className: `${thisClassPrefix} ${cur.year}${
-          cur.school === "ASSUMPTION" ? "/" : "-"
-        }${cur.classNo}`,
+        className: toClassName(cur.school, cur.program, cur.year, cur.classNo),
         color: cur.color,
       });
     });
-
-    const classPrefix: string =
-      // @ts-ignore
-      classPrefixFormat[primaryClass.program] || "M";
 
     res.status(200).json({
       primaryClass: {
         _id: primaryClass._id,
         school: primaryClass?.school,
-        className: `${classPrefix} ${primaryClass.year}${
-          primaryClass.school === "ASSUMPTION" ? "/" : "-"
-        }${primaryClass.classNo}`,
+        className: toClassName(
+          primaryClass.school,
+          primaryClass.program,
+          primaryClass.year,
+          primaryClass.classNo
+        ),
         color: primaryClass.color,
       },
       starredClass: formattedData,
