@@ -27,6 +27,8 @@ This API is used for most of our latest products, like Timetables, Central Authe
 
 ## **Features** 📝
 
+**_Current Version_ | 5.3** <br/>
+
 **_Auth_**
 
 - Login
@@ -98,7 +100,7 @@ Basically this is the new timetables is the re-written version of Timetables.
 
 ## **Versions** 📜
 
-**_Current Version_ | 5.2** <br/>
+**_Current Version_ | 5.3** <br/>
 
 **_Previous Versions_**
 

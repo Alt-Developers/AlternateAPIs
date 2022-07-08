@@ -5,6 +5,7 @@ declare global {
   namespace Express {
     interface Request {
       [key: string]: any;
+      user: UserInterface;
     }
   }
   interface Error {
@@ -16,7 +17,14 @@ declare global {
   }
 }
 
-export type AvaliableSchool = "ASSUMPTION" | "NEWTON" | "ESSENCE" | string;
+export type AvaliableSchool =
+  | "ASSUMPTION"
+  | "NEWTON"
+  | "ESSENCE"
+  | "ESSENCEP"
+  | "SATHIT_PRATHUMWAN"
+  | "ASSUMPTION_THON"
+  | string;
 
 export type ErrorRequestHandler = (
   err: any,
@@ -56,6 +64,7 @@ export interface UserInterface extends Document {
   preferredColor: string;
   timetables?: {
     preferredColor: string;
+    modalId: ObjectId[];
     primaryClass: ObjectId;
     starred: ObjectId[];
     created: ObjectId[];
@@ -66,6 +75,8 @@ export interface UserInterface extends Document {
     showCovid: "showCov" | "hideCov" | string;
     tmrPref: "subject" | "book" | "hide" | string;
   };
+  passwordChangedAt?: Date;
+  status: boolean;
 }
 
 export interface UnlockedObjectInterface extends Object {
@@ -129,7 +140,7 @@ export interface UniversalCodeInterface extends Document {
 
 export interface HolidayInterface extends Document {
   type: "specific" | "public";
-  school: "ALL" | "ASSUMPTION" | "NEWTON" | "ESSENCE" | string;
+  school: "ALL" | AvaliableSchool | string;
   name: {
     TH: string;
     EN: string;
@@ -161,4 +172,13 @@ export interface TimeLayoutInterface extends Document {
   school: AvaliableSchool;
   program: string;
   time: string[];
+}
+
+export interface ModalDataInterface {
+  modalName: string;
+  displayMode: "SCHOOL" | "ALL" | "SPECIAL";
+  displayTo?: AvaliableSchool;
+  header: string;
+  message: string;
+  type: "important" | "prompt" | string;
 }

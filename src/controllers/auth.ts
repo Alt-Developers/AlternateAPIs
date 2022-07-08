@@ -132,8 +132,12 @@ export const login: RequestHandler = async (req, res, next) => {
       {
         email: user.email,
         userId: user._id,
+        iat: new Date().getTime(),
       },
-      process.env.JWT_KEY!
+      process.env.JWT_KEY!,
+      {
+        issuer: "ss-apis",
+      }
     );
 
     res.status(200).json({
@@ -151,7 +155,7 @@ export const getUserData: RequestHandler = async (req, res, next) => {
     validationErrCheck(req);
 
     const userId = req.userId;
-    const user = await User.findById(userId);
+    const user = req.user;
     if (!user) return newError(404, "User not found.", "user");
 
     res.status(200).json({
@@ -215,7 +219,7 @@ export const editAccount: RequestHandler = async (req, res, next) => {
     const lastName = req.body.lastName;
     const color = req.body.color;
 
-    const user = await User.findById(userId);
+    const user = req.user;
     if (!user)
       return newError(
         404,
@@ -258,15 +262,15 @@ export const editAccount: RequestHandler = async (req, res, next) => {
 };
 
 export const editPassword: RequestHandler = async (req, res, next) => {
-  validationErrCheck(req);
-
-  const userId = req.userId;
-  const newPassword = req.body.newPassword;
-  const ConfirmNewPassword = req.body.confirmNewPassword;
-  const password = req.body.password;
-
   try {
-    const user = await User.findById(userId);
+    validationErrCheck(req);
+
+    const userId = req.userId;
+    const newPassword = req.body.newPassword;
+    const ConfirmNewPassword = req.body.confirmNewPassword;
+    const password = req.body.password;
+
+    const user = req.user;
     if (!user)
       return newError(
         404,
@@ -293,6 +297,7 @@ export const editPassword: RequestHandler = async (req, res, next) => {
     const hashedNewPassword = await bcrypt.hash(newPassword, 12);
 
     user.password = hashedNewPassword;
+    user.passwordChangedAt = new Date();
     const result = await user.save();
     res.status(201).json({
       modal: true,
@@ -315,7 +320,7 @@ export const editConfig: RequestHandler = async (req, res, next) => {
     const showCovid: string = req.body.showCovid;
     const tmrPref: string = req.body.tmrPref;
 
-    const user = await User.findById(userId);
+    const user = req.user;
     if (!user) return newError(404, "User not found.", "user");
 
     if (dateTime) user.preferredConfig.dateTime = dateTime;

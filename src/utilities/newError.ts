@@ -1,4 +1,4 @@
-let modalType = ["validation", "user"];
+let modalType = ["validation", "user", "important"];
 
 const newError = (
   code: number,

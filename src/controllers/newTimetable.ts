@@ -19,12 +19,14 @@ import {
   AvaliableSchool,
   ClassInfoInterface,
   HolidayInterface,
+  ModalDataInterface,
   TimetableContentInterface,
   TimetableRequestInterface,
 } from "../models/types/modelType";
 import formatClassName from "../utilities/timetables/formatClassName";
 import bookToAdd from "../utilities/timetables/bookToAdd";
 import toClassName from "../utilities/timetables/toClassName";
+import Modal from "../models/timetables/Modal";
 
 const days = [
   "weekend",
@@ -42,7 +44,7 @@ export const newTimetable: RequestHandler = async (req, res, next) => {
     validationErrCheck(req);
 
     const userId = req.userId;
-    const user = await User.findById(userId);
+    const user = req.user;
     if (!user)
       return newError(
         404,
@@ -141,7 +143,7 @@ export const newFormat: RequestHandler = async (req, res, next) => {
     validationErrCheck(req);
 
     const userId = req.userId;
-    const user = await User.findById(userId);
+    const user = req.user;
     if (!user)
       return newError(
         404,
@@ -232,13 +234,7 @@ export const getClassFromSchool: RequestHandler = async (req, res, next) => {
     validationErrCheck(req);
 
     const userId = req.userId;
-    const user = await User.findById(userId);
-    if (!user)
-      return newError(
-        404,
-        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
-        "important"
-      );
+    const user = req.user;
 
     const school = req.query.school;
 
@@ -294,13 +290,7 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
     const classId = req.params.classId;
     const userId = req.userId;
 
-    const user = await User.findById(userId);
-    if (!user)
-      return newError(
-        404,
-        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
-        "important"
-      );
+    const user = req.user;
 
     const timetableData = await Timetables.findById(classId).select(
       "-createdAt -updatedAt -createdBy"
@@ -402,6 +392,8 @@ export const getTimetable: RequestHandler = async (req, res, next) => {
     res.status(200).json({
       timetableData,
       timetableTimeLayout: timetableTimeLayout.time,
+      timetableColor: timetableData.color,
+
       isPrimaryClass: isPrimaryClass,
       className: toClassName({
         school: timetableData.school,
@@ -429,13 +421,7 @@ export const getGlance: RequestHandler = async (req, res, next) => {
     const userId = req.userId;
     const now = getCurTime();
 
-    const user = await User.findById(userId);
-    if (!user)
-      return newError(
-        404,
-        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
-        "important"
-      );
+    const user = req.user;
 
     if (!user.timetables?.primaryClass) {
       return res.status(200).json({
@@ -900,13 +886,7 @@ export const registerUserClass: RequestHandler = async (req, res, next) => {
     const classId = req.body.classId;
     const isPrimary = req.body.isPrimary;
 
-    const user = await User.findById(userId);
-    if (!user)
-      return newError(
-        404,
-        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
-        "important"
-      );
+    const user = req.user;
 
     const timetableData = await Timetables.findById(classId);
     if (!timetableData)
@@ -983,13 +963,7 @@ export const removeClassFromUser: RequestHandler = async (req, res, next) => {
 
     const classId = req.body.classId;
 
-    const user = await User.findById(userId);
-    if (!user)
-      return newError(
-        404,
-        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
-        "important"
-      );
+    const user = req.user;
 
     if (!user.timetables?.starred.includes(classId)) {
       return newError(
@@ -1020,13 +994,7 @@ export const getMyClass: RequestHandler = async (req, res, next) => {
 
     const userId = req.userId;
 
-    const user = await User.findById(userId);
-    if (!user)
-      return newError(
-        404,
-        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
-        "important"
-      );
+    const user = req.user;
 
     const primaryClass = await Timetables.findById(
       user.timetables?.primaryClass
@@ -1083,13 +1051,7 @@ export const setHoliday: RequestHandler = async (req, res, next) => {
     const { type, name, desc, date, school } = req.body;
 
     const userId = req.userId;
-    const user = await User.findById(userId);
-    if (!user)
-      return newError(
-        404,
-        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
-        "important"
-      );
+    const user = req.user;
 
     if (user.accType !== "developer")
       return newError(
@@ -1135,13 +1097,7 @@ export const uploadTimetable: RequestHandler = async (req, res, next) => {
     validationErrCheck(req);
 
     const userId = req.userId;
-    const user = await User.findById(userId);
-    if (!user)
-      return newError(
-        404,
-        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
-        "important"
-      );
+    const user = req.user;
     if (!req.file)
       return newError(
         422,
@@ -1208,13 +1164,7 @@ export const newTimetableTimeLayout: RequestHandler = async (
     validationErrCheck(req);
 
     const userId = req.userId;
-    const user = await User.findById(userId);
-    if (!user)
-      return newError(
-        404,
-        "Critical Error Has Occured|Please contect system administrator immediately. CODE[USR0001]",
-        "important"
-      );
+    const user = req.user;
 
     if (user.accType !== "developer")
       return newError(
@@ -1342,6 +1292,7 @@ export const previewGetTimetable: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({
       timetableData,
+      timetableColor: timetableData.color,
       timetableTimeLayout: timetableTimeLayout.time,
       className: toClassName({
         school: timetableData.school,
@@ -1358,6 +1309,92 @@ export const previewGetTimetable: RequestHandler = async (req, res, next) => {
         ...new Set([...processedTimetableTime, ...processedTimetableBreakTime]),
       ],
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMyModal: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
+    const userId = req.userId;
+    const user = req.user;
+    let modalData: ModalDataInterface | null | undefined;
+    if (!user.timetables)
+      return newError(
+        400,
+        "User Did not subscribe to the SS APIs Tiemtables Service | Contact system administrator to reslove CODE[DBT0001]",
+        "important"
+      );
+    const userTimetable = await Timetables.findById(
+      user.timetables?.primaryClass
+    );
+    if (!userTimetable) return newError(404, "User Have no primary Class");
+    // Find User specific Modal
+    modalData = await Modal.findOne(user.timetables.modalId[0]);
+    if (!modalData) {
+      // find School specific modal
+      modalData = await Modal.findOne({
+        displayMode: "SCHOOL",
+        displayTo: userTimetable.school,
+      });
+    }
+    if (!modalData) {
+      // Find public modal
+      modalData = await Modal.findOne({ displayMode: "ALL" });
+    }
+    if (modalData) {
+      return res.json({
+        isModal: true,
+        modalContent: {
+          header: modalData.header ?? "Fallback|Error",
+          message:
+            modalData.message ??
+            "Fallback Error please contact system administrator CODE[GMM0001]",
+        },
+        metaData: {
+          displayTo: modalData.displayTo ?? "ALL",
+          displayMode: modalData.displayMode,
+        },
+      });
+    }
+    if (!modalData) {
+      return res.json({
+        isModal: false,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createNewModal: RequestHandler = async (req, res, next) => {
+  try {
+    validationErrCheck(req);
+    const userId = req.userId;
+    const user = req.user;
+    if (user.accType !== "developer")
+      return newError(
+        403,
+        "Forbidden|You do not have sufficient rights to access this resource",
+        "user"
+      );
+    const header: string = req.body.header;
+    const message: string = req.body.message;
+    const displayMode: "SCHOOL" | "ALL" | "SPECIAL" = req.body.displayMode;
+    const displayTo: AvaliableSchool | undefined | null = req.body.displayTo;
+    const displayType: "prompt" | "important" | string = req.body.type;
+    const modalName: string = req.body.modalName;
+    const newModal = new Modal({
+      modalName: modalName,
+      header: header,
+      message: message,
+      displayMode: displayMode,
+      displayTo: displayTo,
+      type: displayType,
+    });
+    const result = newModal.save();
+    return res.json(result);
   } catch (error) {
     next(error);
   }

@@ -31,6 +31,7 @@ const userSchema = new Schema(
       primaryClass: Types.ObjectId,
       starred: [Types.ObjectId],
       created: [Types.ObjectId],
+      modalId: [Types.ObjectId],
     },
     avatar: {
       type: String,
@@ -46,6 +47,8 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    passwordChangedAt: { type: Date, required: false },
+    status: { type: Boolean, required: true, default: true },
   },
   { timestamps: true }
 );

@@ -39,5 +39,7 @@ router.get(
   "/previewGetTimetable/:classId",
   systemController.previewGetTimetable
 );
+router.get("/getMyModal", dCrypt, systemController.getMyModal);
+router.post("/createNewModal", dCrypt, systemController.createNewModal);
 
 export default router;

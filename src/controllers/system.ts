@@ -10,7 +10,7 @@ export const getPlayersList: Middleware = async (req, res, next) => {
   const userId = req.userId;
 
   try {
-    const user = await User.findById(userId);
+    const user = req.user;
 
     if (!user) return newError(404, "User not found.");
 
@@ -35,7 +35,7 @@ export const getPlayersList: Middleware = async (req, res, next) => {
 export const getRealNameList: Middleware = async (req, res, next) => {
   const userId = req.userId;
   try {
-    const user = await User.findById(userId);
+    const user = req.user;
 
     if (!user) return newError(404, "User not found.");
 
@@ -71,7 +71,7 @@ export const addPlayer: Middleware = async (req, res, next) => {
       });
     }
 
-    const user = await User.findById(userId);
+    const user = req.user;
 
     if (!user) return newError(404, "User not found.");
 
@@ -117,7 +117,7 @@ export const deletePlayer: Middleware = async (req, res, next) => {
 
     const player = await Player.findById(playerId);
 
-    const user = await User.findById(userId);
+    const user = req.user;
 
     if (!player || !user) return newError(404, "User / Player not found");
 
@@ -149,7 +149,7 @@ export const deletePlayer: Middleware = async (req, res, next) => {
 export const getUserPlayer: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.userId;
-    const user = await User.findById(userId);
+    const user = req.user;
     if (!user) return newError(404, "User not found.");
     const populatedUser = await User.findById(userId).populate(
       "system13",

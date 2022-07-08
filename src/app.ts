@@ -13,7 +13,7 @@ env.config({ path: "./.env" });
 import * as errorController from "./controllers/errors";
 import systemRoutes from "./routes/system";
 import authRoutes from "./routes/auth";
-import expensesRoutes from "./routes/expenses";
+// import expensesRoutes from "./routes/expenses";
 import timetablesRoutes from "./routes/timetables";
 import socket from "./socket";
 import * as multerConfig from "./multerConfig";
@@ -41,7 +41,7 @@ app.use(cors());
 // Find Endpoint
 app.use("/images", express.static("./images"));
 app.use("/icons", express.static("./icons"));
-app.use("/expenses", expensesRoutes);
+// app.use("/expenses", expensesRoutes);
 app.use("/auth", authRoutes);
 app.use("/system13", systemRoutes);
 app.use("/timetables", timetablesRoutes);

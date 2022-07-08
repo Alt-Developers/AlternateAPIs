@@ -20,8 +20,6 @@ export const centralError: ErrorRequestHandler = (
 
   if (req.file) deleteFile(req.file.path);
 
-  console.log(err);
-
   res.status(code).json({
     type: err.type || "general",
     modal: err.modal,
