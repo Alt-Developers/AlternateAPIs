@@ -1,11 +1,21 @@
 {
   "dependencies": {
-    "@prisma/client": "4.1.0",
-    "@types/express": "^4.17.13",
-    "argon2": "^0.28.7",
+    "@types/bcrypt": "^5.0.0",
+    "@types/express": "^4.17.14",
+    "@types/jsonwebtoken": "^8.5.9",
+    "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
-    "express": "^4.18.1",
-    "multer": "^1.4.5-lts.1",
-    "prisma": "^4.1.0"
-  }
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.6.5",
+    "multer": "^1.4.5-lts.1"
+  },
+  "name": "alt-apis",
+  "version": "6.0.0",
+  "description": "The central APIs for all Alternate. Products",
+  "main": "src/app.ts",
+  "repository": "https://github.com/SS-Developers/SS-APIs.git",
+  "author": "SEN-SENSATION <prawich.th@gmail.com>",
+  "license": "GNP3.0"
 }
