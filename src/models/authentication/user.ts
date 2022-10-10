@@ -12,11 +12,11 @@ const userSchema = new Schema(
     preferredColor: { type: String, require: false },
     timetables: {
       modalId: { type: Types.ObjectId },
-      primaryClass: { type: Types.ObjectId },
-      starred: { type: Types.ObjectId },
+      primaryClass: [{ type: Types.ObjectId }],
+      starred: [{ type: Types.ObjectId }],
     },
     passwordLastChanged: { type: String, require: false },
-    status: { type: Boolean, require: true },
+    status: { type: String, require: true },
   },
   { timestamps: true }
 );

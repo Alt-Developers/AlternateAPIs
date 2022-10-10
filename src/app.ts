@@ -2,6 +2,7 @@ import env from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import { centralError } from "./controllers/errors";
+import { UserInterface } from "./models/types/modelType";
 
 import authRouter from "./routers/auth";
 
@@ -9,6 +10,7 @@ declare global {
   namespace Express {
     interface Request {
       [key: string]: any;
+      user: UserInterface;
     }
   }
   interface Error {
@@ -24,7 +26,7 @@ env.config({ path: ".env" });
 
 const app = express();
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.use("/auth", authRouter);
 
