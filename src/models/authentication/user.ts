@@ -11,12 +11,16 @@ const userSchema = new Schema(
     accType: { type: String, require: true },
     preferredColor: { type: String, require: false },
     timetables: {
-      modalId: { type: Types.ObjectId },
+      modalId: [{ type: Types.ObjectId }],
       primaryClass: [{ type: Types.ObjectId }],
       starred: [{ type: Types.ObjectId }],
     },
     passwordLastChanged: { type: String, require: false },
     status: { type: String, require: true },
+    passwordR: {
+      token: { type: String, require: false },
+      exp: { type: Date, require: false },
+    },
   },
   { timestamps: true }
 );

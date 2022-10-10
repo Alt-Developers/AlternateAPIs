@@ -23,6 +23,9 @@ const verifyToken: RequestHandler = async (req, res, next) => {
     const user = await User.findOne({ _id: verified.id, status: "active" });
     if (!user) throw newError(404, "User not Found");
 
+    if (new Date(user.passwordLastChanged).getTime() > verified.iat)
+      throw newError(401, "Password has been changed");
+
     req.user = user;
 
     next();

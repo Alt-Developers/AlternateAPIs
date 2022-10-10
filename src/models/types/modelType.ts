@@ -18,10 +18,14 @@ export interface UserInterface {
   accType: "developer" | "user";
   preferredColor?: string;
   timetables: {
-    modalId: ObjectId;
+    modalId: ObjectId[];
     primaryClass: ObjectId;
     starred: ObjectId[];
   };
   passwordLastChanged: Date;
   status: "active" | "suspend";
+  passwordR?: {
+    token: string;
+    exp: Date;
+  };
 }
