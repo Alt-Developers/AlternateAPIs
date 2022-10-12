@@ -53,11 +53,15 @@ export const decodeToken: RequestHandler = async (req, res, next) => {
   };
 
   if (service === "timetables") {
-    respond["timetables"] = {
-      primaryClass: req.user.timetables.primaryClass,
-      starred: req.user.timetables.starred,
-      modalId: req.user.timetables.modalId ?? false,
-    };
+    if (!req.user.timetables) {
+      respond["timetable"] = false;
+    } else {
+      respond["timetables"] = {
+        primaryClass: req.user.timetables.primaryClass,
+        starred: req.user.timetables.starred,
+        modalId: req.user.timetables.modalId ?? false,
+      };
+    }
   }
 
   res.status(201).json(respond);
@@ -103,7 +107,7 @@ export const verifyPasswordToken: RequestHandler = async (req, res, next) => {
     if (!user.passwordR) throw newError(500, "Something went wrong");
 
     if (Date.now() > user.passwordR.exp.getTime()) {
-      user.passwordR.token = "";
+      user.passwordR = undefined;
       await user.save();
       throw newError(401, "Token Expried (2 hrs.)");
     }
@@ -162,6 +166,77 @@ export const changePassWithToken: RequestHandler = async (req, res, next) => {
     return res.status(201).json({
       message: "Success!",
       token: jwt,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changePassWithPassword: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const password = req.body.password;
+    const newPassword = req.body.newPassword;
+    const cNewPassword = req.body.cNewPassword;
+
+    if (newPassword !== cNewPassword)
+      throw newError(400, "Confirm password does not match");
+
+    if (!passwordRegex.test(password))
+      throw newError(400, "Password does not match the specification");
+
+    const isValidPassword = await compare(password, req.user.password);
+    if (!isValidPassword) throw newError(401, "Incorrect Password");
+
+    const hashedPassword = await hash(newPassword, 12);
+    req.user.password = hashedPassword;
+
+    await req.user.save();
+
+    return res.status(200).json({
+      message: "Succuess!",
+      username: req.user.username,
+      email: req.user.email,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const signup: RequestHandler = async (req, res, next) => {
+  try {
+    const { username, name, email, password, cpassword } = req.body;
+    const avatar = req.file?.path ?? "/images/default.png";
+
+    if (!name || !username || !email || !password || !cpassword)
+      throw newError(400, "Missing Required Data");
+
+    if (password !== cpassword)
+      throw newError(400, "Confirm password does not match");
+
+    if (!passwordRegex.test(password))
+      throw newError(400, "Password does not match the specification");
+
+    const hashedPassword = await hash(password, 12);
+
+    const newUser = new User({
+      accType: "user",
+      name,
+      username,
+      email,
+      password: hashedPassword,
+      avatar,
+      status: "active",
+    });
+
+    const user = await newUser.save();
+
+    return res.status(201).json({
+      message: "Successfully created a user",
+      id: user._id,
     });
   } catch (error) {
     next(error);

@@ -5,6 +5,10 @@ import verifyToken from "../helpers/verifyToken";
 const router = Router();
 
 router.post("/login", authController.login);
+router.post("/signup", authController.signup);
+
+router.post("/change-pw-with-password", authController.changePassWithPassword);
+
 router.get("/decode-token", verifyToken, authController.decodeToken);
 router.get(
   "/forget-password",

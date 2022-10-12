@@ -17,7 +17,7 @@ export interface UserInterface {
   avatar: string;
   accType: "developer" | "user";
   preferredColor?: string;
-  timetables: {
+  timetables?: {
     modalId: ObjectId[];
     primaryClass: ObjectId;
     starred: ObjectId[];
