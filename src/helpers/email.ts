@@ -6,7 +6,10 @@ import newError from "./newError";
 
 env.config({ path: "./.env" });
 
-console.log({ user: process.env.mail_user, pass: process.env.mail_pass });
+console.table({
+  user: process.env.mail_user,
+  pass: process.env.mail_pass,
+});
 
 const transport = nodemailer.createTransport({
   host: "smtppro.zoho.com",

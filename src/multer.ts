@@ -4,7 +4,7 @@ import { Request } from "express";
 import { v4 as uuidv4 } from "uuid";
 
 export const docFileFilter = (req: any, file: any, cb: any) => {
-  console.log("Mime Type:", file.mimetype);
+  // console.log("Mime Type:", file.mimetype);
 
   const filetypes = /png|jpg|jpeg|JPG/; // filetypes you will accept
   const mimetype = filetypes.test(file.mimetype); // verify file is == filetypes you will accept
@@ -14,7 +14,7 @@ export const docFileFilter = (req: any, file: any, cb: any) => {
     return cb(null, true);
   }
   // if mimetype or extname false, give an error of compatibilty
-  return cb("ไม่รองรับรูปแบบไฟล์|รูปแบบไฟล์ที่คุณอัพโหลดไม่รองรับ");
+  return cb("File Type unsupported");
 };
 
 export const docFileStorage = multer.diskStorage({

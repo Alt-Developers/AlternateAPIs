@@ -11,6 +11,8 @@ export const login: RequestHandler = async (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
 
+    if (!email || !password) throw newError(400, "Missing required arguments");
+
     const user = await User.findOne({ email: email });
     if (!user) throw newError(404, "User not found", "user");
 
@@ -135,6 +137,8 @@ export const changePassWithToken: RequestHandler = async (req, res, next) => {
     const password = req.body.password;
     const cpassword = req.body.cpassword;
 
+    if (!token) throw newError(400, "Missing required arguments");
+
     if (password !== cpassword)
       throw newError(400, "Confirm password does not match");
 
@@ -185,6 +189,9 @@ export const changePassWithPassword: RequestHandler = async (
     const newPassword = req.body.newPassword;
     const cNewPassword = req.body.cNewPassword;
 
+    if (!password || !newPassword || !cNewPassword)
+      throw newError(400, "Missing required arguments");
+
     if (newPassword !== cNewPassword)
       throw newError(400, "Confirm password does not match");
 
@@ -222,6 +229,17 @@ export const signup: RequestHandler = async (req, res, next) => {
 
     if (!passwordRegex.test(password))
       throw newError(400, "Password does not match the specification");
+
+    const findUser = await User.findOne({
+      $or: [{ email: email }, { username: username }],
+    });
+    if (findUser) {
+      if (findUser.email === email)
+        throw newError(409, "Email is already taken");
+      if (findUser.username === username)
+        throw newError(409, "Username already taken");
+      throw newError(500, "Something went wrong");
+    }
 
     const hashedPassword = await hash(password, 12);
 
