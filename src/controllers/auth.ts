@@ -4,6 +4,7 @@ import User from "../models/authentication/user";
 import { compare, hash } from "bcrypt";
 import { sign } from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
+import { sentTokenEmail } from "../helpers/email";
 
 export const login: RequestHandler = async (req, res, next) => {
   try {
@@ -81,6 +82,8 @@ export const fotgetPassword: RequestHandler = async (req, res, next) => {
     user.passwordR = { token, exp: new Date(Date.now() + 7200000) };
 
     await user.save();
+
+    sentTokenEmail(user.email, user.name, token);
 
     return res.status(201).json({
       passwordR: user.passwordR,
