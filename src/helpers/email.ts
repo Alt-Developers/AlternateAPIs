@@ -27,7 +27,7 @@ export const sentTokenEmail = (
 ) => {
   console.log("Sending Email");
   ejs.renderFile(
-    path.join(__dirname, "..", "mail", "forgetPassword.ejs"),
+    path.join(__dirname, "..", "..", "mail", "forgetPassword.ejs"),
     {
       email: receiver,
       token,
