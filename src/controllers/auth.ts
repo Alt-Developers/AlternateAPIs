@@ -8,12 +8,15 @@ import { sentTokenEmail } from "../helpers/email";
 
 export const login: RequestHandler = async (req, res, next) => {
   try {
-    const email = req.body.email;
+    const identifier = req.body.identifier;
     const password = req.body.password;
 
-    if (!email || !password) throw newError(400, "Missing required arguments");
+    if (!identifier || !password)
+      throw newError(400, "Missing required arguments");
 
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { username: identifier }],
+    });
     if (!user) throw newError(404, "User not found", "user");
 
     const isValidPassword = await compare(password, user.password);
@@ -88,7 +91,7 @@ export const fotgetPassword: RequestHandler = async (req, res, next) => {
     sentTokenEmail(user.email, user.name, token);
 
     return res.status(201).json({
-      passwordR: user.passwordR,
+      message: "Success!",
     });
   } catch (error) {
     next(error);

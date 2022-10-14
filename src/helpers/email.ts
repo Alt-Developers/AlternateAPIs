@@ -34,7 +34,7 @@ export const sentTokenEmail = (
       name,
     },
     (err, data) => {
-      if (err) throw newError(500, "Something went wrong");
+      if (err) return console.error(err);
       console.log("mailing " + receiver);
 
       const mailOptions = {
